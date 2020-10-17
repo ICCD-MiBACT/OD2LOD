@@ -1,0 +1,1 @@
+call ..\bin\cygwin\curl.exe %*
