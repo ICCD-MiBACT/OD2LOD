@@ -1,0 +1,1 @@
+call java -cp ..\bin\classes;..\bin\lib\poi-3.8-20120326.jar it.ccr.maas.tools.transform.xls2csv %*
