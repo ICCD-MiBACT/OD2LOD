@@ -1,0 +1,16 @@
+https://www.python.org/downloads/windows/
+https://www.python.org/ftp/python/2.7.15/python-2.7.15.amd64.msi
+
+install (only pip option)
+
+se pip non si installa:
+https://pip.pypa.io/en/stable/installing/
+https://bootstrap.pypa.io/get-pip.py
+> python get-pip.py
+
+> .\Scripts\pip install rdflib-jsonld
+
+> .\Scripts\rdfpipe --input-format nt --output-format json-ld eventi.nt > eventi.json
+
+eventualmente creare rdfpipe.local.cmd esplicitando il comando completo
+
