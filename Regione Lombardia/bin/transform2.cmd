@@ -1,0 +1,2 @@
+call java -Xmx1024m -cp bin\xalan\xalan.jar;bin\xalan\serializer.jar org.apache.xalan.xslt.Process %*
+@rem call java -Xmx1676m -cp bin\xalan\xalan.jar;bin\xalan\serializer.jar org.apache.xalan.xslt.Process %*
