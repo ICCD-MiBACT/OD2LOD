@@ -1,1 +1,0 @@
-java -Dfile.encoding=UTF-8 -cp .;lib/opencsv-5.2.jar;lib/commons-lang3-3.11.jar csv2xml %*
