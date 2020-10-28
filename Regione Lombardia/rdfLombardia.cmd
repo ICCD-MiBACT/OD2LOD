@@ -1,0 +1,3 @@
+@rem java -Dfile.encoding=UTF-8 -jar target/rdfLombardia-0.0.1-jar-with-dependencies.jar ./results %* 2>&1 | findstr /V IndexSearcher
+@rem to avoid mvn package in test
+@java -Dfile.encoding=UTF-8 -cp target/classes;target/rdfLombardia-0.0.1-jar-with-dependencies.jar it.beniculturali.dati.od2lod.rdfRegioni.RdfLombardia ./results %* 2>&1 | findstr /V IndexSearcher | findstr /V "Empty sequence return"
