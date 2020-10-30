@@ -108,8 +108,7 @@ public class RdfLombardia {
   }
 
   private void writeException(String outFolder, String id, Document row, int line, Exception e) throws Exception {
-    if (id == null)
-      throw (e);
+    if (id == null) throw (e);
     String filename = "offending_row_" + id + ".xml";
     System.err.println("ERROR - Exception " + e + " caught @row " + line + " written to " + filename);
     writeDocument(new File(outFolder, filename), row);
@@ -142,8 +141,7 @@ public class RdfLombardia {
 
   private void flushContent(String itemId, int rows, String outFolder, int dataIndex, byte[] content) throws IOException {
     if (lastStartRow == 0 || rows - lastStartRow >= rowCountFlush) {
-      if (bos != null)
-        closeContent();
+      if (bos != null) closeContent();
       String filename = "arco-knowledge-graph-1.0_R03_" + (dataIndex > 0 ? "" + dataIndex + "_" : "") + df7.format(rows) + ".nt.gz";
       System.out.println("STATUS - writing @" + filename);
       bos = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(new File(outFolder, filename), false)));
@@ -168,8 +166,7 @@ public class RdfLombardia {
   }
 
   static String writeRate(long n, long md) {
-    if (md == 0)
-      return "";
+    if (md == 0) return "";
     return "@" + df.format(n * 1000. / md) + " rows/sec";
   }
 
@@ -188,12 +185,11 @@ public class RdfLombardia {
 
   @SuppressWarnings("serial")
   static FileSystem zfs(String outFolder) throws IOException {
-    if (zfs == null)
-      zfs = FileSystems.newFileSystem(URI.create("jar:" + new File(outFolder, "dump.zip").toURI()), new HashMap<String, String>() {
-        {
-          put("create", "true");
-        }
-      });
+    if (zfs == null) zfs = FileSystems.newFileSystem(URI.create("jar:" + new File(outFolder, "dump.zip").toURI()), new HashMap<String, String>() {
+      {
+        put("create", "true");
+      }
+    });
     return zfs;
   };
 
@@ -206,10 +202,9 @@ public class RdfLombardia {
     db.hashMap(name).keySerializer(org.mapdb.Serializer.STRING).valueSerializer(org.mapdb.Serializer.JAVA).createOrOpen();
   }
 
-  void checkDbData() {
-    if (new File(PreprocessedData.dbFileName).exists())
-      return;
+  void checkDbData() { //if (new File(PreprocessedData.dbFileName).exists()) return;
     DB db = DBMaker.fileDB(PreprocessedData.dbFileName).make();
+    db.atomicLong("GENERATED").createOrOpen().set(System.currentTimeMillis());
     addMap(db, "ftan2URL");
     addMap(db, "catalogueRecordIdentifier2URI");
     addMap(db, "uniqueIdentifier2URIs");
@@ -227,8 +222,7 @@ public class RdfLombardia {
         System.out.println("STATUS - reading @" + csvUrl);
         return new CsvRow2domReader(csvUrl, properties.getProperty("" + pass + ".splitter"), properties.getProperty("" + pass + ".split"), true, timeout);
       } catch (Exception e) {
-        if (tryCount == maxTry)
-          throw e;
+        if (tryCount == maxTry) throw e;
         System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry);
         Thread.sleep(tryWait * 1000);
       }
@@ -236,26 +230,18 @@ public class RdfLombardia {
   }
 
   private Converter converter = null;
-  private Preprocessor preprocessor = null;
 
+  //private Preprocessor preprocessor = null;
   void initializeArco() throws MalformedURLException, IOException {
     checkDbData();
     converter = new Converter(); /* preprocessor = new Preprocessor(".", ".", "https://w3id.org/arco/resource/"); */
   }
 
-  void shutdownArco() {
-    if (preprocessor != null) {
-      preprocessor.commit();
-      preprocessor.close();
-    }
-    if (converter != null)
-      converter.destroy();
+  void shutdownArco() { /*if (preprocessor!=null) {preprocessor.commit(); preprocessor.close();}*/
+    if (converter != null) converter.destroy();
   }
 
-  void updateArco(Document d) throws XPathExpressionException {
-    preprocessor.preprocessDomRecord(d);
-  }
-
+  //void updateArco(Document d) throws XPathExpressionException { preprocessor.preprocessDomRecord(d); }
   long arcoMillis = 0;
 
   String toIsoDate(String s) {
@@ -267,8 +253,7 @@ public class RdfLombardia {
     List<String> result = new ArrayList<String>();
     for (int j = 1;; j++) {
       String id = properties.getProperty("" + j + ".id");
-      if (id == null)
-        break;
+      if (id == null) break;
       result.add(id);
     }
     return result;
@@ -290,8 +275,7 @@ public class RdfLombardia {
         System.out.println("update date is " + result);
         return result;
       } catch (Exception e) {
-        if (tryCount == maxTry)
-          throw e;
+        if (tryCount == maxTry) throw e;
         System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry);
         Thread.sleep(tryWait * 1000);
       }
@@ -301,16 +285,14 @@ public class RdfLombardia {
   String lastDate(List<String> dates) {
     String result = null;
     for (String date : dates)
-      if (result == null || result.compareTo(date) < 0)
-        result = date;
+      if (result == null || result.compareTo(date) < 0) result = date;
     return result;
   }
 
   String lastUpdateDate(int dataIndex) throws Exception {
     List<String> ids = passes(), dates = new ArrayList<String>();
     for (int pass = 1; pass <= ids.size(); pass++) {
-      if (dataIndex > 0 && pass != dataIndex)
-        continue;
+      if (dataIndex > 0 && pass != dataIndex) continue;
       String id = ids.get(pass - 1);
       dates.add(dateStamp(id));
     }
@@ -336,8 +318,7 @@ public class RdfLombardia {
       int rows = 1;
       startMillis = new Date().getTime();
       for (int pass = 1; pass <= ids.size(); pass++) {
-        if (dataIndex > 0 && pass != dataIndex)
-          continue;
+        if (dataIndex > 0 && pass != dataIndex) continue;
         int line = 1;
         String dataset = properties.getProperty("" + pass + ".dataset", "@pass " + pass);
         System.out.println("@dataset " + dataset);
@@ -359,14 +340,12 @@ public class RdfLombardia {
           try {
             itemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
             //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);     
-            if (dump)
-              zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row));
+            if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row));
             xtr.setSource(new DOMSource(row)); //System.out.println("@id " + itemId);      
             xtr.transform();
             Model model;
             byte[] ba = baos.toByteArray();
-            if (dump)
-              zWrite(outFolder, itemId + ".xml", ba);
+            if (dump) zWrite(outFolder, itemId + ".xml", ba);
             long start = new Date().getTime();
             try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
               model = converter.convert(itemId, new ByteArrayInputStream(ba));
@@ -401,8 +380,7 @@ public class RdfLombardia {
       writeDateStamp(lastDate(dates), outFolder);
     } finally {
       shutdownArco();
-      if (zfs != null)
-        zfs.close();
+      if (zfs != null) zfs.close();
     }
   }
 
@@ -412,8 +390,7 @@ public class RdfLombardia {
   }
 
   public static void main(String[] args) throws Exception {
-    if (args.length < 1)
-      uso();
+    if (args.length < 1) uso();
     String outFolder = args[0];
     boolean datestamp = false, dump = false;
     int dataIndex = -1;

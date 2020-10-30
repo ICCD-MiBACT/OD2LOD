@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,10 +45,14 @@ public class CsvRow2domReader {
         System.out.println(" " + this.splitFields.size() + " fields to split " + this.splitFields);
       }
     }
-    //reader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream(), StandardCharsets.UTF_8))).withCSVParser(new RFC4180ParserBuilder().build()).build();  
-    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-    if (timeout > 0)
+    //reader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream(), StandardCharsets.UTF_8))).withCSVParser(new RFC4180ParserBuilder().build()).build();
+    URL targetURL = new URL(url);
+    URLConnection connection;
+    if (timeout > 0 && targetURL.getProtocol().compareToIgnoreCase("file") != 0) {
+      connection = (HttpURLConnection) targetURL.openConnection();
       connection.setConnectTimeout(timeout * 1000);
+    } else
+      connection = targetURL.openConnection();
     BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
     if (preload) { // avoid read timeout issues
       String content = br.lines().collect(Collectors.joining("\n"));
@@ -72,12 +77,9 @@ public class CsvRow2domReader {
   }
 
   private void addCell(Element row, String name, String value, boolean leaveEmpty) {
-    if (stripReplacer != null)
-      value = stripChar(value, stripReplacer);
-    if (trimFields)
-      value = value.trim();
-    if (!leaveEmpty && value.length() == 0)
-      return;
+    if (stripReplacer != null) value = stripChar(value, stripReplacer);
+    if (trimFields) value = value.trim();
+    if (!leaveEmpty && value.length() == 0) return;
     Element cell = row.getOwnerDocument().createElement("cell");
     cell.setAttribute("name", name);
     cell.appendChild(row.getOwnerDocument().createTextNode(value));
@@ -89,8 +91,7 @@ public class CsvRow2domReader {
 
   Document next() throws IOException {
     String[] fieldValues = reader.readNext();
-    if (fieldValues == null)
-      return null;
+    if (fieldValues == null) return null;
     lines++;
     if (fieldValues.length != fieldNames.length)
       System.err.println("field count mismatch at line " + lines + " " + fieldValues.length + "!=" + fieldNames.length + " (line starts with '"
@@ -114,7 +115,6 @@ public class CsvRow2domReader {
   }
 
   void close() throws IOException {
-    if (reader != null)
-      reader.close();
+    if (reader != null) reader.close();
   }
 }
