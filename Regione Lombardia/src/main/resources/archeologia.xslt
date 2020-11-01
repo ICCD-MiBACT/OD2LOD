@@ -274,6 +274,7 @@
        </xsl:if>
       </xsl:element>
       
+      <xsl:if test="cell[@name='GPDPX'] and cell[@name='GPDPY']">
       <xsl:element name="GP">
        <xsl:attribute name="hint">GEOREFERENZIAZIONE TRAMITE PUNTO</xsl:attribute>
        <xsl:element name="GPD">
@@ -285,15 +286,18 @@
          </xsl:element>
         </xsl:element>
       </xsl:element>
+      </xsl:if>
 
      </xsl:element>
 
+     <xsl:if test="cell[@name='WGS84_X'] and cell[@name='WGS84_Y']">
      <xsl:element name="harvesting">
       <xsl:element name="geocoding">
        <xsl:element name="x"><xsl:value-of select="cell[@name='WGS84_X']"/></xsl:element>		
        <xsl:element name="y"><xsl:value-of select="cell[@name='WGS84_Y']"/></xsl:element>
       </xsl:element>
      </xsl:element>
+     </xsl:if>
 
     </schede>
        
