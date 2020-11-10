@@ -47,12 +47,12 @@
  <xsl:template match="row" mode="b">
 	 <xsl:element name="rdf:Description">
   	<xsl:attribute name="rdf:about">ArchitecturalOrLandscapeHeritage/<xsl:value-of select="cell[@name='NUM_SCHEDA_SIRBEC']"/>/R03</xsl:attribute>
-		 <xsl:element name="dc:source">
+		 <!--<xsl:element name="dc:source">
 		  <xsl:attribute name="rdf:resource">http://www.lombardiabeniculturali.it/architetture/schede/<xsl:value-of select="cell[@name='NUM_SCHEDA_SIRBEC']"/></xsl:attribute>
 		 </xsl:element>
 		 <xsl:element name="dc:source">
 		  <xsl:attribute name="rdf:resource">http://www.lombardiabeniculturali.it/architetture/schede-complete/<xsl:value-of select="cell[@name='NUM_SCHEDA_SIRBEC']"/></xsl:attribute>
-		 </xsl:element>
+		 </xsl:element>-->
 		
  		<xsl:if test="cell[@name='COMPLESSITA_DEL_BENE']='bene componente'">
 	 		<xsl:element name="arco:isCulturalPropertyComponentOf">
