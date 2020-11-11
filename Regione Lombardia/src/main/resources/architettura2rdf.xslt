@@ -14,7 +14,7 @@
  <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
   
  <xsl:template match="/">
-  <rdf:RDF xml:base="https://w3id.org/arco/resource/"
+  <rdf:RDF xml:base="https://w3id.org/arco/resource/Lombardia/"
    xmlns="https://w3id.org/arco/resource/"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:dcterms="http://purl.org/dc/terms/"
@@ -46,7 +46,7 @@
 
  <xsl:template match="row" mode="b">
 	 <xsl:element name="rdf:Description">
-  	<xsl:attribute name="rdf:about">ArchitecturalOrLandscapeHeritage/<xsl:value-of select="cell[@name='NUM_SCHEDA_SIRBEC']"/>/R03</xsl:attribute>
+  	<xsl:attribute name="rdf:about">ArchitecturalOrLandscapeHeritage/<xsl:value-of select="cell[@name='NUM_SCHEDA_SIRBEC']"/>_R03</xsl:attribute>
 		 <!--<xsl:element name="dc:source">
 		  <xsl:attribute name="rdf:resource">http://www.lombardiabeniculturali.it/architetture/schede/<xsl:value-of select="cell[@name='NUM_SCHEDA_SIRBEC']"/></xsl:attribute>
 		 </xsl:element>
@@ -56,7 +56,7 @@
 		
  		<xsl:if test="cell[@name='COMPLESSITA_DEL_BENE']='bene componente'">
 	 		<xsl:element name="arco:isCulturalPropertyComponentOf">
-		  	<xsl:attribute name="rdf:resource">ArchitecturalOrLandscapeHeritage/<xsl:value-of select="cell[@name='NUM_SCHEDA_BENE_COMPLESSO']"/>/R03</xsl:attribute>
+		  	<xsl:attribute name="rdf:resource">ArchitecturalOrLandscapeHeritage/<xsl:value-of select="cell[@name='NUM_SCHEDA_BENE_COMPLESSO']"/>_R03</xsl:attribute>
 		 	</xsl:element>
 	 	</xsl:if>
 	 </xsl:element>		

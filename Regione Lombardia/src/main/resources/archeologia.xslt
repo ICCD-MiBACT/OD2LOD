@@ -14,7 +14,7 @@
   <record>
    <header>
     <xsl:element name="identifier">
-     <xsl:value-of select="cell[@name='IDK']"/><!--<xsl:value-of select="translate(cell[@name='MTC'],$translateIdFrom,$translateIdTo)"/>-->
+     <xsl:value-of select="cell[@name='IDK']"/>
     </xsl:element>
     <datestamp><xsl:value-of select="$datestamp"/></datestamp>
    </header>
@@ -66,7 +66,7 @@
        <xsl:attribute name="hint">ALTRI CODICI</xsl:attribute>
        <xsl:element name="ACC">
         <xsl:attribute name="hint">Altro codice bene</xsl:attribute>
-        <xsl:value-of select="cell[@name='IDK']"/>/R03</xsl:element>
+        <xsl:value-of select="cell[@name='IDK']"/>_R03</xsl:element>
       </xsl:element>
       
       <xsl:element name="OG">
