@@ -271,8 +271,7 @@ public class RdfLombardia {
         InputStream is = connection.getInputStream();
         String result = (String) xPath.evaluate(properties.getProperty("datePath").replaceAll("\\$\\(id\\)", id), db.parse(is));
         is.close();
-        result = toIsoDate(result);
-        System.out.println("update date is " + result);
+        result = toIsoDate(result); //System.out.println("INFO - update date is " + result);
         return result;
       } catch (Exception e) {
         if (tryCount == maxTry) throw e;
@@ -317,14 +316,17 @@ public class RdfLombardia {
       List<String> ids = passes(), dates = new ArrayList<String>();
       int rows = 1;
       startMillis = new Date().getTime();
+      String resourcePrefix = properties.getProperty("resourcePrefix", "https://w3id.org/arco/resource/Lombardia/").trim();
       for (int pass = 1; pass <= ids.size(); pass++) {
         if (dataIndex > 0 && pass != dataIndex) continue;
         int line = 1;
-        String dataset = properties.getProperty("" + pass + ".dataset", "@pass " + pass);
-        System.out.println("@dataset " + dataset);
+        String dataset = properties.getProperty("" + pass + ".dataset", "#" + pass);
+        System.out.println("INFO - dataset " + dataset);
         String id = ids.get(pass - 1), itemPath = properties.getProperty("" + pass + ".itemId"); //System.out.println("@id " + id);
+        String documentPrefix = properties.getProperty("" + pass + ".documentPrefix").trim();
         String date = dateStamp(id);
         dates.add(date);
+        System.out.println("INFO - update date is " + date);
         XsltTransformer xtrRdf = null, xtr = xco.compile(new StreamSource(ras(properties.getProperty("" + pass + ".xslt")))).load();
         xtr.setDestination(out);
         xtr.setParameter(new QName("datestamp"), new XdmAtomicValue(date));
@@ -348,7 +350,7 @@ public class RdfLombardia {
             if (dump) zWrite(outFolder, itemId + ".xml", ba);
             long start = new Date().getTime();
             try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
-              model = converter.convert(itemId, new ByteArrayInputStream(ba));
+              model = converter.convert(itemId, resourcePrefix, documentPrefix, new ByteArrayInputStream(ba));
             } catch (Exception e) {
               writeException(outFolder, itemId, ba, line, e);
               continue;

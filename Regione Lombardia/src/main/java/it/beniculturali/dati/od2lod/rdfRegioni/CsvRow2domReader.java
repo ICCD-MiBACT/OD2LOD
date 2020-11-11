@@ -48,7 +48,7 @@ public class CsvRow2domReader {
     //reader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream(), StandardCharsets.UTF_8))).withCSVParser(new RFC4180ParserBuilder().build()).build();
     URL targetURL = new URL(url);
     URLConnection connection;
-    if (timeout > 0 && targetURL.getProtocol().compareToIgnoreCase("file") != 0) {
+    if (timeout > 0 && targetURL.getProtocol().toLowerCase().startsWith("http")) {
       connection = (HttpURLConnection) targetURL.openConnection();
       connection.setConnectTimeout(timeout * 1000);
     } else
