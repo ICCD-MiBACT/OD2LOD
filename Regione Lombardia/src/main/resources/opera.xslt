@@ -49,7 +49,7 @@
        <xsl:attribute name="hint">ALTRI CODICI</xsl:attribute>
        <xsl:element name="ACC">
         <xsl:attribute name="hint">Altro codice bene</xsl:attribute>
-        <xsl:value-of select="cell[@name='IDK']"/>_R03</xsl:element>
+        <xsl:value-of select="cell[@name='IDK']"/> /R03</xsl:element>
       </xsl:element>
 
       <xsl:element name="OG">

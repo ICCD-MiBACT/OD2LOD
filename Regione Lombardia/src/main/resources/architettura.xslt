@@ -67,7 +67,7 @@
          <xsl:element name="RVEL">
           <xsl:attribute name="hint">Livello</xsl:attribute>1</xsl:element> <!-- il livello è sempre 1, perchè nei dati non c'è informazione per mettere un altro numero -->
          <xsl:element name="RVER">
-          <xsl:attribute name="hint">Codice bene radice</xsl:attribute><xsl:value-of select="cell[@name='NUM_SCHEDA_BENE_COMPLESSO']"/>_R03</xsl:element>
+          <xsl:attribute name="hint">Codice bene radice</xsl:attribute><xsl:value-of select="cell[@name='NUM_SCHEDA_BENE_COMPLESSO']"/> /R03</xsl:element>
         </xsl:element>
        </xsl:element>
       </xsl:if>
@@ -85,7 +85,7 @@
       <xsl:element name="AC">
        <xsl:attribute name="hint">ALTRI CODICI</xsl:attribute>
        <xsl:element name="ACC">
-        <xsl:attribute name="hint">Altro codice bene</xsl:attribute><xsl:value-of select="cell[@name='NUM_SCHEDA_SIRBEC']"/>_R03</xsl:element>
+        <xsl:attribute name="hint">Altro codice bene</xsl:attribute><xsl:value-of select="cell[@name='NUM_SCHEDA_SIRBEC']"/> /R03</xsl:element>
       </xsl:element>
       
       <xsl:element name="OG">
