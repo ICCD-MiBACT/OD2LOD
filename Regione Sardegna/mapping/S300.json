@@ -1,0 +1,21 @@
+{
+    "NCTN": ["record", "metadata", "schede", "S", "CD", "NCT", "NCTN"],
+    "OGTD": ["record", "metadata", "schede", "S", "OG", "OGT", "OGTD"],
+    "SGTI": ["record", "metadata", "schede", "S", "OG", "SGT", "SGTI"],
+    "SGTT": ["record", "metadata", "schede", "S", "OG", "SGT", "SGTT"],
+    "AUTN": ["record", "metadata", "schede", "S", "AU", "AUT", "AUTN"],
+    "PVCP": ["record", "metadata", "schede", "S", "LC", "PVC", "PVCP"],
+    "PVCC": ["record", "metadata", "schede", "S", "LC", "PVC", "PVCC"],
+    "LDCN": ["record", "metadata", "schede", "S", "LC", "LDC", "LDCN"],
+    "LDCU": ["record", "metadata", "schede", "S", "LC", "LDC", "LDCU"],
+    "DTZG": ["record", "metadata", "schede", "S", "DT", "DTZ", "DTZG"],
+    "MTC": ["record", "metadata", "schede", "S", "MT", "MTC"],
+    "MISU": ["record", "metadata", "schede", "S", "MT", "MIS", "MISU"],
+    "MISL": ["record", "metadata", "schede", "S", "MT", "MIS", "MISL"],
+    "MISA": ["record", "metadata", "schede", "S", "MT", "MIS", "MISA"],
+    "STCC": ["record", "metadata", "schede", "S", "CO", "STC", "STCC"],
+    "CDGG": ["record", "metadata", "schede", "S", "TU", "CDG", "CDGG"],
+    "CMPD": ["record", "metadata", "schede", "S", "CM", "CMP", "CMPD"],
+    "CMPN": ["record", "metadata", "schede", "S", "CM", "CMP", "CMPN"],
+    "URL": []
+}

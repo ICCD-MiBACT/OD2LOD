@@ -1,0 +1,16 @@
+{
+    "NCTN": ["record", "metadata", "schede", "SI", "CD", "NCT", "NCTN"],
+    "OGTD": ["record", "metadata", "schede", "SI", "OG", "OGT", "OGTD"],
+    "OGTN": ["record", "metadata", "schede", "SI", "OG", "OGT", "OGTN"],
+    "PVCP": ["record", "metadata", "schede", "SI", "LC", "PVC", "PVCP"],
+    "PVCC": ["record", "metadata", "schede", "SI", "LC", "PVC", "PVCC"],
+    "DTZG": ["record", "metadata", "schede", "SI", "DT", "DTZ", "DTZG"],
+    "ATBD": ["record","metadata", "schede", "SI", "AU", "ATB", "ATBD"],
+    "MISU": ["record", "metadata", "schede", "SI", "MT", "MIS", "MISU"],
+    "MISV": ["record", "metadata", "schede", "SI", "MT", "MIS", "MISV"],
+    "STCC": ["record", "metadata", "schede", "SI", "CO", "STC", "STCC"],
+    "CDGG": ["record", "metadata", "schede", "SI", "TU", "CDG", "CDGG"],
+    "CMPD": ["record", "metadata", "schede", "SI", "CM", "CMP", "CMPD"],
+    "CMPN": ["record", "metadata", "schede", "SI", "CM", "CMP", "CMPN"],
+    "URL": []
+}
