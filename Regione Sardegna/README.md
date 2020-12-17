@@ -4,6 +4,10 @@
 Per procedere alla trasformazione dei dati provenienti da regione sardegna è necessario aver installato python3 ed aver installato e compilato il repository "rdfizer" nel progetto https://github.com/ICCD-MiBACT/ArCo.
 Per poter utilizzare questo repository è necessario anche `python3` `virtualenv` e `BASH`
 
+## Fonti e mappatura.
+
+Le fonti utilizzate sono specificate nel file `datasets.csv`. Nello stesso file è specificata la mappatura necessaria per trasformare il CSV in un XML.
+
 ## Ottenimento e triplificazione dei dati
 
 ```BASH
