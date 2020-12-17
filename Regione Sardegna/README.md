@@ -1,6 +1,8 @@
 
 # Regione Sardegna
 
+Procedure per la trasformazione di dataset pubblicati dalla Regione Sardegna sul sito http://opendata.regione.sardegna.it/. I dati in input vengono trasformati in RDF secondo gli standard di catalogazione ICCD.
+
 Per procedere alla trasformazione dei dati provenienti da regione sardegna è necessario aver installato python3 ed aver installato e compilato il repository "rdfizer" nel progetto https://github.com/ICCD-MiBACT/ArCo.
 Per poter utilizzare questo repository è necessario anche `python3` `virtualenv` e `BASH`
 
