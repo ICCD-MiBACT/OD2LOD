@@ -1,0 +1,22 @@
+{
+    "NCTN": ["record", "metadata", "schede", "SM", "CD", "NCT", "NCTN"],
+    "OGTD": ["record", "metadata", "schede", "SM", "OG", "OGT", "OGTD"],
+    "OGDN": ["record", "metadata", "schede", "SM", "OG", "OGD", "OGDN"],
+    "PVCP": ["record", "metadata", "schede", "SM", "LC", "PVC", "PVCP"],
+    "PVCC": ["record", "metadata", "schede", "SM", "LC", "PVC", "PVCC"],
+    "LDCN": ["record", "metadata", "schede", "SM", "LC", "LDC", "LDCN"],
+    "LDCU": ["record", "metadata", "schede", "SM", "LC", "LDC", "LDCU"],
+    "LATITUDINE": ["record", "metadata","schede", "harvesting", "geocoding", "x"],
+    "LONGITUDINE": ["record", "metadata","schede", "harvesting", "geocoding", "y"],
+    "DTZG": ["record", "metadata", "schede", "SM", "DT", "DTZ", "DTZG"],
+    "MTCM": ["record", "metadata", "schede", "SM", "MT", "MTC",  "MTCM"],
+    "MTCT": ["record", "metadata", "schede", "SM", "MT", "MTC",  "MTCT"],
+    "MISU": ["record", "metadata", "schede", "SM", "MT", "MIS", "MISU"],
+    "MISZ": ["record", "metadata", "schede", "SM", "MT", "MIS", "MISZ"],
+    "MISM": ["record", "metadata", "schede", "SM", "MT", "MIS", "MISM"],
+    "STCC": ["record", "metadata", "schede", "SM", "CO", "STC", "STCC"],
+    "CDGG": ["record", "metadata", "schede", "SM", "TU", "CDG", "CDGG"],
+    "CMPD": ["record", "metadata", "schede", "SM", "CM", "CMP", "CMPD"],
+    "CMPN": ["record", "metadata", "schede", "SM", "CM", "CMP", "CMPN"],
+    "URL": []
+}
