@@ -36,5 +36,8 @@ with open(outfile, 'w+') as out:
                                 components[2] = "<" + nctn2url[nctn] + ">"
                                 line = ' '.join(components)
                                 out.write(line)
+            elif '<https://w3id.org/italia/onto/CLV/Address> .' in line:
+                out.write(line.split(' ')[0] + ' <https://w3id.org/italia/onto/CLV/hasRegion> <https://w3id.org/arco/resource/Sardegna/Region/sardegna> .')
+                out.write(line)
             else:
                 out.write(line)
