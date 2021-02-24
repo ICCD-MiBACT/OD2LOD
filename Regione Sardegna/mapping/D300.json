@@ -1,4 +1,5 @@
 {
+    "NCTR": ["record", "metadata", "schede", "D", "CD", "NCT", "NCTR"],
     "NCTN": ["record", "metadata", "schede", "D", "CD", "NCT", "NCTN"],
     "OGTD": ["record", "metadata", "schede", "D", "OG", "OGT", "OGTD"],
     "SGTI": ["record", "metadata", "schede", "D", "OG", "SGT", "SGTI"],

@@ -17,8 +17,8 @@ def uri_validator(x):
 with open('nctn2url.json') as f:
     nctn2url = json.load(f)
 
-with open(outfile, 'w+') as out:
-    with gzip.open(fileName,'rt') as f:
+with open(outfile, mode='w+', encoding="utf-8") as out:
+    with gzip.open(fileName, mode='rt', encoding="utf-8") as f:
         for line in f:
             # Changing baseURL
             line = re.sub(r'<https://w3id.org/arco/resource/', '<https://w3id.org/arco/resource/SARDEGNA/', line)
@@ -38,6 +38,6 @@ with open(outfile, 'w+') as out:
                                 out.write(line)
             elif '<https://w3id.org/italia/onto/CLV/Address> .' in line:
                 out.write(line.split(' ')[0] + ' <https://w3id.org/italia/onto/CLV/hasRegion> <https://w3id.org/arco/resource/Sardegna/Region/sardegna> .')
-                out.write(line)
+                out.write('\n' + line)
             else:
                 out.write(line)

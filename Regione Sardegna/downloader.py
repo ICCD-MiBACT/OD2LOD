@@ -31,6 +31,10 @@ def CSV_to_dict(data, mapping_file):
     if 'LONGITUDINE' in data.keys():
         if data['LONGITUDINE'] != '':
             data['LONGITUDINE'] = re.sub(r'[^0-9\.]', '', data['LONGITUDINE'])
+            if data['LONGITUDINE'].find('.') == 2:
+                data['LONGITUDINE'], data['LATITUDINE'] = data['LATITUDINE'], data['LONGITUDINE']
+            
+    data['NCTR'] = '20'
 
     obj = dict()
     for key, value in data.items():
@@ -54,7 +58,7 @@ def CSV_to_dict(data, mapping_file):
 def handle_CSV(csv_file, mapping_file, nctn2url):
 
     # reading csv
-    with open(csv_file) as csv_data:
+    with open(csv_file, mode="r", encoding="utf-8") as csv_data:
         csv_data_reader = csv.DictReader(csv_data)
 
         previous_NCTN = ''
@@ -81,7 +85,7 @@ def handle_CSV(csv_file, mapping_file, nctn2url):
             if not os.path.exists(base_dir):
                 os.makedirs(base_dir)
             xml_file_name = base_dir + '/' + base_filename + '-' + data_row['NCTN'] + '.xml'
-            with open(xml_file_name, 'w') as w:
+            with open(xml_file_name, mode='w', encoding="utf-8") as w:
                 w.write(xmltodict.unparse(convert_obj, pretty=True))
 
             if 'URL' in data_row.keys() and data_row['URL'] != '':

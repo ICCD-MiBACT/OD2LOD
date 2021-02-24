@@ -1,4 +1,5 @@
 {
+    "NCTR": ["record", "metadata", "schede", "NU", "CD", "NCT", "NCTR"],
     "NCTN": ["record", "metadata", "schede", "NU", "CD", "NCT", "NCTN"],
     "OGTD": ["record", "metadata", "schede", "NU", "OG", "OGT", "OGTD"],
     "OGTL": ["record", "metadata", "schede", "NU", "OG", "OGT", "OGTD"],
@@ -7,8 +8,8 @@
     "PVCC": ["record", "metadata", "schede", "NU", "LC", "PVC", "PVCC"],
     "LDCN": ["record", "metadata", "schede", "NU", "LC", "LDC", "LDCN"],
     "LDCU": ["record", "metadata", "schede", "NU", "LC", "LDC", "LDCU"],
-    "LATITUDINE": ["record", "metadata", "schede", "harvesting", "geocoding", "x"],
-    "LONGITUDINE": ["record", "metadata", "schede", "harvesting", "geocoding", "y"],
+    "LATITUDINE": ["record", "metadata", "schede", "harvesting", "geocoding", "y"],
+    "LONGITUDINE": ["record", "metadata", "schede", "harvesting", "geocoding", "x"],
     "DTZG": ["record", "metadata", "schede", "NU", "DT", "DTZ", "DTZG"],
     "ATBD": ["record", "metadata", "schede", "NU", "AU", "ATB", "ATBD"],
     "MTC": ["record", "metadata", "schede", "NU", "MT", "MTC"],
