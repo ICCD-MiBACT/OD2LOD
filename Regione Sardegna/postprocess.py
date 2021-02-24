@@ -37,7 +37,7 @@ with open(outfile, mode='w+', encoding="utf-8") as out:
                                 line = ' '.join(components)
                                 out.write(line)
             elif '<https://w3id.org/italia/onto/CLV/Address> .' in line:
-                out.write(line.split(' ')[0] + ' <https://w3id.org/italia/onto/CLV/hasRegion> <https://w3id.org/arco/resource/Sardegna/Region/sardegna> .')
+                out.write(line.split(' ')[0] + ' <https://w3id.org/italia/onto/CLV/hasRegion> <https://w3id.org/arco/resource/Region/sardegna> .')
                 out.write('\n' + line)
             else:
                 out.write(line)
