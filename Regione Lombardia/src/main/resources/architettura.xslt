@@ -175,8 +175,8 @@
  <xsl:template match="cell[@name='lat']">
   <xsl:element name="harvesting">
 	  <xsl:element name="geocoding">
-		  <xsl:element name="x"><xsl:value-of select="."/></xsl:element>		
-		  <xsl:element name="y"><xsl:value-of select="../cell[@name='lng']"/></xsl:element>
+		  <xsl:element name="y"><xsl:value-of select="."/></xsl:element>		
+		  <xsl:element name="x"><xsl:value-of select="../cell[@name='lng']"/></xsl:element>
 	  </xsl:element>
   </xsl:element>
  </xsl:template>
