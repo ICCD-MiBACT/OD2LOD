@@ -24,8 +24,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -49,6 +52,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import it.cnr.istc.stlab.arco.Converter;
 import it.cnr.istc.stlab.arco.preprocessing.PreprocessedData;
@@ -176,7 +180,7 @@ public class RdfLombardia {
     if ((rows % 2048) == 0) {
       long now = new Date().getTime();
       System.out.println("STATUS - got " + rows + " rows " + writeRate(rows, now - startMillis)
-          + (dataIndex > 0 ? "" : (pass > 1 ? " @line " + csvLine + " of" : "") + " @pass " + pass + "/" + passes) + " (arco "
+          + (dataIndex > 0 ? "" : (pass > 1 ? " @line " + csvLine : "") + " @pass " + pass + "/" + passes) + " (arco "
           + writePercentage(arcoMillis, now - startMillis) + ")");
     }
   }
@@ -208,6 +212,8 @@ public class RdfLombardia {
     addMap(db, "ftan2URL");
     addMap(db, "catalogueRecordIdentifier2URI");
     addMap(db, "uniqueIdentifier2URIs");
+    addMap(db, "contenitoreFisicoSystemRecordCode2CCF");
+    addMap(db, "contenitoreGiuridicoSystemRecordCode2CCG");
     db.commit();
     db.close();
   }
@@ -337,11 +343,22 @@ public class RdfLombardia {
           xtrRdf.setDestination(out);
         }
         CsvRow2domReader r2d = getPassReader(id, pass);
+        String rmp = properties.getProperty("" + pass + ".rmDup");
+        if (rmp != null) System.out.println("INFO - remove duplicates " + rmp + " @" + dataset);//String rmp = "row/cell[@name='NCTN']";
+        Set<String> rmSet = new HashSet<String>();
         for (Document row; (row = r2d.next()) != null; line++, rows++) {
           String itemId = null;
           try {
             itemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
-            //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);     
+            //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);
+            if (rmp != null) {
+              String rmc = (String) xPath.evaluate(rmp, row, XPathConstants.STRING);
+              if (rmc.length() > 0 && !rmSet.add(rmc)) { // avoid duplicate IRI
+                Node dead = (Node) xPath.evaluate(rmp, row, XPathConstants.NODE);
+                dead.getParentNode().removeChild(dead);
+                System.out.println("duplicate " + rmp + " " + rmc + " removed");
+              }
+            }
             if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row));
             xtr.setSource(new DOMSource(row)); //System.out.println("@id " + itemId);      
             xtr.transform();
@@ -375,7 +392,7 @@ public class RdfLombardia {
           }
           //if (line==2) break; // test
         }
-        System.out.println("STATUS - got " + (line - 1) + " lines @dataset " + dataset);
+        System.out.println("STATUS - got " + line + " lines @dataset " + dataset);
         r2d.close();
       }
       closeContent();
