@@ -14,29 +14,35 @@ def uri_validator(x):
     except:
         return False
 
-with open('nctn2url.json') as f:
-    nctn2url = json.load(f)
+#with open('nctn2url.json') as f:
+#    nctn2url = json.load(f)
 
 with open(outfile, mode='w+', encoding="utf-8") as out:
     with gzip.open(fileName, mode='rt', encoding="utf-8") as f:
         for line in f:
-            # Changing baseURL
-            line = re.sub(r'<https://w3id.org/arco/resource/', '<https://w3id.org/arco/resource/SARDEGNA/', line)
-            
-            # Changing baseURI 
-            if " <http://purl.org/dc/elements/1.1/source> " in line:
-                nctns = re.search('<https://w3id.org/arco/resource/SARDEGNA/[^/]+/([a-zA-Z0-9]+)>.*', line)
-                if nctns:
-                    nctn = nctns.group(1)
-                    #print(nctn)
-                    components = line.split(' ')
-                    if len(components) == 4:
-                        if nctn in nctn2url.keys() and nctn2url[nctn]:
-                            if uri_validator(nctn2url[nctn]):
-                                components[2] = "<" + nctn2url[nctn] + ">"
-                                line = ' '.join(components)
-                                out.write(line)
-            elif '<https://w3id.org/italia/onto/CLV/Address> .' in line:
+            #
+            # deactivated following code
+            #  baseURL => rdfizer command line
+            #  dc:source => xtra.xslt
+            #
+            ## Changing baseURL
+            #line = re.sub(r'<https://w3id.org/arco/resource/', '<https://w3id.org/arco/resource/SARDEGNA/', line)
+            #
+            ## Changing baseURI 
+            #if " <http://purl.org/dc/elements/1.1/source> " in line:
+            #    nctns = re.search('<https://w3id.org/arco/resource/SARDEGNA/[^/]+/([a-zA-Z0-9]+)>.*', line)
+            #    if nctns:
+            #        nctn = nctns.group(1)
+            #        #print(nctn)
+            #        components = line.split(' ')
+            #        if len(components) == 4:
+            #            if nctn in nctn2url.keys() and nctn2url[nctn]:
+            #                if uri_validator(nctn2url[nctn]):
+            #                    components[2] = "<" + nctn2url[nctn] + ">"
+            #                    line = ' '.join(components)
+            #                    out.write(line)
+            #elif '<https://w3id.org/italia/onto/CLV/Address> .' in line:
+            if '<https://w3id.org/italia/onto/CLV/Address> .' in line:
                 out.write(line.split(' ')[0] + ' <https://w3id.org/italia/onto/CLV/hasRegion> <https://w3id.org/arco/resource/Region/sardegna> .')
                 out.write('\n' + line)
             else:

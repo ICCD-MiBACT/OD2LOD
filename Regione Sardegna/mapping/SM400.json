@@ -3,6 +3,7 @@
     "NCTN": ["record", "metadata", "schede", "SM", "CD", "NCT", "NCTN"],
     "OGTD": ["record", "metadata", "schede", "SM", "OG", "OGT", "OGTD"],
     "OGDN": ["record", "metadata", "schede", "SM", "OG", "OGD", "OGDN"],
+    "OGDT": ["record", "metadata", "schede", "SM", "OG", "OGD", "OGDT"],
     "PVCP": ["record", "metadata", "schede", "SM", "LC", "PVC", "PVCP"],
     "PVCC": ["record", "metadata", "schede", "SM", "LC", "PVC", "PVCC"],
     "LDCN": ["record", "metadata", "schede", "SM", "LC", "LDC", "LDCN"],
@@ -19,5 +20,7 @@
     "CDGG": ["record", "metadata", "schede", "SM", "TU", "CDG", "CDGG"],
     "CMPD": ["record", "metadata", "schede", "SM", "CM", "CMP", "CMPD"],
     "CMPN": ["record", "metadata", "schede", "SM", "CM", "CMP", "CMPN"],
-    "URL": []
+    "FTA0": ["record", "metadata","schede", "harvesting", "linkMedia"],
+    "DIRITTI":[],
+    "URL": ["record", "metadata","schede", "harvesting", "linkSource"]
 }

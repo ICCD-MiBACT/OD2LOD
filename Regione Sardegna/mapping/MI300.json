@@ -18,5 +18,7 @@
     "CDGG": ["record", "metadata","schede", "MI", "TU", "CDG", "CDGG"],
     "CMPD": ["record", "metadata","schede", "MI", "CM", "CMP", "CMPD"],
     "CMPN": ["record", "metadata","schede", "MI", "CM", "CMP", "CMPN"],
-    "URL": []
+    "FTA0": ["record", "metadata","schede", "harvesting", "linkMedia"],
+    "DIRITTI":[],
+    "URL": ["record", "metadata","schede", "harvesting", "linkSource"]
 }

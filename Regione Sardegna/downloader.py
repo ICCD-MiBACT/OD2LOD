@@ -88,8 +88,8 @@ def handle_CSV(csv_file, mapping_file, nctn2url):
             with open(xml_file_name, mode='w', encoding="utf-8") as w:
                 w.write(xmltodict.unparse(convert_obj, pretty=True))
 
-            if 'URL' in data_row.keys() and data_row['URL'] != '':
-                nctn2url[data_row['NCTN']] = data_row['URL']
+            #if 'URL' in data_row.keys() and data_row['URL'] != '':
+            #    nctn2url[data_row['NCTN']] = data_row['URL']
 
 
 with open('datasets.csv') as csvfile:
@@ -107,5 +107,5 @@ with open('datasets.csv') as csvfile:
         
         handle_CSV(csv_name, row['mapping'], nctn2url)
 
-with open('nctn2url.json' ,'w') as json_file:
-    json.dump(nctn2url, json_file)
+#with open('nctn2url.json' ,'w') as json_file:
+#    json.dump(nctn2url, json_file)
