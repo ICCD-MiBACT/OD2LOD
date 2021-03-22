@@ -1,0 +1,120 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>it.beniculturali.dati.od2lod.rdfRegioni</groupId>
+  <artifactId>rdfVeneto</artifactId>
+  <version>0.0.1</version>
+  <name>veneto</name>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>  
+  <build>
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <groupId>it.cnr.istc.stlab.arco</groupId>
+          <artifactId>rdfizer</artifactId>
+          <version>1.0</version>
+          <packaging>jar</packaging>
+          <file>${project.basedir}/dependencies/arco.rdfizer.jar</file>
+          <generatePom>true</generatePom>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install-jar-lib</id>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- NOTE: We don't need a groupId specification because the group is
+             org.apache.maven.plugins ...which is assumed by default.
+         -->
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <!-- avoid console WARNINGS
+          <finalName>${project.artifactId}-${project.version}-full</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          -->
+          <finalName>${project.artifactId}-${project.version}</finalName>
+          <archive>
+            <manifest>
+              <mainClass>it.beniculturali.dati.od2lod.rdfRegioni.RdfVeneto</mainClass>
+            </manifest>
+          </archive>          
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- bind to the packaging phase -->
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    
+    <!-- added by eclipse quick fix to avoid 'plugin execution not covered by lifecycle configuration' (maven-install-plugin) -->
+    <pluginManagement>
+     <plugins>
+      <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+      
+      <plugin>
+       <groupId>org.eclipse.m2e</groupId>
+       <artifactId>lifecycle-mapping</artifactId>
+       <version>1.0.0</version>
+       <configuration>
+        <lifecycleMappingMetadata>
+         <pluginExecutions>
+          <pluginExecution>
+           <pluginExecutionFilter>
+            <groupId>
+             org.apache.maven.plugins
+            </groupId>
+            <artifactId>
+             maven-install-plugin
+            </artifactId>
+            <versionRange>
+             [2.5.1,)
+            </versionRange>
+            <goals>
+             <goal>install-file</goal>
+            </goals>
+           </pluginExecutionFilter>
+           <action>
+            <ignore></ignore>
+           </action>
+          </pluginExecution>
+         </pluginExecutions>
+        </lifecycleMappingMetadata>
+       </configuration>
+      </plugin>
+      
+     </plugins>
+    </pluginManagement>
+  </build>
+  
+  <dependencies>
+    <!-- position means packaging order (reversed) commons-lang3 3.11 opencsv > 3.0 rdfizer -->
+    <dependency>
+      <groupId>it.cnr.istc.stlab.arco</groupId>
+      <artifactId>rdfizer</artifactId>
+      <version>1.0</version>
+      <!--
+      <scope>provided</scope>
+      -->
+    </dependency>
+  </dependencies>
+</project>
