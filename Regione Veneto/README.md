@@ -1,6 +1,8 @@
 
 # Regione Veneto
-Procedure per la trasformazione di dataset dalla Regione Veneto
+Procedure per la trasformazione dei dataset dalla Regione Veneto esposti dal servizio
+
+  https://beniculturali.regione.veneto.it/xway-front/application/crv/engine/crv.jsp
 
 I dati in ingresso sono resi conformi agli schema elaborati per le schede ICCD e modellati in ArCo / RDF.
 

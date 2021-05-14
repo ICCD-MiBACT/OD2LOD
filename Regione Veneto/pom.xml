@@ -107,7 +107,6 @@
   </build>
   
   <dependencies>
-    <!-- position means packaging order (reversed) commons-lang3 3.11 opencsv > 3.0 rdfizer -->
     <dependency>
       <groupId>it.cnr.istc.stlab.arco</groupId>
       <artifactId>rdfizer</artifactId>
