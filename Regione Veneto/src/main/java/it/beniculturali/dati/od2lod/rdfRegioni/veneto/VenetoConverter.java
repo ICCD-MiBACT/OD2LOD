@@ -31,39 +31,57 @@ import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XsltTransformer;
 
 class VenetoConverter extends Converter {
-	DocumentBuilder builder = null; Transformer transformer = null;
-	StreamSource setStylesheetVersionAttribute(Path path) throws ParserConfigurationException, TransformerFactoryConfigurationError, IOException, SAXException, TransformerException {
-		if (builder==null) builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		if (transformer==null) transformer = TransformerFactory.newInstance().newTransformer();
-		InputStream is = Files.newInputStream(path);
-		Document xslt = builder.parse(is); is.close();
-		Element stylesheet = xslt.getDocumentElement();
-		stylesheet.setAttribute("version", "1.0"); //System.out.println("@version "+stylesheet.getAttribute("version")+" @"+path.getFileName());
-		ByteArrayOutputStream os = new ByteArrayOutputStream(); transformer.transform(new DOMSource(xslt), new StreamResult(os));
-		return new StreamSource(new ByteArrayInputStream(os.toByteArray()));
-	}
-	@Override // xslt version 1.0 to allow partial import of non schema compliant data
-	public StreamSource xslt2source(Path path) throws Exception {//return new StreamSource(Files.newInputStream(path));
-		// preserve line number in error messages //return setStylesheetVersionAttribute(path);
-		byte[]b = Files.readAllBytes(path); String s = new String(b,StandardCharsets.UTF_8.toString());
-		int start = s.indexOf("<xsl:stylesheet");
-		int stop =  s.indexOf(">", start), pos = s.indexOf("version", start);
-		if (pos<stop) { start = s.indexOf('"', pos); // avoid single quotes in attributes please
-			int end = s.indexOf('"', start + 1);
-			if (start<stop&&end<stop) {
-				if (b[start + 1] == '2') b[start + 1] = '1';
-				else System.out.println("xslt version 1 @" + path.getFileName());
-			}
-			else System.out.println("xslt version not found @" + path.getFileName());
-		}
-		return new StreamSource(new ByteArrayInputStream(b));
-	}
-	@Override
-    public void prepareTransformer(XsltTransformer trans, String name) { final String xsl = name;
-    	trans.setMessageListener(new MessageListener(){public void message(XdmNode arg0, boolean arg1, SourceLocator arg2) {System.out.println("message: \"" + arg0.getStringValue()+"\" @"+xsl);}});
+  DocumentBuilder builder = null;
+  Transformer transformer = null;
+
+  StreamSource setStylesheetVersionAttribute(Path path) throws ParserConfigurationException, TransformerFactoryConfigurationError, IOException, SAXException,
+      TransformerException {
+    if (builder == null) builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    if (transformer == null) transformer = TransformerFactory.newInstance().newTransformer();
+    InputStream is = Files.newInputStream(path);
+    Document xslt = builder.parse(is);
+    is.close();
+    Element stylesheet = xslt.getDocumentElement();
+    stylesheet.setAttribute("version", "1.0"); //System.out.println("@version "+stylesheet.getAttribute("version")+" @"+path.getFileName());
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    transformer.transform(new DOMSource(xslt), new StreamResult(os));
+    return new StreamSource(new ByteArrayInputStream(os.toByteArray()));
+  }
+
+  @Override
+  // xslt version 1.0 to allow partial import of non schema compliant data
+  public StreamSource xslt2source(Path path) throws Exception {//return new StreamSource(Files.newInputStream(path));
+    // preserve line number in error messages //return setStylesheetVersionAttribute(path);
+    byte[] b = Files.readAllBytes(path);
+    String s = new String(b, StandardCharsets.UTF_8.toString());
+    int start = s.indexOf("<xsl:stylesheet");
+    int stop = s.indexOf(">", start), pos = s.indexOf("version", start);
+    if (pos < stop) {
+      start = s.indexOf('"', pos); // avoid single quotes in attributes please
+      int end = s.indexOf('"', start + 1);
+      if (start < stop && end < stop) {
+        if (b[start + 1] == '2')
+          b[start + 1] = '1';
+        else
+          System.out.println("xslt version 1 @" + path.getFileName());
+      } else
+        System.out.println("xslt version not found @" + path.getFileName());
     }
-	@Override
-	public void customizeXsltProcessor(Processor proc) {
-		proc.registerExtensionFunction(CatalogueRecordIdentifierToCulturalProperty.getInstance());		
-	};
+    return new StreamSource(new ByteArrayInputStream(b));
+  }
+
+  @Override
+  public void prepareTransformer(XsltTransformer trans, String name) {
+    final String xsl = name;
+    trans.setMessageListener(new MessageListener() {
+      public void message(XdmNode arg0, boolean arg1, SourceLocator arg2) {
+        System.out.println("message: \"" + arg0.getStringValue() + "\" @" + xsl);
+      }
+    });
+  }
+
+  @Override
+  public void customizeXsltProcessor(Processor proc) {
+    proc.registerExtensionFunction(CatalogueRecordIdentifierToCulturalProperty.getInstance());
+  };
 }

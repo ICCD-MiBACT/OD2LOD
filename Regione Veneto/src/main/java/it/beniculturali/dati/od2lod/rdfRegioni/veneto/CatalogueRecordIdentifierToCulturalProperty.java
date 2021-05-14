@@ -15,43 +15,42 @@ import net.sf.saxon.s9api.XdmValue;
 
 public class CatalogueRecordIdentifierToCulturalProperty implements ExtensionFunction {
 
-	private static CatalogueRecordIdentifierToCulturalProperty instance;
-	private Map<String, String> catalogueRecordIdentifier2URI;
-	
-	private CatalogueRecordIdentifierToCulturalProperty() {
-		PreprocessedData pd = PreprocessedData.getInstance(true);
-		this.catalogueRecordIdentifier2URI = pd.getCatalogueRecordIdentifier2URI();
-	}
+  private static CatalogueRecordIdentifierToCulturalProperty instance;
+  private Map<String, String> catalogueRecordIdentifier2URI;
 
-	public static CatalogueRecordIdentifierToCulturalProperty getInstance() {
-		if (instance == null)
-			instance = new CatalogueRecordIdentifierToCulturalProperty();
-		return instance;
-	}
+  private CatalogueRecordIdentifierToCulturalProperty() {
+    PreprocessedData pd = PreprocessedData.getInstance(true);
+    this.catalogueRecordIdentifier2URI = pd.getCatalogueRecordIdentifier2URI();
+  }
 
-	public XdmValue call(XdmValue[] arguments) throws SaxonApiException {
-		String arg = ((XdmAtomicValue) arguments[0].itemAt(0)).getStringValue();
-		String url = catalogueRecordIdentifier2URI.get(arg);
-		if ((url == null || url.length() == 0) && arg.endsWith("-0")) {
-			arg = arg.substring(0, arg.length()-2);
-			url = catalogueRecordIdentifier2URI.get(arg);
-		}
-		if (url == null || url.length() == 0) {
-			System.out.println("Empty sequence return @" + arg);
-			return XdmEmptySequence.getInstance();
-		}
-		return XdmValue.makeValue(url);
-	}
+  public static CatalogueRecordIdentifierToCulturalProperty getInstance() {
+    if (instance == null) instance = new CatalogueRecordIdentifierToCulturalProperty();
+    return instance;
+  }
 
-	public SequenceType[] getArgumentTypes() {
-		return new SequenceType[] { SequenceType.makeSequenceType(ItemType.STRING, OccurrenceIndicator.ONE) };
-	}
+  public XdmValue call(XdmValue[] arguments) throws SaxonApiException {
+    String arg = ((XdmAtomicValue) arguments[0].itemAt(0)).getStringValue();
+    String url = catalogueRecordIdentifier2URI.get(arg);
+    if ((url == null || url.length() == 0) && arg.endsWith("-0")) {
+      arg = arg.substring(0, arg.length() - 2);
+      url = catalogueRecordIdentifier2URI.get(arg);
+    }
+    if (url == null || url.length() == 0) {
+      System.out.println("Empty sequence return @" + arg);
+      return XdmEmptySequence.getInstance();
+    }
+    return XdmValue.makeValue(url);
+  }
 
-	public QName getName() {
-		return new QName("https://w3id.org/arco/saxon-extension", "catalogue-record-identifier-to-cultural-property");
-	}
+  public SequenceType[] getArgumentTypes() {
+    return new SequenceType[] { SequenceType.makeSequenceType(ItemType.STRING, OccurrenceIndicator.ONE) };
+  }
 
-	public SequenceType getResultType() {
-		return SequenceType.makeSequenceType(ItemType.ANY_ITEM, OccurrenceIndicator.ZERO_OR_MORE);
-	}
+  public QName getName() {
+    return new QName("https://w3id.org/arco/saxon-extension", "catalogue-record-identifier-to-cultural-property");
+  }
+
+  public SequenceType getResultType() {
+    return SequenceType.makeSequenceType(ItemType.ANY_ITEM, OccurrenceIndicator.ZERO_OR_MORE);
+  }
 }
