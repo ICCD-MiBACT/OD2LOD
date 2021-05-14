@@ -15,16 +15,11 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -356,8 +351,10 @@ public class RdfVeneto {
       initializeArco();
       String xsltRdf = properties.getProperty("2rdf.xslt");
       if (xsltRdf != null) {
-        converter.addXSTLConverter(Paths.get(this.getClass().getClassLoader().getResource(xsltRdf).toURI()));
+        URI uri = this.getClass().getClassLoader().getResource(xsltRdf).toURI();
+        converter.addXSTLConverter(uri.getScheme().equals("jar") ? Zip.open(uri).getPath(xsltRdf) : Paths.get(uri));
       }
+      //if (xsltRdf!=null) { converter.addXSTLConverter(Paths.get(this.getClass().getClassLoader().getResource(xsltRdf).toURI())); }
       for (byte[] ba; (ba = cr.next()) != null;) {
         String itemId = cr.name();
         try {

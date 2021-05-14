@@ -42,6 +42,10 @@ public class Zip { // flat zip filesystem
     return FileSystems.newFileSystem(URI.create("jar:" + z.toURI()), new HashMap<String, String>());
   }
 
+  static FileSystem open(URI uri) throws IOException {
+    return FileSystems.newFileSystem(uri, new HashMap<String, String>());
+  }
+
   static void write(FileSystem fs, String name, byte[] content) throws IOException {
     Files.write(fs.getPath(name), content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
   } // jre 1.8 bug: needs explicit option}
