@@ -67,6 +67,8 @@
   </record>
  </xsl:template>
  
+ <xsl:template match="NCT/NCTN"><xsl:copy><xsl:value-of select="normalize-space()"/></xsl:copy></xsl:template>
+ <xsl:template match="NCT/NCTR"><xsl:copy><xsl:value-of select="normalize-space()"/></xsl:copy></xsl:template>
  <xsl:template match="*[not(node())]" priority="1"/>
  <xsl:template match="@xml:space"/>
  <xsl:template match="/*/*/csm_def/DO/FTA/FTA_IMG/*/node()"/>
