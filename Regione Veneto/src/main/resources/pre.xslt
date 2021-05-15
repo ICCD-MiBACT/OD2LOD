@@ -44,11 +44,20 @@
       <xsl:if test="name()='scheda_RA' or name()='scheda_F'"> 
        <xsl:attribute name="version">3.00</xsl:attribute>
       </xsl:if>
+      <xsl:if test="not(csm_def/CD/NCT/NCTR)">
+        <xsl:element name="CD">
+         <xsl:element name="NCT">
+          <xsl:element name="NCTR">05</xsl:element>
+         </xsl:element>
+        </xsl:element>
+      </xsl:if>
+      <!--
       <xsl:choose>
        <xsl:when test="csm_def/CD/NCT/NCTN"/>
        <xsl:when test="csm_def/CD/CBC"/>
        <xsl:when test="csm_def/AC/ACC"/>
        <xsl:otherwise>
+       -->
         <xsl:element name="AC">
          <xsl:element name="ACC">
           <xsl:value-of select="csm_def/*[starts-with(name(),'ser_')]"/>
@@ -58,8 +67,10 @@
           </xsl:if>
          </xsl:element>
         </xsl:element>
+        <!-- 
        </xsl:otherwise>
       </xsl:choose>
+       -->
       <xsl:apply-templates select="csm_def/*"/>
      </xsl:element>
     </schede>
@@ -67,8 +78,10 @@
   </record>
  </xsl:template>
  
+ <xsl:template match="NCT/NCTN"/><!-- 
  <xsl:template match="NCT/NCTN"><xsl:copy><xsl:value-of select="normalize-space()"/></xsl:copy></xsl:template>
- <xsl:template match="NCT/NCTR"><xsl:copy><xsl:value-of select="normalize-space()"/></xsl:copy></xsl:template>
+  -->
+ <xsl:template match="NCT/NCTR"><xsl:copy>05</xsl:copy></xsl:template>
  <xsl:template match="*[not(node())]" priority="1"/>
  <xsl:template match="@xml:space"/>
  <xsl:template match="/*/*/csm_def/DO/FTA/FTA_IMG/*/node()"/>
