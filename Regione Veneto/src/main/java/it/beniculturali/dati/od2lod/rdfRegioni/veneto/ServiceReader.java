@@ -17,9 +17,9 @@ public class ServiceReader implements DocumentReader {
   private XPath xPath;
   String contentUri;
   private int offset = 0, count = 0;
-  int maxTry = 8, tryAfter = 60; // sec
+  static int maxTry = 8, tryAfter = 60; // sec
 
-  private Document readDocument(String request) throws Exception {
+  public static Document readDocument(String request, DocumentBuilder documentBuilder) throws Exception {
     int tryCount = maxTry;
     for (;;) { //System.out.println("GET " + request);
       try {
@@ -39,6 +39,10 @@ public class ServiceReader implements DocumentReader {
         Thread.sleep(tryAfter * 1000);
       }
     }
+  }
+
+  private Document readDocument(String request) throws Exception {
+    return readDocument(request, documentBuilder);
   }
 
   public ServiceReader(String queryUri, String dataUri, String countPath) throws Exception {

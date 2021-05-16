@@ -44,7 +44,7 @@
       <xsl:if test="name()='scheda_RA' or name()='scheda_F'"> 
        <xsl:attribute name="version">3.00</xsl:attribute>
       </xsl:if>
-      <xsl:if test="not(csm_def/CD/NCT/NCTR)">
+      <xsl:if test="not(csm_def/CD/NCT/NCTR/node())">
         <xsl:element name="CD">
          <xsl:element name="NCT">
           <xsl:element name="NCTR">05</xsl:element>
@@ -81,6 +81,7 @@
  <xsl:template match="NCT/NCTN"/><!-- 
  <xsl:template match="NCT/NCTN"><xsl:copy><xsl:value-of select="normalize-space()"/></xsl:copy></xsl:template>
   -->
+ <xsl:template match="RVE/RVEL"><xsl:copy><xsl:value-of select="normalize-space()"/></xsl:copy></xsl:template>
  <xsl:template match="NCT/NCTR"><xsl:copy>05</xsl:copy></xsl:template>
  <xsl:template match="*[not(node())]" priority="1"/>
  <xsl:template match="@xml:space"/>

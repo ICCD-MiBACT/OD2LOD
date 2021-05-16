@@ -15,6 +15,8 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -251,6 +254,7 @@ public class RdfVeneto {
     String NCTPath = properties.getProperty("NCT");
     String RVELPath = properties.getProperty("RVEL");
     String itemPath = properties.getProperty("itemId");
+    String datePath = properties.getProperty("datePath");
     String sheetTypePath = properties.getProperty("sheetType");
     String resourcePrefix = properties.getProperty("resourcePrefix");
     XsltTransformer xtr = xco.compile(new StreamSource(ras(properties.getProperty("xslt")))).load()/*, xtrRdf = null*/;
@@ -260,6 +264,7 @@ public class RdfVeneto {
     String[] ids = id == null ? new String[] { null } : id.split(":");
     List<String> itemIds = new ArrayList<String>();
     XPath xPath = XPathFactory.newInstance().newXPath();
+    String lastDate = "00000000";
     for (String cardId : ids) {
       DocumentReader sr = serviceReader(cardId, outFolder);
       boolean dump = ServiceReader.class.isInstance(sr);
@@ -267,14 +272,21 @@ public class RdfVeneto {
         String itemId = null;
         try {
           itemId = (String) xPath.evaluate(itemPath, card, XPathConstants.STRING);
+          String date = (String) xPath.evaluate(datePath, card, XPathConstants.STRING);
+          if (date.compareTo(lastDate) > 0) lastDate = date;
           String sheetType = (String) xPath.evaluate(sheetTypePath, card, XPathConstants.STRING);
           String specificPropertyType = Utilities.getLocalName(Utilities.getSpecificPropertyType(sheetType));
-          String NCTN = (String) xPath.evaluate(NCTPath + "/NCTN", card, XPathConstants.STRING);
-          String RVEL = (String) xPath.evaluate(RVELPath, card, XPathConstants.STRING);
+          String NCTN = ((String) xPath.evaluate(NCTPath + "/NCTN", card, XPathConstants.STRING)).trim();
+          String RVEL = ((String) xPath.evaluate(RVELPath, card, XPathConstants.STRING)).trim();
+
+          // resource is always serial based (see pre.xslt) 
+          String resource = resourcePrefix + specificPropertyType + "/" + itemId + (RVEL.length() > 0 ? "-" + Urifier.toURI(RVEL) : "");
+
           if (NCTN.length() > 0) {//String NCTR = (String)xPath.evaluate(NCTPath + "/NCTR", card, XPathConstants.STRING);String NCTS = (String)xPath.evaluate(NCTPath + "/NCTS", card, XPathConstants.STRING);
-            String NCT = (String) xPath.evaluate("concat(" + NCTPath + "/NCTR,'" + NCTN + "'," + NCTPath + "/NCTS)", card, XPathConstants.STRING);
-            String identifier = NCT + (RVEL.length() > 0 ? "-" + RVEL : "");//System.out.println(identifier+" <= "+map.get(identifier));
-            String resource = resourcePrefix + specificPropertyType + "/" + NCT + (RVEL.length() > 0 ? "-" + Urifier.toURI(RVEL) : "");
+            //String NCT = (String)xPath.evaluate("concat("+NCTPath+"/NCTR,'"+NCTN+"',"+NCTPath+"/NCTS)", card, XPathConstants.STRING);
+            String NCT = (String) xPath.evaluate("concat('05','" + NCTN + "'," + NCTPath + "/NCTS)", card, XPathConstants.STRING);
+            String identifier = NCT + (RVEL.length() > 0 ? "-" + RVEL : "");//System.out.println(identifier+" <= "+map.get(identifier));      
+            //String resource = resourcePrefix + specificPropertyType + "/" + NCT+(RVEL.length()>0?"-"+Urifier.toURI(RVEL):"");
             map.put(identifier, resource);//System.out.println(identifier+" => "+resource);//System.out.println(itemId+(RVEL.length()>0?"-"+RVEL:"")+" <= "+map.get(itemId));
             map.put(itemId + (RVEL.length() > 0 ? "-" + RVEL : ""), resource);//System.out.println(itemId+(RVEL.length()>0?"-"+RVEL:"")+" => "+resource);
             //if (RVEL.length()==0) { map.put(NCT+"-0", resource); map.put(itemId+"-0", resource); }
@@ -282,8 +294,7 @@ public class RdfVeneto {
               map.put(NCT, resource);
               map.put(itemId, resource);
             }
-          } else {
-            String resource = resourcePrefix + specificPropertyType + "/" + itemId + (RVEL.length() > 0 ? "-" + Urifier.toURI(RVEL) : "");
+          } else {//String resource = resourcePrefix + specificPropertyType + "/" + itemId+(RVEL.length()>0?"-"+Urifier.toURI(RVEL):"");
             map.put(itemId + (RVEL.length() > 0 ? "-" + RVEL : ""), resource);
             //if (RVEL.length()==0) map.put(itemId+"-0", resource);
             if (RVEL.length() > 0) map.put(itemId, resource);
@@ -301,14 +312,16 @@ public class RdfVeneto {
         } finally {
           baos.reset();
         }
-        //if (cardsCount==2) break; // test
         if ((++count % 2048) == 0) preprocessMessage(count, offense, start, false);
+        //if (count==16) break; // test
       }
       if (dump) closeDump();
       sr.close();
     }
     pd.commit();
     //pd.close();
+    System.out.println("INFO - last date: " + lastDate);
+    Files.write(Paths.get(outFolder, "lastdate"), lastDate.getBytes(StandardCharsets.UTF_8.toString()));
     preprocessMessage(count, offense, start, true);
     return new CardZipReader(cache(outFolder), itemIds);
   }
@@ -334,13 +347,32 @@ public class RdfVeneto {
     return new CardZipReader(cache(outFolder), id == null ? null : Arrays.asList(id.split(":")));
   }
 
-  String toIsoDate(String s) {
-    String[] a = s.split("/");
-    return (a[2].length() == 2 ? "20" : "") + a[2] + "-" + (a[1].length() < 2 ? "0" : "") + a[1] + "-" + (a[0].length() < 2 ? "0" : "") + a[0];
+  //String toIsoDate(String s){ String[]a = s.split("/"); return (a[2].length()==2?"20":"") + a[2] + "-" + (a[1].length()<2?"0":"") + a[1] + "-" + (a[0].length()<2?"0":"") + a[0]; }
+  void deleteData(String outFolder, String name) throws IOException {
+    File z = new File(outFolder, name + ".zip");
+    if (z.exists() && !z.delete()) throw new IOException("ERROR - unable to delete " + z);
   }
 
-  void convert(String outFolder, String id) throws Exception {
+  void emptyCache(String outFolder) throws IOException {
+    deleteData(outFolder, "dump");
+    deleteData(outFolder, "cache");
+  }
+
+  boolean checkDate(String outFolder, String date) throws Exception {
+    String request = properties.getProperty("contentQuery") + properties.getProperty("dateRestriction").replaceAll("\\$\\(yyyymmdd\\)", date);
+    Document response = ServiceReader.readDocument(request, DocumentBuilderFactory.newInstance().newDocumentBuilder());
+    XPath xPath = XPathFactory.newInstance().newXPath();
+    String sc = (String) xPath.evaluate(properties.getProperty("contentCount"), response, XPathConstants.STRING);
+    int count = sc != null && sc.length() > 0 ? Integer.parseInt(sc) : 0;
+    System.out.println("STATUS - got " + count + " cards reading @" + request);
+    if (count <= 0) return false;
+    emptyCache(outFolder);
+    return true;
+  }
+
+  void convert(String outFolder, String id, String date) throws Exception {
     try {
+      if (date != null && !checkDate(outFolder, date)) return;
       checkDbData();
       CardZipReader cr = cardReader(outFolder, id);
       ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -354,7 +386,6 @@ public class RdfVeneto {
         URI uri = this.getClass().getClassLoader().getResource(xsltRdf).toURI();
         converter.addXSTLConverter(uri.getScheme().equals("jar") ? Zip.open(uri).getPath(xsltRdf) : Paths.get(uri));
       }
-      //if (xsltRdf!=null) { converter.addXSTLConverter(Paths.get(this.getClass().getClassLoader().getResource(xsltRdf).toURI())); }
       for (byte[] ba; (ba = cr.next()) != null;) {
         String itemId = cr.name();
         try {
@@ -376,6 +407,7 @@ public class RdfVeneto {
         } finally {
           result.reset();
         }
+        //if (id==null && cardsCount==16) break; // test
       }
       System.out.println("STATUS - got " + cardsCount + "/" + (cardsCount + offense) + " cards");
       closeContent();
@@ -414,11 +446,15 @@ public class RdfVeneto {
 
   public static void main(String[] args) throws Exception {
     if (args.length < 1) uso();
-    String outFolder = args[0], id = null;// boolean dump = true;  
+    String outFolder = args[0], id = null, date = null;// boolean dump = true;  
     for (int j = 1; j < args.length; j++) { // System.out.println("args["+j+"]: " + args[j]);
       //if (args[j].compareTo("-dump")==0) { dump = true; continue; }
       if (args[j].startsWith("-card:")) {
         id = args[j].substring(6);
+        continue;
+      }
+      if (args[j].startsWith("-date:")) {
+        date = args[j].substring(6);
         continue;
       }
       if (args[j].compareTo("-map") == 0) {
@@ -436,7 +472,7 @@ public class RdfVeneto {
     });
     RdfVeneto rdfv = new RdfVeneto();
     try {
-      rdfv.convert(outFolder, id);
+      rdfv.convert(outFolder, id, date);
     } catch (Throwable t) {
       fatal(outFolder, t);
     }

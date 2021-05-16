@@ -52,6 +52,7 @@ class VenetoConverter extends Converter {
   // xslt version 1.0 to allow partial import of non schema compliant data
   public StreamSource xslt2source(Path path) throws Exception {//return new StreamSource(Files.newInputStream(path));
     // preserve line number in error messages //return setStylesheetVersionAttribute(path);
+    // NOTE: there is an hazard here assuming utf-8 encoding && one byte char size up to the version attribute && double quotes as delimiters 
     byte[] b = Files.readAllBytes(path);
     String s = new String(b, StandardCharsets.UTF_8.toString());
     int start = s.indexOf("<xsl:stylesheet");
@@ -60,12 +61,13 @@ class VenetoConverter extends Converter {
       start = s.indexOf('"', pos); // avoid single quotes in attributes please
       int end = s.indexOf('"', start + 1);
       if (start < stop && end < stop) {
-        if (b[start + 1] == '2')
+        if (b[start + 1] == '2') {
           b[start + 1] = '1';
-        else
-          System.out.println("xslt version 1 @" + path.getFileName());
+          System.out.println("INFO - set xslt version 1 @" + path.getFileName());
+        } else
+          System.out.println("INFO - got xslt version 1 @" + path.getFileName());
       } else
-        System.out.println("xslt version not found @" + path.getFileName());
+        System.out.println("INFO - xslt version not found @" + path.getFileName());
     }
     return new StreamSource(new ByteArrayInputStream(b));
   }
