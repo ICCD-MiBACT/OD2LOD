@@ -279,7 +279,7 @@ public class RdfVeneto {
           String NCTN = ((String) xPath.evaluate(NCTPath + "/NCTN", card, XPathConstants.STRING)).trim();
           String RVEL = ((String) xPath.evaluate(RVELPath, card, XPathConstants.STRING)).trim();
 
-          // resource is always serial based (see pre.xslt) 
+          // rdf resource is always serial based (see pre.xslt) 
           String resource = resourcePrefix + specificPropertyType + "/" + itemId + (RVEL.length() > 0 ? "-" + Urifier.toURI(RVEL) : "");
 
           if (NCTN.length() > 0) {//String NCTR = (String)xPath.evaluate(NCTPath + "/NCTR", card, XPathConstants.STRING);String NCTS = (String)xPath.evaluate(NCTPath + "/NCTS", card, XPathConstants.STRING);

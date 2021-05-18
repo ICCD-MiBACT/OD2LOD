@@ -60,7 +60,7 @@
        -->
         <xsl:element name="AC">
          <xsl:element name="ACC">
-          <xsl:value-of select="csm_def/*[starts-with(name(),'ser_')]"/>
+          <xsl:value-of select="normalize-space(csm_def/*[starts-with(name(),'ser_')])"/>
           <xsl:variable name="rvel" select="normalize-space(csm_def/RV/RVE/RVEL)"/>
           <xsl:if test="string-length($rvel)">
            <xsl:value-of select="concat('-', $rvel)"/> 
@@ -85,7 +85,10 @@
  <xsl:template match="NCT/NCTR"><xsl:copy>05</xsl:copy></xsl:template>
  <xsl:template match="*[not(node())]" priority="1"/>
  <xsl:template match="@xml:space"/>
+ <!-- 
  <xsl:template match="/*/*/csm_def/DO/FTA/FTA_IMG/*/node()"/>
+  -->
+ <xsl:template match="/*/*/csm_def/DO/FTA/FTA_IMG/*" priority="2"><xsl:copy><xsl:copy-of select="@*"/></xsl:copy></xsl:template>
  <xsl:template match="* | @* | text() | comment()">
   <xsl:copy><xsl:apply-templates select="* | @* | text() | comment()"/></xsl:copy>
  </xsl:template>

@@ -86,7 +86,10 @@
    <!-- /as per dublin-core.xslt code -->
    <xsl:element name="rdf:Description">
     <xsl:attribute name="rdf:about"><xsl:value-of select="$culturalProperty"/></xsl:attribute>
+    <!-- 
     <xsl:for-each select="record/metadata/schede/*/DO/FTA/FTA_IMG/*[@agent.meta]">
+    -->
+    <xsl:for-each select="record/metadata/schede/*/DO/FTA/FTA_IMG/*[@name]">
      <xsl:element name="foaf:depiction">
       <!-- https://beniculturali.regione.veneto.it/xway-front/application/crv/engine/crv.jsp?verbo=attach&db=crv_back&id=ot/meBfC5zA%3d%2ejpg -->
       <xsl:attribute name="rdf:resource"><xsl:value-of select="concat('https://beniculturali.regione.veneto.it/xway-front/application/crv/engine/crv.jsp?verbo=attach&amp;db=crv_back&amp;id=',encode-for-uri(@name))"/></xsl:attribute>
