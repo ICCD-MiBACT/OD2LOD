@@ -96,6 +96,18 @@
      </xsl:element>
     </xsl:for-each>
    </xsl:element>
+   
+   <xsl:for-each select="record/metadata/schede/*/DO/FTA">
+    <xsl:if test="FTA_IMG/*[@name]">
+     <xsl:element name="rdf:Description">
+      <xsl:attribute name="rdf:about"><xsl:value-of select="concat($NS, 'PhotographicDocumentation/', $itemURI, '-photographic-documentation-', position())"/></xsl:attribute>
+      <xsl:element name="foaf:depiction">
+       <xsl:attribute name="rdf:resource"><xsl:value-of select="concat('https://beniculturali.regione.veneto.it/xway-front/application/crv/engine/crv.jsp?verbo=attach&amp;db=crv_back&amp;id=',encode-for-uri(FTA_IMG/*/@name))"/></xsl:attribute>
+      </xsl:element>
+     </xsl:element>
+    </xsl:if> 
+   </xsl:for-each>
+   
   </rdf:RDF>
  </xsl:template>
  
