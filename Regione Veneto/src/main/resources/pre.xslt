@@ -66,6 +66,11 @@
            <xsl:value-of select="concat('-', $rvel)"/> 
           </xsl:if>
          </xsl:element>
+         <!-- sampling content => 5385/39922 presenze, 5080 validi (8 numerici) 5212 univoci di cui 4912 validi
+         <xsl:element name="NCT-N">
+          <xsl:value-of select="normalize-space(csm_def/CD/NCT/NCTN)"/>
+         </xsl:element>
+         -->
         </xsl:element>
         <!-- 
        </xsl:otherwise>
