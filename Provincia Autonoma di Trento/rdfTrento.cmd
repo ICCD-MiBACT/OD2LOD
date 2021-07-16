@@ -1,0 +1,1 @@
+@call java -Dfile.encoding=UTF-8 -cp target/classes;target/rdfTrento-0.0.1-jar-with-dependencies.jar it.beniculturali.dati.od2lod.rdfRegioni.trento.RdfTrento ./results %*
