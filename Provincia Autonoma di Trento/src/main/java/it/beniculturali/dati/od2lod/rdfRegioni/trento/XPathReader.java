@@ -19,27 +19,36 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class XPathReader {
- private NodeList nodeList;
- private DocumentBuilder documentBuilder;
- XPathReader(String url, String xPath) throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {this(url, xPath, 0);}
- XPathReader(String url, String xPath, int timeout) throws IOException, ParserConfigurationException, SAXException, XPathExpressionException{
-  documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-  URL targetURL = new URL(url); URLConnection connection;
-  if (timeout>0 && targetURL.getProtocol().toLowerCase().startsWith("http")) {
-   connection = (HttpURLConnection) targetURL.openConnection();
-   connection.setConnectTimeout(timeout*1000);
+  private NodeList nodeList;
+  private DocumentBuilder documentBuilder;
+
+  XPathReader(String url, String xPath) throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
+    this(url, xPath, 0);
   }
-  else connection = targetURL.openConnection();  
-  InputStream xmlInputStream = connection.getInputStream();     
-  Document document = documentBuilder.parse(xmlInputStream);
-  xmlInputStream.close();
-  nodeList = (NodeList)XPathFactory.newInstance().newXPath().evaluate(xPath, document, XPathConstants.NODESET);
-  System.out.println("got " + nodeList.getLength() + " nodes with path " + xPath);
- }
- private int offset = 0;
- Node next() throws IOException{
-  if (nodeList.getLength()-offset<=0) return null;
-  return nodeList.item(offset++);
- }
- void close() throws IOException {}
+
+  XPathReader(String url, String xPath, int timeout) throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
+    documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    URL targetURL = new URL(url);
+    URLConnection connection;
+    if (timeout > 0 && targetURL.getProtocol().toLowerCase().startsWith("http")) {
+      connection = (HttpURLConnection) targetURL.openConnection();
+      connection.setConnectTimeout(timeout * 1000);
+    } else
+      connection = targetURL.openConnection();
+    InputStream xmlInputStream = connection.getInputStream();
+    Document document = documentBuilder.parse(xmlInputStream);
+    xmlInputStream.close();
+    nodeList = (NodeList) XPathFactory.newInstance().newXPath().evaluate(xPath, document, XPathConstants.NODESET);
+    System.out.println("got " + nodeList.getLength() + " nodes with path " + xPath);
+  }
+
+  private int offset = 0;
+
+  Node next() throws IOException {
+    if (nodeList.getLength() - offset <= 0) return null;
+    return nodeList.item(offset++);
+  }
+
+  void close() throws IOException {
+  }
 }
