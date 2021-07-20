@@ -97,7 +97,7 @@
        <xsl:if test="*[local-name()='cond_giuri'][normalize-space()!=''][.!='None']">
         <xsl:element name="CDG">
          <xsl:attribute name="hint">CONDIZIONE GIURIDICA</xsl:attribute>
-         <xsl:element name="CDG">
+         <xsl:element name="CDGG">
           <xsl:attribute name="hint">Indicazione generica</xsl:attribute>proprietà <xsl:value-of select="*[local-name()='cond_giuri']"/></xsl:element>
         </xsl:element>
        </xsl:if>
