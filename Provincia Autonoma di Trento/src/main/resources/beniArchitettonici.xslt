@@ -66,7 +66,7 @@
         <xsl:element name="PVCS">
          <xsl:attribute name="hint">Stato</xsl:attribute>Italia</xsl:element>
         <xsl:element name="PVCR">
-         <xsl:attribute name="hint">Regione</xsl:attribute>Trentino-Alto Adige</xsl:element>
+         <xsl:attribute name="hint">Regione</xsl:attribute>Trentino - Alto Adige</xsl:element>
         <xsl:element name="PVCP">
          <xsl:attribute name="hint">Provincia</xsl:attribute>TN</xsl:element>
         <xsl:element name="PVCC">
