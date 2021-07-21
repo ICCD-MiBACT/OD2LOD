@@ -68,7 +68,7 @@
         <xsl:element name="PVCR">
          <xsl:attribute name="hint">Regione</xsl:attribute>Trentino-Alto Adige</xsl:element>
         <xsl:element name="PVCP">
-         <xsl:attribute name="hint">Provincia</xsl:attribute>Trento</xsl:element>
+         <xsl:attribute name="hint">Provincia</xsl:attribute>TN</xsl:element>
         <xsl:element name="PVCC">
          <xsl:attribute name="hint">Comune</xsl:attribute><xsl:value-of select="*[local-name()='com_amm']"/></xsl:element>
         <xsl:if test="*[local-name()='loc_amm'][normalize-space()!=''][.!='None']">
@@ -139,13 +139,14 @@
       </xsl:element>
        
      </xsl:element>
-     <xsl:variable name="idb" select="*[local-name()='id_bene']"/>
-     <!-- 7242 5716 -->   
-     <xsl:element name="harvesting">
-      <xsl:element name="media">
-       <xsl:value-of select="concat('https://webgis.provincia.tn.it/wgt/services/static/immagini/sbc/bea/',$idb,'/',$idb,'.jpg')"/>
+     <xsl:variable name="idb" select="*[local-name()='id_bene']"/><!-- 404 -->   
+     <xsl:if test="not(contains(' 7242 5716 3698 6055 6174 6159 8790 10677 7492 7212 5638 6491 ',concat(' ',$idb,' ')))">
+      <xsl:element name="harvesting">
+       <xsl:element name="media">
+        <xsl:value-of select="concat('https://webgis.provincia.tn.it/wgt/services/static/immagini/sbc/bea/',$idb,'/',$idb,'.jpg')"/>
+       </xsl:element>
       </xsl:element>
-     </xsl:element>
+     </xsl:if>
     </schede>
   </metadata>
   </record>
