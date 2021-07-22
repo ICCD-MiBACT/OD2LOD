@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
@@ -211,6 +212,10 @@ public class RdfTrento {
     addMap(db, "codiceEnteToNomeEnte");
     db.commit();
     db.close();
+    PreprocessedData pd = PreprocessedData.getInstance(false);
+    Map<String, String> map = pd.getCodiceEnteToNomeEnte();
+    map.put("S222", "Provincia Autonoma di Trento - Soprintendenza per i Beni Culturali");
+    pd.commit();
   }
 
   void remove(File dir) {
@@ -393,7 +398,7 @@ public class RdfTrento {
           converter.addXSTLConverter(uri.getScheme().equals("jar") ? Zip.open(uri).getPath(xsltRdf) : Paths.get(uri));
         }
         XPathReader reader = getPassReader(id, pass, outFolder);
-        boolean test = false;
+        int testlines = -1;
         for (Node node; (node = reader.next()) != null; line++, rows++) {
           String itemId = null;
           try {
@@ -409,7 +414,7 @@ public class RdfTrento {
               model = converter.convert(itemId, resourcePrefix, documentPrefix, new ByteArrayInputStream(ba));
             } catch (Exception e) {
               writeException(outFolder, itemId, ba, line, e);
-              if (test && line == 2) break;
+              if (testlines == line) break;
               continue;
             } finally {
               arcoMillis += new Date().getTime() - start;
@@ -430,7 +435,7 @@ public class RdfTrento {
             result.reset();
             baos.reset();
           }
-          if (test && line == 2) break;
+          if (testlines == line) break;
         }
         System.out.println("STATUS - got " + line + " lines @dataset " + dataset);
         reader.close();
