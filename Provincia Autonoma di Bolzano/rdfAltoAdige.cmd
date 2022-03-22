@@ -1,0 +1,3 @@
+@rem java -Dfile.encoding=UTF-8 -jar target/rdfAltoAdige-0.0.1-jar-with-dependencies.jar ./results %* 2>&1 | grep --line-buffered -v -e IndexSearcher -e "Empty sequence return" -e META-INF -e "PreprocessedData.java"
+@rem to avoid mvn package in test
+@java -Dfile.encoding=UTF-8 -cp target/classes;target/rdfAltoAdige-0.0.1-jar-with-dependencies.jar it.beniculturali.dati.od2lod.rdfRegioni.RdfAltoAdige ./results %* 2>&1 | grep --line-buffered -Fv -e IndexSearcher -e "Empty sequence return" -e META-INF -e "PreprocessedData.java"
