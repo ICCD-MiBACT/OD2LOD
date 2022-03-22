@@ -66,210 +66,387 @@ import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltTransformer;
 
 public class RdfAltoAdige {
- private DocumentBuilder db;
- private Transformer nullTransformer;
- RdfAltoAdige() throws IOException, TransformerConfigurationException, TransformerFactoryConfigurationError, ParserConfigurationException { 
-  db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-  loadProperties(); nullTransformer = TransformerFactory.newInstance().newTransformer(); }
- InputStream ras(String s) { return this.getClass().getClassLoader().getResourceAsStream(s); }
- Properties properties = new Properties();
- void loadProperties() throws IOException {
-  InputStream is = ras("rdfAltoAdige.properties");
-  properties.load(is);
-  is.close();
- } 
- static String safeIriPart(String s, String replacer) {
-  String pattern = "[^" +
-   "-A-Za-z0-9\\._~" +          
-   "\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF" +
-   "\u10000-\u1FFFD\u20000-\u2FFFD\u30000-\u3FFFD" +
-   "\u40000-\u4FFFD\u50000-\u5FFFD\u60000-\u6FFFD" +
-   "\u70000-\u7FFFD\u80000-\u8FFFD\u90000-\u9FFFD" +
-   "\uA0000-\uAFFFD\uB0000-\uBFFFD\uC0000-\uCFFFD" +
-   "\uD0000-\uDFFFD\uE1000-\uEFFFD" +
-   "]";
-  return s.replaceAll(pattern, replacer);
- }
- static void fatal(String outFolder, Throwable t) throws UnsupportedEncodingException, FileNotFoundException {
-  String filename = "" + new Date().getTime() + ".exception"; System.err.println("ERROR - Exception " + t + " written to " + filename);
-  PrintStream ps = new PrintStream(new FileOutputStream(new File(outFolder, filename)), false, StandardCharsets.UTF_8.toString());
-  t.printStackTrace(ps); ps.close();
- }
- byte[] document2bytes(Document d) throws TransformerException { ByteArrayOutputStream os = new ByteArrayOutputStream(); nullTransformer.transform(new DOMSource(d), new StreamResult(os)); return os.toByteArray(); }
- void writeDocument(File f, Document d) throws TransformerException { nullTransformer.transform(new DOMSource(d), new StreamResult(f)); }
- private void writeException(String outFolder, String id, Document row, int line, Exception e) throws Exception { if (id==null) throw(e);
-  String filename = "offending_row_" + id + ".xml"; System.err.println("ERROR - Exception " + e + " caught @row " + line + " written to " + filename);
-  writeDocument(new File(outFolder, filename), row);
- }
- static void writeContent(File f, byte[]c) throws IOException { FileOutputStream fos = new FileOutputStream(f); fos.write(c); fos.close(); }
- private void writeException(String outFolder, String id, byte[]content, int line, Exception e) throws Exception {
-  String filename = "offending_node_" + id + ".xml"; System.err.println("ERROR - Exception " + e + " caught @row " + line + " written to " + filename);
-  writeContent(new File(outFolder, filename), content);  
- }
- static DecimalFormat df = new DecimalFormat("0.0"), df7 = new DecimalFormat("0000000");
- int lastStartRow = 0;
- int rowCountFlush = 12 * 1024;
- private BufferedOutputStream bos = null;
- private void closeContent() throws IOException { if (bos!=null) {bos.flush(); bos.close(); bos = null;} }
- private void flushContent(String itemId, int rows, String outFolder, int dataIndex, byte[]content) throws IOException {
-  if (lastStartRow==0 || rows-lastStartRow>=rowCountFlush) { if (bos!=null) closeContent();
-   String filename = "arco-knowledge-graph-1.0_R03_" + (dataIndex>0?""+dataIndex+"_":"") + df7.format(rows) + ".nt.gz";
-   System.out.println("STATUS - writing @" + filename);
-   bos = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(new File(outFolder, filename),false)));
-   lastStartRow = rows;
+  private DocumentBuilder db;
+  private Transformer nullTransformer;
+
+  RdfAltoAdige() throws IOException, TransformerConfigurationException, TransformerFactoryConfigurationError, ParserConfigurationException {
+    db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    loadProperties();
+    nullTransformer = TransformerFactory.newInstance().newTransformer();
   }
-  bos.write(("# " + itemId + "\n").getBytes(StandardCharsets.UTF_8.toString()));
-  bos.write(content);
-  /*
-  String lines[] = new String(content, StandardCharsets.UTF_8.toString()).split("\\r\\n|\\n|\\r");
-  Set<String>xlines = new HashSet<String>(1024);
-  for (String line:lines) xlines.add(line);
-  xlines = new TreeSet<String>(xlines); // sort
-  Iterator<String>it = xlines.iterator(); 
-  while (it.hasNext()) bos.write((it.next()+"\n").getBytes(StandardCharsets.UTF_8.toString()));
-  */
- }
- long startMillis;
- static String writePercentage(long n, long d) { return d>0 ? "" + df.format(n * 100. / d) + "%" : "0"; }
- static String writeRate(long n, long md){if (md==0) return ""; return "@" + df.format(n*1000./md) + " rows/sec";}
- private void writeContent(String itemId, int pass, /*int passes,*/ int csvLine, int rows, String outFolder, int dataIndex, ByteArrayOutputStream result) throws IOException { flushContent(itemId, rows, outFolder, dataIndex, result.toByteArray());
-  if ((rows%2048)==0) { long now=new Date().getTime(); System.out.println("STATUS - got "+rows+" rows "+writeRate(rows, now-startMillis)+(dataIndex>0?"":(pass>1?" @line "+csvLine:"")+" @pass "+pass/*"/"+passes*/)+" (arco " + writePercentage(arcoMillis, now-startMillis)+")"); }
- } 
- static FileSystem zfs = null; 
- @SuppressWarnings("serial") static FileSystem zfs(String outFolder) throws IOException {if (zfs==null) zfs = FileSystems.newFileSystem(URI.create("jar:" + new File(outFolder, "dump.zip").toURI()), new HashMap<String, String>() {{ put("create", "true"); }}); return zfs;};
- static void zWrite(String outFolder, String name, byte[]content) throws IOException { 
-  Files.write(zfs(outFolder).getPath(name), content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE); // jre 1.8 bug: needs explicit option
- }
- @SuppressWarnings("unchecked") void addMap(DB db, String name) {db.hashMap(name).keySerializer(org.mapdb.Serializer.STRING).valueSerializer(org.mapdb.Serializer.JAVA).createOrOpen();}
- void checkDbData() { //if (new File(PreprocessedData.dbFileName).exists()) return;
-  DB db = DBMaker.fileDB(PreprocessedData.dbFileName).make(); db.atomicLong("GENERATED").createOrOpen().set(System.currentTimeMillis());
-  addMap(db, "ftan2URL"); addMap(db, "catalogueRecordIdentifier2URI"); addMap(db, "uniqueIdentifier2URIs");
-  addMap(db, "contenitoreFisicoSystemRecordCode2CCF"); addMap(db, "contenitoreGiuridicoSystemRecordCode2CCG");
-  addMap(db, "codiceEnteToNomeEnte");
-  db.commit(); db.close();
- }
- int maxTry = 3, tryWait = 15, timeout = 15;
- CsvRow2domReader getPassReader(int pass) throws Exception { String csvUrl = properties.getProperty("" + pass + ".csv");
-  for (int tryCount=1;; tryCount++) { try { System.out.println("STATUS - reading @" + csvUrl);
-   return new CsvRow2domReader(csvUrl, properties.getProperty("" + pass + ".splitter"), properties.getProperty("" + pass + ".split"), true, timeout, false); 
-  } catch (Exception e) { if (tryCount==maxTry) throw e; System.err.println("ERROR - failure @try "+tryCount+"/"+maxTry); Thread.sleep(tryWait*1000); }}
- }
- private Converter converter = null;
- //private Preprocessor preprocessor = null;
- void initializeArco() throws MalformedURLException, IOException { checkDbData(); converter = new Converter(); /* preprocessor = new Preprocessor(".", ".", "https://w3id.org/arco/resource/"); */ }
- void shutdownArco() { /*if (preprocessor!=null) {preprocessor.commit(); preprocessor.close();}*/ if (converter!=null) converter.destroy(); }
- //void updateArco(Document d) throws XPathExpressionException { preprocessor.preprocessDomRecord(d); }
- long arcoMillis = 0;
- String toIsoDate(String s){ String[]a = s.split("/"); return (a[2].length()==2?"20":"") + a[2] + "-" + (a[1].length()<2?"0":"") + a[1] + "-" + (a[0].length()<2?"0":"") + a[0]; }
- //List<String>passes() { List<String>result = new ArrayList<String>(); for (int j=1;;j++) { String id = properties.getProperty("" + j + ".id"); if (id==null) break; result.add(id); } return result; }
- private XPath xPath = XPathFactory.newInstance().newXPath();
- String dateStamp(int dataIndex) throws Exception { String dateDocument = properties.getProperty("" + dataIndex + ".dateDocument");
-  if (dateDocument==null) return null;
-  for (int tryCount=1;; tryCount++) { try { System.out.println("STATUS - reading @" + dateDocument);
-   HttpURLConnection connection = (HttpURLConnection) new URL(dateDocument).openConnection(); connection.setConnectTimeout(timeout*1000);
-   InputStream is = connection.getInputStream();
-   String result = (String)xPath.evaluate(properties.getProperty("" + dataIndex + ".datePath"),db.parse(is));
-   is.close(); result = toIsoDate(result); //System.out.println("INFO - update date is " + result);
-   return result;
-  } catch (Exception e) { if (tryCount==maxTry) throw e; System.err.println("ERROR - failure @try "+tryCount+"/"+maxTry); Thread.sleep(tryWait*1000); }} 
- }
- String lastDate(List<String>dates) { String result = null; for (String date:dates) if (result == null || result.compareTo(date)<0) result = date; return result; }
- String lastUpdateDate(int dataIndex) throws Exception { List<String>/*ids = passes(),*/ dates = new ArrayList<String>();
-  //for (int pass=1; pass<=ids.size(); pass++) { if (dataIndex>0 && pass!=dataIndex) continue; String id = ids.get(pass-1); dates.add(dateStamp(id)); }
-  for (int pass=1;;pass++) { if (dataIndex>0 && pass!=dataIndex) continue; String date = dateStamp(dataIndex); if (date==null) break; dates.add(date); }
-  return lastDate(dates);
- }
- void writeDateStamp(String date, String outFolder) throws UnsupportedEncodingException, IOException { Files.write( Paths.get(outFolder,"datestamp.isodate"), date.getBytes(StandardCharsets.UTF_8.toString())); }
- void datestamp(String outFolder, int dataIndex) throws Exception { writeDateStamp(lastUpdateDate(dataIndex), outFolder); }
- void convert(String outFolder, int dataIndex, boolean dump) throws Exception { try { initializeArco(); 
-  Processor pro = new Processor(false); XsltCompiler xco = pro.newXsltCompiler();
-  ByteArrayOutputStream baos = new ByteArrayOutputStream(), result = new ByteArrayOutputStream();
-  Serializer out = pro.newSerializer(baos);
-  /*List<String>ids = passes(), dates = new ArrayList<String>();*/ int rows = 1; startMillis = new Date().getTime();
-  String resourcePrefix = properties.getProperty("resourcePrefix","https://w3id.org/arco/resource/AltoAdige/").trim();
-  String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date().getTime()), lastDate = null;  
-  for (int pass=1;; pass++) { if (dataIndex>0 && pass!=dataIndex) continue; int line = 1; String passDate = null;
-   String itemPath = properties.getProperty("" + pass + ".itemId"); //System.out.println("@id " + id);
-   if (itemPath==null) break;
-   String datePath = properties.getProperty("" + pass + ".date");
-   String dataset = properties.getProperty("" + pass + ".dataset", "#" + pass); System.out.println("INFO - dataset " + dataset);
-   String documentPrefix = properties.getProperty("" + pass + ".documentPrefix").trim();
-   String date = dateStamp(pass); //dates.add(date); System.out.println("INFO - update date is " + date);
-   if (date!=null) passDate = date;
-   String xslt = properties.getProperty("" + pass + ".xslt");
-   String xsltUrl = this.getClass().getClassLoader().getResource(xslt).toExternalForm();
-   String xsltBase = xsltUrl.substring(0,xsltUrl.lastIndexOf('/'))+"/";//System.out.println("transformer base => " + xsltBase);
-   XsltTransformer xtrRdf = null, xtr = xco.compile(new StreamSource(ras(xslt))).load();
-   xtr.setParameter(new QName("xsltBase"), new XdmAtomicValue(xsltBase));
-   xtr.setDestination(out);
-   //xtr.setParameter(new QName("datestamp"), new XdmAtomicValue(date));
-   String xsltRdf = properties.getProperty("" + pass + ".2rdf.xslt");
-   if (xsltRdf!=null) { System.out.println("xsltRdf: " + xsltRdf);
-    xtrRdf = xco.compile(new StreamSource(ras(xsltRdf))).load();
-    xtrRdf.setDestination(out);   
-   }
-   CsvRow2domReader r2d = getPassReader(pass);
-   String rmp = properties.getProperty("" + pass + ".rmDup");
-   if (rmp!=null) System.out.println("INFO - remove duplicates " + rmp + " @" + dataset);//String rmp = "row/cell[@name='NCTN']";
-   Set<String>rmSet = new HashSet<String>();
-   for (Document row;(row=r2d.next())!=null;line++,rows++) { String itemId = null;
-    try { itemId = safeIriPart((String)xPath.evaluate(itemPath, row, XPathConstants.STRING),"_");
-     //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);
-     if (rmp!=null) { String rmc = (String)xPath.evaluate(rmp, row, XPathConstants.STRING);
-      if (rmc.length()>0 && !rmSet.add(rmc)) { // avoid duplicate IRI
-       Node dead = (Node)xPath.evaluate(rmp, row, XPathConstants.NODE);
-       dead.getParentNode().removeChild(dead);    
-       System.out.println("duplicate " + rmp + " " + rmc + " removed");
-     }}
-     String rowDate = nowDate;
-     if (datePath!=null) { rowDate = (String)xPath.evaluate(datePath, row, XPathConstants.STRING);
-      if (rowDate!=null && rowDate.length()>0) {
-       if (passDate==null || passDate.compareTo(rowDate)<0) passDate = rowDate;
-      } else rowDate = nowDate;
-     }
-     xtr.setParameter(new QName("datestamp"), new XdmAtomicValue(rowDate));
-     if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row));
-     xtr.setSource(new DOMSource(row)); //System.out.println("@id " + itemId);      
-     xtr.transform(); Model model; byte[]ba = baos.toByteArray();
-     if (dump) zWrite(outFolder, itemId + ".xml", ba);
-     long start = new Date().getTime();
-     try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
-      model = converter.convert(itemId, resourcePrefix, documentPrefix, new ByteArrayInputStream(ba)); }
-     catch (Exception e) { writeException(outFolder, itemId, ba, line, e); continue; }
-     finally { arcoMillis += new Date().getTime() - start; }
-     if (xtrRdf!=null) {
-      baos.reset();
-      xtrRdf.setSource(new DOMSource(row));
-      xtrRdf.transform();
-      Model xModel = ModelFactory.createDefaultModel();
-      xModel.read(new ByteArrayInputStream(baos.toByteArray()), null, "RDF/XML");
-      model.add(xModel);     
-     }
-     model.write(result, "N-TRIPLES");
-     writeContent(itemId, pass, /*ids.size(),*/ line, rows, outFolder, dataIndex, result);
+
+  InputStream ras(String s) {
+    return this.getClass().getClassLoader().getResourceAsStream(s);
+  }
+
+  Properties properties = new Properties();
+
+  void loadProperties() throws IOException {
+    InputStream is = ras("rdfAltoAdige.properties");
+    properties.load(is);
+    is.close();
+  }
+
+  static String safeIriPart(String s, String replacer) {
+    String pattern = "[^" + "-A-Za-z0-9\\._~" + "\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF" + "\u10000-\u1FFFD\u20000-\u2FFFD\u30000-\u3FFFD"
+        + "\u40000-\u4FFFD\u50000-\u5FFFD\u60000-\u6FFFD" + "\u70000-\u7FFFD\u80000-\u8FFFD\u90000-\u9FFFD" + "\uA0000-\uAFFFD\uB0000-\uBFFFD\uC0000-\uCFFFD"
+        + "\uD0000-\uDFFFD\uE1000-\uEFFFD" + "]";
+    return s.replaceAll(pattern, replacer);
+  }
+
+  static void fatal(String outFolder, Throwable t) throws UnsupportedEncodingException, FileNotFoundException {
+    String filename = "" + new Date().getTime() + ".exception";
+    System.err.println("ERROR - Exception " + t + " written to " + filename);
+    PrintStream ps = new PrintStream(new FileOutputStream(new File(outFolder, filename)), false, StandardCharsets.UTF_8.toString());
+    t.printStackTrace(ps);
+    ps.close();
+  }
+
+  byte[] document2bytes(Document d) throws TransformerException {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    nullTransformer.transform(new DOMSource(d), new StreamResult(os));
+    return os.toByteArray();
+  }
+
+  void writeDocument(File f, Document d) throws TransformerException {
+    nullTransformer.transform(new DOMSource(d), new StreamResult(f));
+  }
+
+  private void writeException(String outFolder, String id, Document row, int line, Exception e) throws Exception {
+    if (id == null) throw (e);
+    String filename = "offending_row_" + id + ".xml";
+    System.err.println("ERROR - Exception " + e + " caught @row " + line + " written to " + filename);
+    writeDocument(new File(outFolder, filename), row);
+  }
+
+  static void writeContent(File f, byte[] c) throws IOException {
+    FileOutputStream fos = new FileOutputStream(f);
+    fos.write(c);
+    fos.close();
+  }
+
+  private void writeException(String outFolder, String id, byte[] content, int line, Exception e) throws Exception {
+    String filename = "offending_node_" + id + ".xml";
+    System.err.println("ERROR - Exception " + e + " caught @row " + line + " written to " + filename);
+    writeContent(new File(outFolder, filename), content);
+  }
+
+  static DecimalFormat df = new DecimalFormat("0.0"), df7 = new DecimalFormat("0000000");
+  int lastStartRow = 0;
+  int rowCountFlush = 12 * 1024;
+  private BufferedOutputStream bos = null;
+
+  private void closeContent() throws IOException {
+    if (bos != null) {
+      bos.flush();
+      bos.close();
+      bos = null;
     }
-    catch(Exception e) { writeException(outFolder, itemId, row, line, e); }
-    finally { result.reset(); baos.reset(); }
-    if (passDate!=null && (lastDate==null || lastDate.compareTo(passDate)<0)) lastDate = passDate;
-    //if (line==2) break; // test
-   }
-   System.out.println("STATUS - got " + line + " lines @dataset " + dataset);
-   r2d.close();
   }
-  closeContent();
-  writeDateStamp(lastDate!=null?lastDate:nowDate, outFolder);//writeDateStamp(lastDate(dates), outFolder);
- } finally { shutdownArco(); if (zfs!=null) zfs.close(); }}
- static void uso() { System.err.println("uso: java -jar rdfAltoAdige-0.0.1-full.jar <output folder> [-dump] [-datestamp] [-dataset:<index>]"); System.exit(-1); }
- public static void main(String[] args) throws Exception { if (args.length<1) uso();
-  String outFolder = args[0]; boolean datestamp = false, dump = false; int dataIndex=-1;  
-  for (int j=1; j<args.length; j++) {
-   if (args[j].compareTo("-datestamp")==0) { datestamp = true; continue; }
-   if (args[j].compareTo("-dump")==0) { dump = true; continue; }
-   if (args[j].startsWith("-dataset:")) { dataIndex=Integer.parseInt(args[j].substring(9)); continue; }
-   uso();
+
+  private void flushContent(String itemId, int rows, String outFolder, int dataIndex, byte[] content) throws IOException {
+    if (lastStartRow == 0 || rows - lastStartRow >= rowCountFlush) {
+      if (bos != null) closeContent();
+      String filename = "arco-knowledge-graph-1.0_R03_" + (dataIndex > 0 ? "" + dataIndex + "_" : "") + df7.format(rows) + ".nt.gz";
+      System.out.println("STATUS - writing @" + filename);
+      bos = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(new File(outFolder, filename), false)));
+      lastStartRow = rows;
+    }
+    bos.write(("# " + itemId + "\n").getBytes(StandardCharsets.UTF_8.toString()));
+    bos.write(content);
+    /*
+    String lines[] = new String(content, StandardCharsets.UTF_8.toString()).split("\\r\\n|\\n|\\r");
+    Set<String>xlines = new HashSet<String>(1024);
+    for (String line:lines) xlines.add(line);
+    xlines = new TreeSet<String>(xlines); // sort
+    Iterator<String>it = xlines.iterator(); 
+    while (it.hasNext()) bos.write((it.next()+"\n").getBytes(StandardCharsets.UTF_8.toString()));
+     */
   }
-  RdfAltoAdige rdfaa = new RdfAltoAdige(); 
-  try { if (datestamp) rdfaa.datestamp(outFolder, dataIndex); else rdfaa.convert(outFolder, dataIndex, dump); }
-  catch (Throwable t) { fatal(outFolder, t); }
- }
+
+  long startMillis;
+
+  static String writePercentage(long n, long d) {
+    return d > 0 ? "" + df.format(n * 100. / d) + "%" : "0";
+  }
+
+  static String writeRate(long n, long md) {
+    if (md == 0) return "";
+    return "@" + df.format(n * 1000. / md) + " rows/sec";
+  }
+
+  private void writeContent(String itemId, int pass, /*int passes,*/int csvLine, int rows, String outFolder, int dataIndex, ByteArrayOutputStream result)
+      throws IOException {
+    flushContent(itemId, rows, outFolder, dataIndex, result.toByteArray());
+    if ((rows % 2048) == 0) {
+      long now = new Date().getTime();
+      System.out.println("STATUS - got " + rows + " rows " + writeRate(rows, now - startMillis)
+          + (dataIndex > 0 ? "" : (pass > 1 ? " @line " + csvLine : "") + " @pass " + pass/*"/"+passes*/) + " (arco "
+          + writePercentage(arcoMillis, now - startMillis) + ")");
+    }
+  }
+
+  static FileSystem zfs = null;
+
+  @SuppressWarnings("serial")
+  static FileSystem zfs(String outFolder) throws IOException {
+    if (zfs == null) zfs = FileSystems.newFileSystem(URI.create("jar:" + new File(outFolder, "dump.zip").toURI()), new HashMap<String, String>() {
+      {
+        put("create", "true");
+      }
+    });
+    return zfs;
+  };
+
+  static void zWrite(String outFolder, String name, byte[] content) throws IOException {
+    Files.write(zfs(outFolder).getPath(name), content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE); // jre 1.8 bug: needs explicit option
+  }
+
+  @SuppressWarnings("unchecked")
+  void addMap(DB db, String name) {
+    db.hashMap(name).keySerializer(org.mapdb.Serializer.STRING).valueSerializer(org.mapdb.Serializer.JAVA).createOrOpen();
+  }
+
+  void checkDbData() { //if (new File(PreprocessedData.dbFileName).exists()) return;
+    DB db = DBMaker.fileDB(PreprocessedData.dbFileName).make();
+    db.atomicLong("GENERATED").createOrOpen().set(System.currentTimeMillis());
+    addMap(db, "ftan2URL");
+    addMap(db, "catalogueRecordIdentifier2URI");
+    addMap(db, "uniqueIdentifier2URIs");
+    addMap(db, "contenitoreFisicoSystemRecordCode2CCF");
+    addMap(db, "contenitoreGiuridicoSystemRecordCode2CCG");
+    addMap(db, "codiceEnteToNomeEnte");
+    db.commit();
+    db.close();
+  }
+
+  int maxTry = 3, tryWait = 15, timeout = 15;
+
+  CsvRow2domReader getPassReader(int pass) throws Exception {
+    String csvUrl = properties.getProperty("" + pass + ".csv");
+    for (int tryCount = 1;; tryCount++) {
+      try {
+        System.out.println("STATUS - reading @" + csvUrl);
+        return new CsvRow2domReader(csvUrl, properties.getProperty("" + pass + ".splitter"), properties.getProperty("" + pass + ".split"), true, timeout, false);
+      } catch (Exception e) {
+        if (tryCount == maxTry) throw e;
+        System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry);
+        Thread.sleep(tryWait * 1000);
+      }
+    }
+  }
+
+  private Converter converter = null;
+
+  //private Preprocessor preprocessor = null;
+  void initializeArco() throws MalformedURLException, IOException {
+    checkDbData();
+    converter = new Converter(); /* preprocessor = new Preprocessor(".", ".", "https://w3id.org/arco/resource/"); */
+  }
+
+  void shutdownArco() { /*if (preprocessor!=null) {preprocessor.commit(); preprocessor.close();}*/
+    if (converter != null) converter.destroy();
+  }
+
+  //void updateArco(Document d) throws XPathExpressionException { preprocessor.preprocessDomRecord(d); }
+  long arcoMillis = 0;
+
+  String toIsoDate(String s) {
+    String[] a = s.split("/");
+    return (a[2].length() == 2 ? "20" : "") + a[2] + "-" + (a[1].length() < 2 ? "0" : "") + a[1] + "-" + (a[0].length() < 2 ? "0" : "") + a[0];
+  }
+
+  //List<String>passes() { List<String>result = new ArrayList<String>(); for (int j=1;;j++) { String id = properties.getProperty("" + j + ".id"); if (id==null) break; result.add(id); } return result; }
+  private XPath xPath = XPathFactory.newInstance().newXPath();
+
+  String dateStamp(int dataIndex) throws Exception {
+    String dateDocument = properties.getProperty("" + dataIndex + ".dateDocument");
+    if (dateDocument == null) return null;
+    for (int tryCount = 1;; tryCount++) {
+      try {
+        System.out.println("STATUS - reading @" + dateDocument);
+        HttpURLConnection connection = (HttpURLConnection) new URL(dateDocument).openConnection();
+        connection.setConnectTimeout(timeout * 1000);
+        InputStream is = connection.getInputStream();
+        String result = (String) xPath.evaluate(properties.getProperty("" + dataIndex + ".datePath"), db.parse(is));
+        is.close();
+        result = toIsoDate(result); //System.out.println("INFO - update date is " + result);
+        return result;
+      } catch (Exception e) {
+        if (tryCount == maxTry) throw e;
+        System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry);
+        Thread.sleep(tryWait * 1000);
+      }
+    }
+  }
+
+  String lastDate(List<String> dates) {
+    String result = null;
+    for (String date : dates)
+      if (result == null || result.compareTo(date) < 0) result = date;
+    return result;
+  }
+
+  String lastUpdateDate(int dataIndex) throws Exception {
+    List<String>/*ids = passes(),*/dates = new ArrayList<String>();
+    //for (int pass=1; pass<=ids.size(); pass++) { if (dataIndex>0 && pass!=dataIndex) continue; String id = ids.get(pass-1); dates.add(dateStamp(id)); }
+    for (int pass = 1;; pass++) {
+      if (dataIndex > 0 && pass != dataIndex) continue;
+      String date = dateStamp(dataIndex);
+      if (date == null) break;
+      dates.add(date);
+    }
+    return lastDate(dates);
+  }
+
+  void writeDateStamp(String date, String outFolder) throws UnsupportedEncodingException, IOException {
+    Files.write(Paths.get(outFolder, "datestamp.isodate"), date.getBytes(StandardCharsets.UTF_8.toString()));
+  }
+
+  void datestamp(String outFolder, int dataIndex) throws Exception {
+    writeDateStamp(lastUpdateDate(dataIndex), outFolder);
+  }
+
+  void convert(String outFolder, int dataIndex, boolean dump) throws Exception {
+    try {
+      initializeArco();
+      Processor pro = new Processor(false);
+      XsltCompiler xco = pro.newXsltCompiler();
+      ByteArrayOutputStream baos = new ByteArrayOutputStream(), result = new ByteArrayOutputStream();
+      Serializer out = pro.newSerializer(baos);
+      /*List<String>ids = passes(), dates = new ArrayList<String>();*/int rows = 1;
+      startMillis = new Date().getTime();
+      String resourcePrefix = properties.getProperty("resourcePrefix", "https://w3id.org/arco/resource/AltoAdige/").trim();
+      String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date().getTime()), lastDate = null;
+      for (int pass = 1;; pass++) {
+        if (dataIndex > 0 && pass != dataIndex) continue;
+        int line = 1;
+        String passDate = null;
+        String itemPath = properties.getProperty("" + pass + ".itemId"); //System.out.println("@id " + id);
+        if (itemPath == null) break;
+        String datePath = properties.getProperty("" + pass + ".date");
+        String dataset = properties.getProperty("" + pass + ".dataset", "#" + pass);
+        System.out.println("INFO - dataset " + dataset);
+        String documentPrefix = properties.getProperty("" + pass + ".documentPrefix").trim();
+        String date = dateStamp(pass); //dates.add(date); System.out.println("INFO - update date is " + date);
+        if (date != null) passDate = date;
+        String xslt = properties.getProperty("" + pass + ".xslt");
+        String xsltUrl = this.getClass().getClassLoader().getResource(xslt).toExternalForm();
+        String xsltBase = xsltUrl.substring(0, xsltUrl.lastIndexOf('/')) + "/";//System.out.println("transformer base => " + xsltBase);
+        XsltTransformer xtrRdf = null, xtr = xco.compile(new StreamSource(ras(xslt))).load();
+        xtr.setParameter(new QName("xsltBase"), new XdmAtomicValue(xsltBase));
+        xtr.setDestination(out);
+        //xtr.setParameter(new QName("datestamp"), new XdmAtomicValue(date));
+        String xsltRdf = properties.getProperty("" + pass + ".2rdf.xslt");
+        if (xsltRdf != null) {
+          System.out.println("xsltRdf: " + xsltRdf);
+          xtrRdf = xco.compile(new StreamSource(ras(xsltRdf))).load();
+          xtrRdf.setDestination(out);
+        }
+        CsvRow2domReader r2d = getPassReader(pass);
+        String rmp = properties.getProperty("" + pass + ".rmDup");
+        if (rmp != null) System.out.println("INFO - remove duplicates " + rmp + " @" + dataset);//String rmp = "row/cell[@name='NCTN']";
+        Set<String> rmSet = new HashSet<String>();
+        for (Document row; (row = r2d.next()) != null; line++, rows++) {
+          String itemId = null;
+          try {
+            itemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
+            //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);
+            if (rmp != null) {
+              String rmc = (String) xPath.evaluate(rmp, row, XPathConstants.STRING);
+              if (rmc.length() > 0 && !rmSet.add(rmc)) { // avoid duplicate IRI
+                Node dead = (Node) xPath.evaluate(rmp, row, XPathConstants.NODE);
+                dead.getParentNode().removeChild(dead);
+                System.out.println("duplicate " + rmp + " " + rmc + " removed");
+              }
+            }
+            String rowDate = nowDate;
+            if (datePath != null) {
+              rowDate = (String) xPath.evaluate(datePath, row, XPathConstants.STRING);
+              if (rowDate != null && rowDate.length() > 0) {
+                if (passDate == null || passDate.compareTo(rowDate) < 0) passDate = rowDate;
+              } else
+                rowDate = nowDate;
+            }
+            xtr.setParameter(new QName("datestamp"), new XdmAtomicValue(rowDate));
+            if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row));
+            xtr.setSource(new DOMSource(row)); //System.out.println("@id " + itemId);      
+            xtr.transform();
+            Model model;
+            byte[] ba = baos.toByteArray();
+            if (dump) zWrite(outFolder, itemId + ".xml", ba);
+            long start = new Date().getTime();
+            try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
+              model = converter.convert(itemId, resourcePrefix, documentPrefix, new ByteArrayInputStream(ba));
+            } catch (Exception e) {
+              writeException(outFolder, itemId, ba, line, e);
+              continue;
+            } finally {
+              arcoMillis += new Date().getTime() - start;
+            }
+            if (xtrRdf != null) {
+              baos.reset();
+              xtrRdf.setSource(new DOMSource(row));
+              xtrRdf.transform();
+              Model xModel = ModelFactory.createDefaultModel();
+              xModel.read(new ByteArrayInputStream(baos.toByteArray()), null, "RDF/XML");
+              model.add(xModel);
+            }
+            model.write(result, "N-TRIPLES");
+            writeContent(itemId, pass, /*ids.size(),*/line, rows, outFolder, dataIndex, result);
+          } catch (Exception e) {
+            writeException(outFolder, itemId, row, line, e);
+          } finally {
+            result.reset();
+            baos.reset();
+          }
+          if (passDate != null && (lastDate == null || lastDate.compareTo(passDate) < 0)) lastDate = passDate;
+          //if (line==2) break; // test
+        }
+        System.out.println("STATUS - got " + line + " lines @dataset " + dataset);
+        r2d.close();
+      }
+      closeContent();
+      writeDateStamp(lastDate != null ? lastDate : nowDate, outFolder);//writeDateStamp(lastDate(dates), outFolder);
+    } finally {
+      shutdownArco();
+      if (zfs != null) zfs.close();
+    }
+  }
+
+  static void uso() {
+    System.err.println("uso: java -jar rdfAltoAdige-0.0.1-full.jar <output folder> [-dump] [-datestamp] [-dataset:<index>]");
+    System.exit(-1);
+  }
+
+  public static void main(String[] args) throws Exception {
+    if (args.length < 1) uso();
+    String outFolder = args[0];
+    boolean datestamp = false, dump = false;
+    int dataIndex = -1;
+    for (int j = 1; j < args.length; j++) {
+      if (args[j].compareTo("-datestamp") == 0) {
+        datestamp = true;
+        continue;
+      }
+      if (args[j].compareTo("-dump") == 0) {
+        dump = true;
+        continue;
+      }
+      if (args[j].startsWith("-dataset:")) {
+        dataIndex = Integer.parseInt(args[j].substring(9));
+        continue;
+      }
+      uso();
+    }
+    RdfAltoAdige rdfaa = new RdfAltoAdige();
+    try {
+      if (datestamp)
+        rdfaa.datestamp(outFolder, dataIndex);
+      else
+        rdfaa.convert(outFolder, dataIndex, dump);
+    } catch (Throwable t) {
+      fatal(outFolder, t);
+    }
+  }
 }
