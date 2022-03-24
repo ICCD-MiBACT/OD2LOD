@@ -64,8 +64,10 @@ public class CsvRow2domReader {
       br.close();
       br = new BufferedReader(new StringReader(content));
     }
-    //reader = new CSVReaderBuilder(br).withCSVParser(new RFC4180ParserBuilder().build()).build();  
-    reader = new CSVReaderBuilder(br).build();
+    if (!RFC4180Parser)
+      reader = new CSVReaderBuilder(br).build();
+    else
+      reader = new CSVReaderBuilder(br).withCSVParser(new RFC4180ParserBuilder().build()).build();
     fieldNames = reader.readNext();
   }
 
