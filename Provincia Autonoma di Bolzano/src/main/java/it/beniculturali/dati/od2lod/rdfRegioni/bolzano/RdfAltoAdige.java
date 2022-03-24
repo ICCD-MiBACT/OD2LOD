@@ -230,7 +230,7 @@ public class RdfAltoAdige {
         return new CsvRow2domReader(csvUrl, properties.getProperty("" + pass + ".splitter"), properties.getProperty("" + pass + ".split"), true, timeout, false);
       } catch (Exception e) {
         if (tryCount == maxTry) throw e;
-        System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry);
+        System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry + " " + e);
         Thread.sleep(tryWait * 1000);
       }
     }
@@ -337,8 +337,8 @@ public class RdfAltoAdige {
       startMillis = new Date().getTime();
       String resourcePrefix = properties.getProperty("resourcePrefix", "https://w3id.org/arco/resource/AltoAdige/").trim();
       String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date().getTime()), lastDate = null;
-      for (int pass = 1;; pass++) {
-        if (dataIndex > 0 && pass != dataIndex) continue;
+      for (int pass = dataIndex > 0 ? dataIndex : 1;; pass++) {
+        if (dataIndex > 0 && pass > dataIndex) break;
         int line = 1;
         String passDate = null;
         String itemPath = properties.getProperty("" + pass + ".itemId"); //System.out.println("@id " + id);
