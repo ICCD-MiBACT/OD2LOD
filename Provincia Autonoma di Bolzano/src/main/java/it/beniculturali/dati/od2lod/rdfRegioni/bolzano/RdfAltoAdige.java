@@ -116,6 +116,7 @@ public class RdfAltoAdige {
     if (id == null) throw (e);
     String filename = "offending_row_" + id + ".xml";
     System.err.println("ERROR - Exception " + e + " caught @row " + line + " written to " + filename);
+    e.printStackTrace();
     writeDocument(new File(outFolder, filename), row);
   }
 
@@ -405,7 +406,7 @@ public class RdfAltoAdige {
             }
             if (xtrRdf != null) {
               baos.reset();
-              xtrRdf.setSource(new DOMSource(row));
+              xtrRdf.setSource(new DOMSource(db.parse(new ByteArrayInputStream(ba))));
               xtrRdf.transform();
               Model xModel = ModelFactory.createDefaultModel();
               xModel.read(new ByteArrayInputStream(baos.toByteArray()), null, "RDF/XML");
