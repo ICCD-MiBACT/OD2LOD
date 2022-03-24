@@ -188,7 +188,13 @@
     </xsl:if>
     <xsl:if test="string-length(normalize-space(cell[@name='CP_geo']))">
      <xsl:element name="puntoPrincipale">
-      <xsl:element name="x"><xsl:value-of select="normalize-space(substring-after(cell[@name='CP_geo'], ','))"/></xsl:element>
+      <xsl:variable name="x" select="normalize-space(substring-after(cell[@name='CP_geo'], ','))"/>
+      <xsl:element name="x">
+       <xsl:choose><!-- ignore multiple points -->
+        <xsl:when test="contains($x,',')"><xsl:value-of select="substring-before($x,',')"/></xsl:when>
+        <xsl:otherwise><xsl:value-of select="$x"/></xsl:otherwise>
+       </xsl:choose>
+      </xsl:element>
       <xsl:element name="y"><xsl:value-of select="substring-before(cell[@name='CP_geo'], ',')"/></xsl:element>
      </xsl:element>
     </xsl:if>
