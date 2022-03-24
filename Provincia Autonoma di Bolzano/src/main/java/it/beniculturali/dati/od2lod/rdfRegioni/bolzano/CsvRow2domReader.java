@@ -1,4 +1,4 @@
-package it.beniculturali.dati.od2lod.rdfRegioni;
+package it.beniculturali.dati.od2lod.rdfRegioni.bolzano;
 
 import java.io.BufferedReader;
 import java.io.IOException;

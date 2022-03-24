@@ -1,4 +1,4 @@
-package it.beniculturali.dati.od2lod.rdfRegioni;
+package it.beniculturali.dati.od2lod.rdfRegioni.bolzano;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -260,24 +260,40 @@ public class RdfAltoAdige {
   private XPath xPath = XPathFactory.newInstance().newXPath();
 
   String dateStamp(int dataIndex) throws Exception {
+    return dateStamp(dataIndex, false);
+  }
+
+  String dateStamp(int dataIndex, boolean read) throws Exception {
     String dateDocument = properties.getProperty("" + dataIndex + ".dateDocument");
-    if (dateDocument == null) return null;
-    for (int tryCount = 1;; tryCount++) {
-      try {
-        System.out.println("STATUS - reading @" + dateDocument);
-        HttpURLConnection connection = (HttpURLConnection) new URL(dateDocument).openConnection();
-        connection.setConnectTimeout(timeout * 1000);
-        InputStream is = connection.getInputStream();
-        String result = (String) xPath.evaluate(properties.getProperty("" + dataIndex + ".datePath"), db.parse(is));
-        is.close();
-        result = toIsoDate(result); //System.out.println("INFO - update date is " + result);
-        return result;
-      } catch (Exception e) {
-        if (tryCount == maxTry) throw e;
-        System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry);
-        Thread.sleep(tryWait * 1000);
+    if (dateDocument != null) {
+      for (int tryCount = 1;; tryCount++) {
+        try {
+          System.out.println("STATUS - reading @" + dateDocument);
+          HttpURLConnection connection = (HttpURLConnection) new URL(dateDocument).openConnection();
+          connection.setConnectTimeout(timeout * 1000);
+          InputStream is = connection.getInputStream();
+          String result = (String) xPath.evaluate(properties.getProperty("" + dataIndex + ".datePath"), db.parse(is));
+          is.close();
+          result = toIsoDate(result); //System.out.println("INFO - update date is " + result);
+          return result;
+        } catch (Exception e) {
+          if (tryCount == maxTry) throw e;
+          System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry);
+          Thread.sleep(tryWait * 1000);
+        }
       }
     }
+    if (!read) return null;
+    String datePath = properties.getProperty("" + dataIndex + ".date");
+    if (datePath == null) return null;
+    String passDate = null;
+    CsvRow2domReader r2d = getPassReader(dataIndex);
+    for (Document row; (row = r2d.next()) != null;) {
+      String rowDate = (String) xPath.evaluate(datePath, row, XPathConstants.STRING);
+      if (rowDate != null && rowDate.length() > 0 && (passDate == null || passDate.compareTo(rowDate) < 0)) passDate = rowDate;
+    }
+    r2d.close();
+    return passDate;
   }
 
   String lastDate(List<String> dates) {
@@ -288,11 +304,14 @@ public class RdfAltoAdige {
   }
 
   String lastUpdateDate(int dataIndex) throws Exception {
+    return lastUpdateDate(dataIndex, false);
+  }
+
+  String lastUpdateDate(int dataIndex, boolean read) throws Exception {
     List<String>/*ids = passes(),*/dates = new ArrayList<String>();
-    //for (int pass=1; pass<=ids.size(); pass++) { if (dataIndex>0 && pass!=dataIndex) continue; String id = ids.get(pass-1); dates.add(dateStamp(id)); }
-    for (int pass = 1;; pass++) {
-      if (dataIndex > 0 && pass != dataIndex) continue;
-      String date = dateStamp(dataIndex);
+    for (int pass = dataIndex > 0 ? dataIndex : 1;; pass++) {
+      if (dataIndex > 0 && pass > dataIndex) break;
+      String date = dateStamp(pass, read);
       if (date == null) break;
       dates.add(date);
     }
@@ -304,7 +323,7 @@ public class RdfAltoAdige {
   }
 
   void datestamp(String outFolder, int dataIndex) throws Exception {
-    writeDateStamp(lastUpdateDate(dataIndex), outFolder);
+    writeDateStamp(lastUpdateDate(dataIndex, true), outFolder);
   }
 
   void convert(String outFolder, int dataIndex, boolean dump) throws Exception {
@@ -314,7 +333,7 @@ public class RdfAltoAdige {
       XsltCompiler xco = pro.newXsltCompiler();
       ByteArrayOutputStream baos = new ByteArrayOutputStream(), result = new ByteArrayOutputStream();
       Serializer out = pro.newSerializer(baos);
-      /*List<String>ids = passes(), dates = new ArrayList<String>();*/int rows = 1;
+      int rows = 1;
       startMillis = new Date().getTime();
       String resourcePrefix = properties.getProperty("resourcePrefix", "https://w3id.org/arco/resource/AltoAdige/").trim();
       String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date().getTime()), lastDate = null;
