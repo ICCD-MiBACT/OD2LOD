@@ -226,6 +226,16 @@
  		 	<xsl:element name="MISM">
     		<xsl:attribute name="hint">Valore</xsl:attribute><xsl:value-of select="$ALT"/>x<xsl:value-of select="$LARG"/></xsl:element>
 		  </xsl:when>
+		  <xsl:when test="contains(.,'lunghezza')">
+  			<xsl:variable name="ALTcc" select="substring-after(.,',')"/>
+ 	 		<xsl:variable name="LARGcc" select="substring-before(.,',')"/>
+ 		 	<xsl:variable name="LARGc" select="substring-after($LARGcc,' ')"/>
+ 			 <xsl:variable name="ALTc" select="substring-after($ALTcc,' ')"/>
+ 		 	<xsl:variable name="LARG" select="substring-before($LARGc,' ')"/>
+ 		 	<xsl:variable name="ALT" select="substring-before($ALTc,' ')"/>
+ 		 	<xsl:element name="MISM">
+    		<xsl:attribute name="hint">Valore</xsl:attribute><xsl:value-of select="$ALT"/>x<xsl:value-of select="$LARG"/></xsl:element>
+		  </xsl:when>
   		<xsl:otherwise>
 		  	<xsl:variable name="ALTc" select="normalize-space(substring-after(.,'x'))"/>
   			<xsl:variable name="LARG" select="normalize-space(substring-before(.,'x'))"/>
