@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
@@ -45,7 +44,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.jena.rdf.model.Model;
@@ -57,7 +55,6 @@ import org.w3c.dom.Node;
 
 import it.cnr.istc.stlab.arco.Converter;
 import it.cnr.istc.stlab.arco.preprocessing.PreprocessedData;
-import it.cnr.istc.stlab.arco.preprocessing.Preprocessor;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.Serializer;
@@ -228,7 +225,9 @@ public class RdfAltoAdige {
     for (int tryCount = 1;; tryCount++) {
       try {
         System.out.println("STATUS - reading @" + csvUrl);
-        return new CsvRow2domReader(csvUrl, properties.getProperty("" + pass + ".splitter"), properties.getProperty("" + pass + ".split"), true, timeout, false);
+        String filterCell = properties.getProperty("" + pass + ".filterCell", "").trim();
+        return new CsvRow2domReader(csvUrl, properties.getProperty("" + pass + ".splitter"), properties.getProperty("" + pass + ".split"), true, timeout, true,
+            filter(filterCell, pass), filterCell);
       } catch (Exception e) {
         if (tryCount == maxTry) throw e;
         System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry + " " + e);
@@ -259,6 +258,18 @@ public class RdfAltoAdige {
 
   //List<String>passes() { List<String>result = new ArrayList<String>(); for (int j=1;;j++) { String id = properties.getProperty("" + j + ".id"); if (id==null) break; result.add(id); } return result; }
   private XPath xPath = XPathFactory.newInstance().newXPath();
+
+  Set<String> filter(String cell, int pass) {
+    Set<String> result = null;
+    if (cell == null || cell.length() == 0) return result;
+    String filterList = properties.getProperty("" + pass + ".filterList", "").trim();
+    if (filterList.length() == 0) return result;
+    String[] filters = filterList.split(",");
+    result = new HashSet<String>();
+    for (int j = 0; j < filters.length; j++)
+      result.add(filters[j]);
+    return result;
+  }
 
   String dateStamp(int dataIndex) throws Exception {
     return dateStamp(dataIndex, false);
@@ -340,8 +351,8 @@ public class RdfAltoAdige {
       String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date().getTime()), lastDate = null;
       for (int pass = dataIndex > 0 ? dataIndex : 1;; pass++) {
         if (dataIndex > 0 && pass > dataIndex) break;
-        int line = 1;
         String passDate = null;
+        //Set<String>filter = null;
         String itemPath = properties.getProperty("" + pass + ".itemId"); //System.out.println("@id " + id);
         if (itemPath == null) break;
         String datePath = properties.getProperty("" + pass + ".date");
@@ -367,9 +378,13 @@ public class RdfAltoAdige {
         String rmp = properties.getProperty("" + pass + ".rmDup");
         if (rmp != null) System.out.println("INFO - remove duplicates " + rmp + " @" + dataset);//String rmp = "row/cell[@name='NCTN']";
         Set<String> rmSet = new HashSet<String>();
-        for (Document row; (row = r2d.next()) != null; line++, rows++) {
+        for (Document row; (row = r2d.next()) != null; rows++) {
           String itemId = null;
-          try {
+          try {/*
+               if (filter!=null) {
+                String filterValue = ((String)xPath.evaluate(filterPath, row, XPathConstants.STRING)).trim().toLowerCase();
+                if (!filter.contains(filterValue)) {rows--; continue;}
+               }*/
             itemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
             //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);
             if (rmp != null) {
@@ -399,7 +414,7 @@ public class RdfAltoAdige {
             try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
               model = converter.convert(itemId, resourcePrefix, documentPrefix, new ByteArrayInputStream(ba));
             } catch (Exception e) {
-              writeException(outFolder, itemId, ba, line, e);
+              writeException(outFolder, itemId, ba, r2d.line(), e);
               continue;
             } finally {
               arcoMillis += new Date().getTime() - start;
@@ -413,9 +428,9 @@ public class RdfAltoAdige {
               model.add(xModel);
             }
             model.write(result, "N-TRIPLES");
-            writeContent(itemId, pass, /*ids.size(),*/line, rows, outFolder, dataIndex, result);
+            writeContent(itemId, pass, /*ids.size(),*/r2d.line(), rows, outFolder, dataIndex, result);
           } catch (Exception e) {
-            writeException(outFolder, itemId, row, line, e);
+            writeException(outFolder, itemId, row, r2d.line(), e);
           } finally {
             result.reset();
             baos.reset();
@@ -423,7 +438,7 @@ public class RdfAltoAdige {
           if (passDate != null && (lastDate == null || lastDate.compareTo(passDate) < 0)) lastDate = passDate;
           //if (line==2) break; // test
         }
-        System.out.println("STATUS - got " + line + " lines @dataset " + dataset);
+        System.out.println("STATUS - got " + r2d.line() + " lines @dataset " + dataset);
         r2d.close();
       }
       closeContent();

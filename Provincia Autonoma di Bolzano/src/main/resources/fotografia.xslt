@@ -183,9 +183,9 @@
    </xsl:element>
    
    <xsl:element name="harvesting">
-    <xsl:if test="string-length(normalize-space(cell[@name='B1p_url']))">
-     <xsl:element name="media"><xsl:value-of select="concat(normalize-space(cell[@name='B1p_url']),'&amp;size=l')"/></xsl:element>
-    </xsl:if>
+    <xsl:for-each select="cell[@name='B1p_url' and string-length(normalize-space())]">
+     <xsl:element name="media"><xsl:value-of select="concat(.,'&amp;size=l')"/></xsl:element>
+    </xsl:for-each>
     <xsl:if test="string-length(normalize-space(cell[@name='CP_geo']))">
      <xsl:element name="puntoPrincipale">
       <xsl:variable name="x" select="normalize-space(substring-after(cell[@name='CP_geo'], ','))"/>

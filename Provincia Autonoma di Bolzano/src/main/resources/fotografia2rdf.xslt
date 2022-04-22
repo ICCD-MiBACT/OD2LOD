@@ -30,11 +30,11 @@
    >  
    <xsl:element name="rdf:Description">
     <xsl:attribute name="rdf:about">PhotographicHeritage/<xsl:value-of select="translate(*/AC/ACC[1]/ACCC,'/ ','_')"/></xsl:attribute>
-    <xsl:if test="harvesting/media">
+    <xsl:for-each select="harvesting/media">
      <xsl:element name="foaf:depiction">
-      <xsl:attribute name="rdf:resource"><xsl:value-of select="harvesting/media"/></xsl:attribute>
+      <xsl:attribute name="rdf:resource"><xsl:value-of select="replace(.,' ','%20')"/></xsl:attribute>
      </xsl:element>
-    </xsl:if>
+    </xsl:for-each>
    </xsl:element>
   </rdf:RDF>
  </xsl:template>
