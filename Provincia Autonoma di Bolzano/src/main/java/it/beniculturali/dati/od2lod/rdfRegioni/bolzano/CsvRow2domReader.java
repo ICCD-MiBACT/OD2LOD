@@ -52,11 +52,12 @@ public class CsvRow2domReader {
     this.filter = filter;
     this.cellFilter = cellFilter;
     documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    if (splitter != null) { /*System.out.println("splitter is '" + splitter + "'");
-      this.splitter = splitter.replaceAll("\\|", Matcher.quoteReplacement("\\|")); 
-      if (splitFields!=null) { this.splitFields = new HashSet<String>(Arrays.asList(splitFields.split(","))); 
-       System.out.println(" " + this.splitFields.size() + " fields to split " + this.splitFields); 
-      }*/
+    if (splitter != null) { //System.out.println("splitter is '" + splitter + "'");
+      //this.splitter = splitter.replaceAll("\\|", Matcher.quoteReplacement("\\|")); 
+      if (splitFields != null) {
+        this.splitFields = new HashSet<String>(Arrays.asList(splitFields.split(",")));
+        System.out.println(" " + this.splitFields.size() + " fields to split " + this.splitFields);
+      }
       // nella cella le sequenze "\," vanno sostituite con "," mentre virgole non precedute da "\" vanno usate come splitter
       this.splitter = "(?<!\\\\),"; // TODO andrebbe letto da properties
       System.out.println("splitter is '" + splitter + "'");
