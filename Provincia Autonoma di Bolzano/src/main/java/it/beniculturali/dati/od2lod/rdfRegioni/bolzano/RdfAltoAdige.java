@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
@@ -201,8 +202,8 @@ public class RdfAltoAdige {
   }
 
   @SuppressWarnings("unchecked")
-  void addMap(DB db, String name) {
-    db.hashMap(name).keySerializer(org.mapdb.Serializer.STRING).valueSerializer(org.mapdb.Serializer.JAVA).createOrOpen();
+  Map<String, String> addMap(DB db, String name) {
+    return db.hashMap(name).keySerializer(org.mapdb.Serializer.STRING).valueSerializer(org.mapdb.Serializer.JAVA).createOrOpen();
   }
 
   void checkDbData() { //if (new File(PreprocessedData.dbFileName).exists()) return;
@@ -213,7 +214,8 @@ public class RdfAltoAdige {
     addMap(db, "uniqueIdentifier2URIs");
     addMap(db, "contenitoreFisicoSystemRecordCode2CCF");
     addMap(db, "contenitoreGiuridicoSystemRecordCode2CCG");
-    addMap(db, "codiceEnteToNomeEnte");
+    Map<String, String> map = addMap(db, "codiceEnteToNomeEnte");
+    map.put("P021", "Provincia autonoma di Bolzano");
     db.commit();
     db.close();
   }
