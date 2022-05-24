@@ -273,24 +273,24 @@ contains($OB_it,'ossido') or
 contains($OB_it,'minerale') or 
 contains($OB_it,'Art: Fluorit') or 
 contains($OB_it,'ammonite') or 
-contains($OB_it,'Art: Quarz (kristalline Form)\, Varietät: Bergkristall') or 
+contains($OB_it,'Art: Quarz (kristalline Form), Varietät: Bergkristall') or 
 contains($OB_it,'carbonato') or 
 contains($OB_it,'solfuro') or 
 contains($OB_it,'Art: Calcit') or 
-contains($OB_it,'Art: Fluorit\, Ausbildung: XX') or 
+contains($OB_it,'Art: Fluorit, Ausbildung: XX') or 
 contains($OB_it,'roccia metamorfica') or 
 contains($OB_it,'Art: Aragonit') or 
-contains($OB_it,'Art: Quarz (kristalline Form)\, Varietät: Amethyst') or 
-contains($OB_it,'Art: Calcit\, Ausbildung: XX') or 
+contains($OB_it,'Art: Quarz (kristalline Form), Varietät: Amethyst') or 
+contains($OB_it,'Art: Calcit, Ausbildung: XX') or 
 contains($OB_it,'solfato') or 
 contains($OB_it,'pietra') or 
 contains($OB_it,'Art: Hämatit') or 
-contains($OB_it,'Art: Schwefel\, Assoziation: Calcit') or 
+contains($OB_it,'Art: Schwefel, Assoziation: Calcit') or 
 contains($OB_it,'roccia sedimentaria') or 
-contains($OB_it,'Art: Pyrit\, Ausbildung: XX') or 
+contains($OB_it,'Art: Pyrit, Ausbildung: XX') or 
 contains($OB_it,'Art: Quarz (kristalline Form)') or 
-contains($OB_it,'Art: Quarz (kristalline Form)\, Varietät: Bergkristall\, Assoziation: Chlorit') or 
-contains($OB_it,'Art: Hämatit\, Ausbildung: XX')">architettonico e paesaggistico</xsl:when>
+contains($OB_it,'Art: Quarz (kristalline Form), Varietät: Bergkristall, Assoziation: Chlorit') or 
+contains($OB_it,'Art: Hämatit, Ausbildung: XX')">architettonico e paesaggistico</xsl:when>
 				<xsl:when test="contains($OB_it,'Art: Ursus spelaeus') or 
 contains($OB_it,'conchiglia') or 
 contains($OB_it,'corallo') or 
@@ -298,15 +298,15 @@ contains($OB_it,'brachiopode') or
 contains($OB_it,'mollusco') or 
 contains($OB_it,'riccio di mare') or 
 contains($OB_it,'cefalopode') or 
-contains($OB_it,'Sorex araneus (Balg\, Schädel)') or 
+contains($OB_it,'Sorex araneus (Balg, Schädel)') or 
 contains($OB_it,'crinoide') or 
 contains($OB_it,'pesce') or 
-contains($OB_it,'Myotis myotis (Alkoholpräparat\, Schädel)')">architettonico e paesaggistico</xsl:when>
+contains($OB_it,'Myotis myotis (Alkoholpräparat, Schädel)')">architettonico e paesaggistico</xsl:when>
 				<xsl:when test="contains($OB_it,'grafica') or 
 contains($OB_it,'disegno (arte)') or 
 contains($OB_it,'disegno') or 
 contains($OB_it,'acquerello') or 
-contains($OB_it,'Landkarte\, politisch') or 
+contains($OB_it,'Landkarte, politisch') or 
 contains($OB_it,'schizzo') or 
 contains($OB_it,'disegno tecnico')">storico artistico</xsl:when>
 				<xsl:when test="contains($OB_it,'MÃ¼nze') or contains($OB_it,'Medaille')">non individuabile</xsl:when>
@@ -393,13 +393,13 @@ contains($OB_it,'lettera') or
 contains($OB_it,'articolo') or 
 contains($OB_it,'Werbeprospekt') or 
 contains($OB_it,'bollo pubblicitario') or 
-contains($OB_it,'Landkarte\, topographisch') or 
+contains($OB_it,'Landkarte, topographisch') or 
 contains($OB_it,'Veranstaltungsprogramm') or 
 contains($OB_it,'fascicolo') or 
 contains($OB_it,'biglietto d') or 
 contains($OB_it,'Einzelblatt') or 
 contains($OB_it,'Stadtplan') or 
-contains($OB_it,'Landkarte\, historisch') or 
+contains($OB_it,'Landkarte, historisch') or 
 contains($OB_it,'Primizbild') or 
 contains($OB_it,'clichÃ© (stampa)') or 
 contains($OB_it,'Beichtzettel') or 
@@ -535,24 +535,24 @@ contains($OB_it,'ossido') or
 contains($OB_it,'minerale') or 
 contains($OB_it,'Art: Fluorit') or 
 contains($OB_it,'ammonite') or 
-contains($OB_it,'Art: Quarz (kristalline Form)\, Varietät: Bergkristall') or 
+contains($OB_it,'Art: Quarz (kristalline Form), Varietät: Bergkristall') or 
 contains($OB_it,'carbonato') or 
 contains($OB_it,'solfuro') or 
 contains($OB_it,'Art: Calcit') or 
-contains($OB_it,'Art: Fluorit\, Ausbildung: XX') or 
+contains($OB_it,'Art: Fluorit, Ausbildung: XX') or 
 contains($OB_it,'roccia metamorfica') or 
 contains($OB_it,'Art: Aragonit') or 
-contains($OB_it,'Art: Quarz (kristalline Form)\, Varietät: Amethyst') or 
-contains($OB_it,'Art: Calcit\, Ausbildung: XX') or 
+contains($OB_it,'Art: Quarz (kristalline Form), Varietät: Amethyst') or 
+contains($OB_it,'Art: Calcit, Ausbildung: XX') or 
 contains($OB_it,'solfato') or 
 contains($OB_it,'pietra') or 
 contains($OB_it,'Art: Hämatit') or 
-contains($OB_it,'Art: Schwefel\, Assoziation: Calcit') or 
+contains($OB_it,'Art: Schwefel, Assoziation: Calcit') or 
 contains($OB_it,'roccia sedimentaria') or 
-contains($OB_it,'Art: Pyrit\, Ausbildung: XX') or 
+contains($OB_it,'Art: Pyrit, Ausbildung: XX') or 
 contains($OB_it,'Art: Quarz (kristalline Form)') or 
-contains($OB_it,'Art: Quarz (kristalline Form)\, Varietät: Bergkristall\, Assoziation: Chlorit') or 
-contains($OB_it,'Art: Hämatit\, Ausbildung: XX')">
+contains($OB_it,'Art: Quarz (kristalline Form), Varietät: Bergkristall, Assoziation: Chlorit') or 
+contains($OB_it,'Art: Hämatit, Ausbildung: XX')">
 				<xsl:element name="IMDT">
 					<xsl:attribute name="hint">Tipo scheda</xsl:attribute>BNM</xsl:element>
 				</xsl:when>
@@ -563,10 +563,10 @@ contains($OB_it,'brachiopode') or
 contains($OB_it,'mollusco') or 
 contains($OB_it,'riccio di mare') or 
 contains($OB_it,'cefalopode') or 
-contains($OB_it,'Sorex araneus (Balg\, Schädel)') or 
+contains($OB_it,'Sorex araneus (Balg, Schädel)') or 
 contains($OB_it,'crinoide') or 
 contains($OB_it,'pesce') or 
-contains($OB_it,'Myotis myotis (Alkoholpräparat\, Schädel)')">
+contains($OB_it,'Myotis myotis (Alkoholpräparat, Schädel)')">
 				<xsl:element name="IMDT">
 					<xsl:attribute name="hint">Tipo scheda</xsl:attribute>BNZ</xsl:element>
 				</xsl:when>
@@ -574,7 +574,7 @@ contains($OB_it,'Myotis myotis (Alkoholpräparat\, Schädel)')">
 contains($OB_it,'disegno (arte)') or 
 contains($OB_it,'disegno') or 
 contains($OB_it,'acquerello') or 
-contains($OB_it,'Landkarte\, politisch') or 
+contains($OB_it,'Landkarte, politisch') or 
 contains($OB_it,'schizzo') or 
 contains($OB_it,'disegno tecnico')">
 				<xsl:element name="IMDT">
@@ -676,13 +676,13 @@ contains($OB_it,'lettera') or
 contains($OB_it,'articolo') or 
 contains($OB_it,'Werbeprospekt') or 
 contains($OB_it,'bollo pubblicitario') or 
-contains($OB_it,'Landkarte\, topographisch') or 
+contains($OB_it,'Landkarte, topographisch') or 
 contains($OB_it,'Veranstaltungsprogramm') or 
 contains($OB_it,'fascicolo') or 
 contains($OB_it,'biglietto d') or 
 contains($OB_it,'Einzelblatt') or 
 contains($OB_it,'Stadtplan') or 
-contains($OB_it,'Landkarte\, historisch') or 
+contains($OB_it,'Landkarte, historisch') or 
 contains($OB_it,'Primizbild') or 
 contains($OB_it,'clichÃ© (stampa)') or 
 contains($OB_it,'Beichtzettel') or 
@@ -747,16 +747,19 @@ contains($OB_it,'Gästebuch')">
 			<xsl:apply-templates select="cell[@name='dim_it']"/>
 		</xsl:element>
 		
+  <xsl:variable name="vv" select="normalize-space(cell[@name='VV_it'])"/>
+  <xsl:if test="string-length($vv)>0">
 		<xsl:element name="AU">
 		<xsl:attribute name="hint">DEFINIZIONE CULTURALE</xsl:attribute>
 			<xsl:element name="AUT">
 			<xsl:attribute name="hint">AUTORE/RESPONSABILITA'</xsl:attribute>
 				<xsl:element name="AUTN">
-				<xsl:attribute name="hint">Nome di persona o ente</xsl:attribute><xsl:value-of select="cell[@name='VV_it']"/></xsl:element>
+				<xsl:attribute name="hint">Nome di persona o ente</xsl:attribute><xsl:value-of select="$vv"/></xsl:element>
 				<xsl:element name="AUTP">
 				<xsl:attribute name="hint">Tipo intestazione</xsl:attribute>NR</xsl:element>
 			</xsl:element>
 		</xsl:element>
+  </xsl:if>
 	
 		<xsl:if test="string-length(normalize-space(cell[@name='CP_geo']))">
 		<xsl:element name="GE">
