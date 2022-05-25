@@ -368,6 +368,7 @@ public class RdfAltoAdige {
         String xsltBase = xsltUrl.substring(0, xsltUrl.lastIndexOf('/')) + "/";//System.out.println("transformer base => " + xsltBase);
         XsltTransformer xtrRdf = null, xtr = xco.compile(new StreamSource(ras(xslt))).load();
         xtr.setParameter(new QName("xsltBase"), new XdmAtomicValue(xsltBase));
+        xtr.setParameter(new QName("dataset"), new XdmAtomicValue(dataset));
         xtr.setDestination(out);
         //xtr.setParameter(new QName("datestamp"), new XdmAtomicValue(date));
         String xsltRdf = properties.getProperty("" + pass + ".2rdf.xslt");
