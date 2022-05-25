@@ -9,7 +9,8 @@
  <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
 
  <xsl:param name="datestamp" select="'2022-03-11T00:00:00Z'"/>  
- <xsl:param name="xsltBase" select="''"/>  
+ <xsl:param name="xsltBase" select="''"/>
+ <xsl:param name="dataset" select="''"/>
  <xsl:variable name="comuniBZ" select="document(concat($xsltBase,'comuniBZ.xml'))"/>
 
  <xsl:template match="/">
@@ -33,7 +34,8 @@
 <xsl:variable name="OB_it" select="normalize-space(cell[@name='OB_it'])"/>
 <xsl:variable name="lc_OB_it" select="lower-case($OB_it)"/> 
 <xsl:choose>
-	<xsl:when test="$lc_OB_it='fotografia' or 
+	<xsl:when test="$dataset='fotografie storiche' or
+                 $lc_OB_it='fotografia' or 
                  $lc_OB_it='cartolina illustrata' or 
                  $lc_OB_it='diapositiva' or 
                  $lc_OB_it='diapositive' or 
