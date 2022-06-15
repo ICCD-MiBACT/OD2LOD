@@ -807,6 +807,11 @@ contains($OB_it,'Gästebuch')">
       <xsl:element name="y"><xsl:value-of select="substring-before(cell[@name='CP_geo'], ',')"/></xsl:element>
      </xsl:element>
     </xsl:if>
+    <xsl:variable name="mus" select="normalize-space(cell[@name='MUS'])"/>
+    <xsl:if test="string-length($mus)">
+     <xsl:element name="idContenitoreGiuridico"><xsl:value-of select="$mus"/></xsl:element>
+     <xsl:element name="idContenitoreFisico"><xsl:value-of select="$mus"/></xsl:element>
+    </xsl:if>
    </xsl:element>
    
   </schede>

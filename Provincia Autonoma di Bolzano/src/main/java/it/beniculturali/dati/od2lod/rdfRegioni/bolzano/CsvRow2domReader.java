@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +24,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.RFC4180ParserBuilder;
@@ -49,6 +52,11 @@ public class CsvRow2domReader {
 
   CsvRow2domReader(String url, String splitter, String splitFields, boolean preload, int timeout, boolean RFC4180Parser, Set<String> filter, String cellFilter)
       throws IOException, ParserConfigurationException {
+    this(url, splitter, splitFields, false, timeout, true, filter, cellFilter, null, null);
+  }
+
+  CsvRow2domReader(String url, String splitter, String splitFields, boolean preload, int timeout, boolean RFC4180Parser, Set<String> filter, String cellFilter,
+      String charset, String separator) throws IOException, ParserConfigurationException {
     this.filter = filter;
     this.cellFilter = cellFilter;
     documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -70,16 +78,19 @@ public class CsvRow2domReader {
       connection.setConnectTimeout(timeout * 1000);
     } else
       connection = targetURL.openConnection();
-    BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+    charset = charset != null ? charset.trim() : StandardCharsets.UTF_8.name();//System.out.println("charset:"+charset);
+    BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), charset));
     if (preload) { // avoid read timeout issues
       String content = br.lines().collect(Collectors.joining("\n"));
       br.close();
       br = new BufferedReader(new StringReader(content));
     }
+    char separ = separator != null ? separator.trim().charAt(0) : ',';
+    System.out.println("STATUS - charset: '" + charset + "', separator '" + separ + "'");
     if (!RFC4180Parser)
-      reader = new CSVReaderBuilder(br).build();
+      reader = new CSVReaderBuilder(br).withCSVParser(new CSVParserBuilder().withSeparator(separ).build()).build();
     else
-      reader = new CSVReaderBuilder(br).withCSVParser(new RFC4180ParserBuilder().build()).build();
+      reader = new CSVReaderBuilder(br).withCSVParser(new RFC4180ParserBuilder().withSeparator(separ).build()).build();
     fieldNames = reader.readNext();
     for (int j = 0; j < fieldNames.length; j++)
       cell2index.put(fieldNames[j], new Integer(j));

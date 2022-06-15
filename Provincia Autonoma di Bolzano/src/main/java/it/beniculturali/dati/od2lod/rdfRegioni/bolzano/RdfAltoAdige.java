@@ -21,12 +21,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -49,10 +51,13 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import it.cnr.istc.stlab.arco.Converter;
 import it.cnr.istc.stlab.arco.preprocessing.PreprocessedData;
@@ -228,8 +233,9 @@ public class RdfAltoAdige {
       try {
         System.out.println("STATUS - reading @" + csvUrl);
         String filterCell = properties.getProperty("" + pass + ".filterCell", "").trim();
+        String charset = properties.getProperty("" + pass + ".charset"), separator = properties.getProperty("" + pass + ".separator");
         return new CsvRow2domReader(csvUrl, properties.getProperty("" + pass + ".splitter"), properties.getProperty("" + pass + ".split"), true, timeout, true,
-            filter(filterCell, pass), filterCell);
+            filter(filterCell, pass), filterCell, charset, separator);
       } catch (Exception e) {
         if (tryCount == maxTry) throw e;
         System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry + " " + e);
@@ -253,9 +259,13 @@ public class RdfAltoAdige {
   //void updateArco(Document d) throws XPathExpressionException { preprocessor.preprocessDomRecord(d); }
   long arcoMillis = 0;
 
-  String toIsoDate(String s) {
+  String toIsoDate(String s) throws ParseException {
     String[] a = s.split("/");
-    return (a[2].length() == 2 ? "20" : "") + a[2] + "-" + (a[1].length() < 2 ? "0" : "") + a[1] + "-" + (a[0].length() < 2 ? "0" : "") + a[0];
+    if (a.length > 2)
+      return (a[2].length() == 2 ? "20" : "") + a[2] + "-" + (a[1].length() < 2 ? "0" : "") + a[1] + "-" + (a[0].length() < 2 ? "0" : "") + a[0];
+    SimpleDateFormat formatter = new SimpleDateFormat("MMMM d, yyyy", Locale.ITALIAN);
+    Date date = formatter.parse(s);
+    return new SimpleDateFormat("yyyy-MM-dd").format(date);
   }
 
   //List<String>passes() { List<String>result = new ArrayList<String>(); for (int j=1;;j++) { String id = properties.getProperty("" + j + ".id"); if (id==null) break; result.add(id); } return result; }
@@ -273,8 +283,48 @@ public class RdfAltoAdige {
     return result;
   }
 
+  int maxtry = 3, tryAfter = 5;//60; // sec
+
+  List<String> extractUrl(String url, String selector, int maxCount, String attribute) {
+    List<String> contents = new ArrayList<String>();
+    org.jsoup.nodes.Document doc;
+    for (int trycount = 1;; trycount++) {
+      try {
+        System.out.println("reading @" + url);
+        doc = Jsoup.connect(url).get();
+        //System.out.println(url+"\n"+doc.body().html());
+        Elements results = doc.select(selector);
+        int count = 0;
+        for (org.jsoup.nodes.Element result : results) {
+          contents.add(attribute == null ? result.html() : result.attr(attribute));
+          if (maxCount > 0 && ++count == maxCount) break;
+        }
+        break;
+      } catch (IOException e) {
+        System.err.println("try #" + trycount + " failed with exception " + e + "  @" + url);
+        if (trycount == maxtry) break;
+        try {
+          System.err.println("try " + (maxtry - trycount) + " times again after " + tryAfter + "sec");
+          Thread.sleep(tryAfter * 1000);
+        } catch (Exception ex) {
+          ;
+        }
+      }
+    }
+    return contents;
+  }
+
   String dateStamp(int dataIndex) throws Exception {
     return dateStamp(dataIndex, false);
+  }
+
+  Document url2dom(String url) throws IOException, SAXException {
+    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    connection.setConnectTimeout(timeout * 1000);
+    InputStream is = connection.getInputStream();
+    Document result = db.parse(is);
+    is.close();
+    return result;
   }
 
   String dateStamp(int dataIndex, boolean read) throws Exception {
@@ -283,12 +333,11 @@ public class RdfAltoAdige {
       for (int tryCount = 1;; tryCount++) {
         try {
           System.out.println("STATUS - reading @" + dateDocument);
-          HttpURLConnection connection = (HttpURLConnection) new URL(dateDocument).openConnection();
-          connection.setConnectTimeout(timeout * 1000);
-          InputStream is = connection.getInputStream();
-          String result = (String) xPath.evaluate(properties.getProperty("" + dataIndex + ".datePath"), db.parse(is));
-          is.close();
-          result = toIsoDate(result); //System.out.println("INFO - update date is " + result);
+          String datePath = properties.getProperty("" + dataIndex + ".datePath");
+          String dateSelector = properties.getProperty("" + dataIndex + ".dateSelector");
+          String result = datePath != null ? (String) xPath.evaluate(datePath, url2dom(dateDocument)) : extractUrl(dateDocument, dateSelector, 1, null).get(0);
+          result = toIsoDate(result);
+          System.out.println("INFO - dateStamp is " + result);
           return result;
         } catch (Exception e) {
           if (tryCount == maxTry) throw e;
@@ -351,6 +400,9 @@ public class RdfAltoAdige {
       startMillis = new Date().getTime();
       String resourcePrefix = properties.getProperty("resourcePrefix", "https://w3id.org/arco/resource/AltoAdige/").trim();
       String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date().getTime()), lastDate = null;
+      PreprocessedData pd = PreprocessedData.getInstance(false);
+      Map<String, String> cfMap = pd.getContenitoreFisicoSystemRecordCode2CCF();
+      Map<String, String> cgMap = pd.getContenitoreGiuridicoSystemRecordCode2CCG();
       for (int pass = dataIndex > 0 ? dataIndex : 1;; pass++) {
         if (dataIndex > 0 && pass > dataIndex) break;
         String passDate = null;
@@ -361,15 +413,34 @@ public class RdfAltoAdige {
         String dataset = properties.getProperty("" + pass + ".dataset", "#" + pass);
         System.out.println("INFO - dataset " + dataset);
         String documentPrefix = properties.getProperty("" + pass + ".documentPrefix").trim();
+        /*String cfPrefix = properties.getProperty("" + pass + ".cfPrefix");
+        String cgPrefix = properties.getProperty("" + pass + ".cgPrefix");*/
         String date = dateStamp(pass); //dates.add(date); System.out.println("INFO - update date is " + date);
         if (date != null) passDate = date;
+        XsltTransformer xtrRdf = null, xtr[] = null;
         String xslt = properties.getProperty("" + pass + ".xslt");
-        String xsltUrl = this.getClass().getClassLoader().getResource(xslt).toExternalForm();
-        String xsltBase = xsltUrl.substring(0, xsltUrl.lastIndexOf('/')) + "/";//System.out.println("transformer base => " + xsltBase);
-        XsltTransformer xtrRdf = null, xtr = xco.compile(new StreamSource(ras(xslt))).load();
-        xtr.setParameter(new QName("xsltBase"), new XdmAtomicValue(xsltBase));
-        xtr.setParameter(new QName("dataset"), new XdmAtomicValue(dataset));
-        xtr.setDestination(out);
+        if (xslt != null) {
+          String[] ax = xslt.split(",");
+          xtr = new XsltTransformer[ax.length];
+          for (int j = 0; j < ax.length; j++) {
+            String xsltUrl = this.getClass().getClassLoader().getResource(ax[j]).toExternalForm();
+            String xsltBase = xsltUrl.substring(0, xsltUrl.lastIndexOf('/')) + "/";//System.out.println("transformer base => " + xsltBase);
+            xtr[j] = xco.compile(new StreamSource(ras(ax[j]))).load();
+            xtr[j].setParameter(new QName("xsltBase"), new XdmAtomicValue(xsltBase));
+            xtr[j].setParameter(new QName("dataset"), new XdmAtomicValue(dataset));
+            xtr[j].setDestination(out);
+          }
+        }
+        String[] idPrefix = null;
+        String pprefix = properties.getProperty("" + pass + ".idprefix");
+        if (pprefix != null) idPrefix = pprefix.split(",");
+        String[] cgmap = null;
+        String pmap = properties.getProperty("" + pass + ".cgmap");
+        if (pmap != null) cgmap = pmap.split(",");
+        String[] cfmap = null;
+        pmap = properties.getProperty("" + pass + ".cfmap");
+        if (pmap != null) cfmap = pmap.split(",");
+
         //xtr.setParameter(new QName("datestamp"), new XdmAtomicValue(date));
         String xsltRdf = properties.getProperty("" + pass + ".2rdf.xslt");
         if (xsltRdf != null) {
@@ -378,62 +449,75 @@ public class RdfAltoAdige {
           xtrRdf.setDestination(out);
         }
         CsvRow2domReader r2d = getPassReader(pass);
-        String rmp = properties.getProperty("" + pass + ".rmDup");
-        if (rmp != null) System.out.println("INFO - remove duplicates " + rmp + " @" + dataset);//String rmp = "row/cell[@name='NCTN']";
-        Set<String> rmSet = new HashSet<String>();
+        /*String rmp = properties.getProperty("" + pass + ".rmDup");
+        if (rmp!=null) System.out.println("INFO - remove duplicates " + rmp + " @" + dataset);//String rmp = "row/cell[@name='NCTN']";
+        Set<String>rmSet = new HashSet<String>();*/
         for (Document row; (row = r2d.next()) != null; rows++) {
-          String itemId = null;
+          String rowitemId = null;
           try {/*
                if (filter!=null) {
                 String filterValue = ((String)xPath.evaluate(filterPath, row, XPathConstants.STRING)).trim().toLowerCase();
                 if (!filter.contains(filterValue)) {rows--; continue;}
                }*/
-            itemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
+            rowitemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
+            //"AA_CG_"+itemId;
             //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);
-            if (rmp != null) {
-              String rmc = (String) xPath.evaluate(rmp, row, XPathConstants.STRING);
-              if (rmc.length() > 0 && !rmSet.add(rmc)) { // avoid duplicate IRI
-                Node dead = (Node) xPath.evaluate(rmp, row, XPathConstants.NODE);
-                dead.getParentNode().removeChild(dead);
-                System.out.println("duplicate " + rmp + " " + rmc + " removed");
-              }
-            }
-            String rowDate = nowDate;
+            /*if (rmp!=null) { String rmc = (String)xPath.evaluate(rmp, row, XPathConstants.STRING);
+             if (rmc.length()>0 && !rmSet.add(rmc)) { // avoid duplicate IRI
+              Node dead = (Node)xPath.evaluate(rmp, row, XPathConstants.NODE);
+              dead.getParentNode().removeChild(dead);    
+              System.out.println("duplicate " + rmp + " " + rmc + " removed");
+            }}*/
+            String rowDate = passDate != null ? passDate : nowDate;
             if (datePath != null) {
               rowDate = (String) xPath.evaluate(datePath, row, XPathConstants.STRING);
               if (rowDate != null && rowDate.length() > 0) {
                 if (passDate == null || passDate.compareTo(rowDate) < 0) passDate = rowDate;
               } else
-                rowDate = nowDate;
+                rowDate = passDate != null ? passDate : nowDate;
             }
-            xtr.setParameter(new QName("datestamp"), new XdmAtomicValue(rowDate));
-            if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row));
-            xtr.setSource(new DOMSource(row)); //System.out.println("@id " + itemId);      
-            xtr.transform();
-            Model model;
-            byte[] ba = baos.toByteArray();
-            if (dump) zWrite(outFolder, itemId + ".xml", ba);
-            long start = new Date().getTime();
-            try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
-              model = converter.convert(itemId, resourcePrefix, documentPrefix, new ByteArrayInputStream(ba));
-            } catch (Exception e) {
-              writeException(outFolder, itemId, ba, r2d.line(), e);
-              continue;
-            } finally {
-              arcoMillis += new Date().getTime() - start;
+            for (int xj = 0; (xtr == null && xj == 0) || xj < xtr.length; xj++) {
+              String itemId = (idPrefix != null ? idPrefix[xj] : "") + rowitemId;
+              byte[] ba = null;
+              Model model = null;
+              if (xtr != null) {
+                baos.reset();
+                xtr[xj].setParameter(new QName("datestamp"), new XdmAtomicValue(rowDate));
+                if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row));
+                xtr[xj].setSource(new DOMSource(row)); //System.out.println("@id " + itemId);      
+                xtr[xj].transform();
+                ba = baos.toByteArray();
+                if (dump) zWrite(outFolder, itemId + ".xml", ba);
+                long start = new Date().getTime();
+                try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
+                  model = converter.convert(itemId, resourcePrefix, documentPrefix, new ByteArrayInputStream(ba));
+                } catch (Exception e) {
+                  writeException(outFolder, itemId, ba, r2d.line(), e);
+                  continue;
+                } finally {
+                  arcoMillis += new Date().getTime() - start;
+                }
+              }
+              if (xtrRdf != null) {
+                baos.reset();
+                //xtrRdf.setSource(new DOMSource(db.parse(new ByteArrayInputStream(ba))));
+                xtrRdf.setSource(new DOMSource(ba != null ? db.parse(new ByteArrayInputStream(ba)) : row));
+                xtrRdf.transform();
+                Model xModel = ModelFactory.createDefaultModel();
+                xModel.read(new ByteArrayInputStream(baos.toByteArray()), null, "RDF/XML");
+                if (model != null)
+                  model.add(xModel);
+                else
+                  model = xModel;
+              }
+              model.write(result, "N-TRIPLES");
+              writeContent(itemId, pass, /*ids.size(),*/r2d.line(), rows, outFolder, dataIndex, result);
+
+              if (cgmap != null && Boolean.valueOf(cgmap[xj])) cgMap.put(rowitemId, itemId);
+              if (cfmap != null && Boolean.valueOf(cfmap[xj])) cfMap.put(rowitemId, itemId);
             }
-            if (xtrRdf != null) {
-              baos.reset();
-              xtrRdf.setSource(new DOMSource(db.parse(new ByteArrayInputStream(ba))));
-              xtrRdf.transform();
-              Model xModel = ModelFactory.createDefaultModel();
-              xModel.read(new ByteArrayInputStream(baos.toByteArray()), null, "RDF/XML");
-              model.add(xModel);
-            }
-            model.write(result, "N-TRIPLES");
-            writeContent(itemId, pass, /*ids.size(),*/r2d.line(), rows, outFolder, dataIndex, result);
           } catch (Exception e) {
-            writeException(outFolder, itemId, row, r2d.line(), e);
+            writeException(outFolder, rowitemId, row, r2d.line(), e);
           } finally {
             result.reset();
             baos.reset();
@@ -445,6 +529,8 @@ public class RdfAltoAdige {
         r2d.close();
       }
       closeContent();
+      pd.commit();
+      pd.close();
       writeDateStamp(lastDate != null ? lastDate : nowDate, outFolder);//writeDateStamp(lastDate(dates), outFolder);
     } finally {
       shutdownArco();
