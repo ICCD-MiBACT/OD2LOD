@@ -227,8 +227,12 @@ public class RdfAltoAdige {
 
   int maxTry = 3, tryWait = 15, timeout = 15;
 
+  String csvProperty(int pass) {
+    return properties.getProperty("" + pass + ".csv");
+  }
+
   CsvRow2domReader getPassReader(int pass) throws Exception {
-    String csvUrl = properties.getProperty("" + pass + ".csv");
+    String csvUrl = csvProperty(pass);
     for (int tryCount = 1;; tryCount++) {
       try {
         System.out.println("STATUS - reading @" + csvUrl);
@@ -265,7 +269,7 @@ public class RdfAltoAdige {
       return (a[2].length() == 2 ? "20" : "") + a[2] + "-" + (a[1].length() < 2 ? "0" : "") + a[1] + "-" + (a[0].length() < 2 ? "0" : "") + a[0];
     SimpleDateFormat formatter = new SimpleDateFormat("MMMM d, yyyy", Locale.ITALIAN);
     Date date = formatter.parse(s);
-    return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    return datestampFormat().format(date);
   }
 
   //List<String>passes() { List<String>result = new ArrayList<String>(); for (int j=1;;j++) { String id = properties.getProperty("" + j + ".id"); if (id==null) break; result.add(id); } return result; }
@@ -348,7 +352,11 @@ public class RdfAltoAdige {
     }
     if (!read) return null;
     String datePath = properties.getProperty("" + dataIndex + ".date");
-    if (datePath == null) return null;
+    if (datePath == null) {
+      URL url = new URL(csvProperty(dataIndex));
+      if (url.getProtocol().compareToIgnoreCase("file") == 0) return datestampFormat().format(new Date(new File(url.getPath()).lastModified()));
+      return null;
+    }
     String passDate = null;
     CsvRow2domReader r2d = getPassReader(dataIndex);
     for (Document row; (row = r2d.next()) != null;) {
@@ -381,6 +389,10 @@ public class RdfAltoAdige {
     return lastDate(dates);
   }
 
+  SimpleDateFormat datestampFormat() {
+    return new SimpleDateFormat("yyyy-MM-dd");
+  }
+
   void writeDateStamp(String date, String outFolder) throws UnsupportedEncodingException, IOException {
     Files.write(Paths.get(outFolder, "datestamp.isodate"), date.getBytes(StandardCharsets.UTF_8.toString()));
   }
@@ -399,7 +411,7 @@ public class RdfAltoAdige {
       int rows = 1;
       startMillis = new Date().getTime();
       String resourcePrefix = properties.getProperty("resourcePrefix", "https://w3id.org/arco/resource/AltoAdige/").trim();
-      String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date().getTime()), lastDate = null;
+      String nowDate = datestampFormat().format(new Date().getTime()), lastDate = null;
       PreprocessedData pd = PreprocessedData.getInstance(false);
       Map<String, String> cfMap = pd.getContenitoreFisicoSystemRecordCode2CCF();
       Map<String, String> cgMap = pd.getContenitoreGiuridicoSystemRecordCode2CCG();
@@ -488,6 +500,7 @@ public class RdfAltoAdige {
                 xtr[xj].transform();
                 ba = baos.toByteArray();
                 if (dump) zWrite(outFolder, itemId + ".xml", ba);
+
                 long start = new Date().getTime();
                 try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
                   model = converter.convert(itemId, resourcePrefix, documentPrefix, new ByteArrayInputStream(ba));
@@ -511,8 +524,9 @@ public class RdfAltoAdige {
                   model = xModel;
               }
               model.write(result, "N-TRIPLES");
-              writeContent(itemId, pass, /*ids.size(),*/r2d.line(), rows, outFolder, dataIndex, result);
-
+              //writeContent(itemId, pass, ids.size(), r2d.line(), rows, outFolder, dataIndex, result);
+              writeContent(itemId, pass, r2d.line(), rows, outFolder, dataIndex, result);
+              // la trasformazione usa una mappa per risalire dal bene al contenitore
               if (cgmap != null && Boolean.valueOf(cgmap[xj])) cgMap.put(rowitemId, itemId);
               if (cfmap != null && Boolean.valueOf(cfmap[xj])) cfMap.put(rowitemId, itemId);
             }
