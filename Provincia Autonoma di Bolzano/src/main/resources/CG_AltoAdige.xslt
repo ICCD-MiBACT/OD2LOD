@@ -93,6 +93,11 @@
 		</xsl:element>		
 				
 	</xsl:element>
+ 
+ <xsl:element name="harvesting">
+  <xsl:element name="label_de"><xsl:value-of select="cell[@name='DENOMINAZIONE_DE']"/></xsl:element>
+ </xsl:element>
+ 
 </schede>
 </metadata>
 </record>

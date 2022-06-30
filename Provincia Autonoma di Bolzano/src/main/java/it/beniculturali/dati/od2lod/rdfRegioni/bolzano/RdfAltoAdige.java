@@ -461,6 +461,14 @@ public class RdfAltoAdige {
           System.out.println("xsltRdf: " + xsltRdf);
           xtrRdf = xco.compile(new StreamSource(ras(xsltRdf))).load();
           xtrRdf.setDestination(out);
+          //xtrRdf.setParameter(new QName("NS"), new XdmAtomicValue(resourcePrefix));
+        }
+        String rdfizerXslt = properties.getProperty("" + pass + ".rdfizer.xslt");
+        if (rdfizerXslt != null) {
+          System.out.println("rdfizerXslt: " + rdfizerXslt);
+          URI uri = this.getClass().getClassLoader().getResource(rdfizerXslt).toURI();
+          converter.addXSTLConverter(uri.getScheme().equals("jar") ? FileSystems.newFileSystem(uri, new HashMap<String, String>()).getPath(rdfizerXslt) : Paths
+              .get(uri));
         }
         CsvRow2domReader r2d = getPassReader(pass);
         /*String rmp = properties.getProperty("" + pass + ".rmDup");
