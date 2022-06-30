@@ -389,8 +389,10 @@ public class RdfAltoAdige {
     return lastDate(dates);
   }
 
+  final static SimpleDateFormat datestampFormat = new SimpleDateFormat("yyyy-MM-dd");
+
   SimpleDateFormat datestampFormat() {
-    return new SimpleDateFormat("yyyy-MM-dd");
+    return datestampFormat;
   }
 
   void writeDateStamp(String date, String outFolder) throws UnsupportedEncodingException, IOException {
