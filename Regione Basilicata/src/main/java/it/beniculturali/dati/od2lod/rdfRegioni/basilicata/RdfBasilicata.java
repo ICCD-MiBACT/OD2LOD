@@ -150,7 +150,7 @@ public class RdfBasilicata {
   private void flushContent(String itemId, int rows, String outFolder, int dataIndex, byte[] content) throws IOException {
     if (lastStartRow == 0 || rows - lastStartRow >= rowCountFlush) {
       if (bos != null) closeContent();
-      String filename = "arco-knowledge-graph-1.0_R03_" + (dataIndex > 0 ? "" + dataIndex + "_" : "") + df7.format(rows) + ".nt.gz";
+      String filename = "arco-knowledge-graph-1.0_R17_" + (dataIndex > 0 ? "" + dataIndex + "_" : "") + df7.format(rows) + ".nt.gz";
       System.out.println("STATUS - writing @" + filename);
       bos = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(new File(outFolder, filename), false)));
       lastStartRow = rows;
