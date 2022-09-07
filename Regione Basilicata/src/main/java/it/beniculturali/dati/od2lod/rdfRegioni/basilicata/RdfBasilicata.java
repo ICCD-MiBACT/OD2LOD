@@ -364,7 +364,7 @@ public class RdfBasilicata {
     }
     String result = (String) xPath.evaluate(properties.getProperty("datePath").replaceAll("\\$\\(uid\\)", id), content);
     System.out.println("INFO - update date is " + result);
-    return result.substring(0, 10);
+    return result;//result.substring(0, 10);
   }
 
   String lastDate(List<String> dates) {
