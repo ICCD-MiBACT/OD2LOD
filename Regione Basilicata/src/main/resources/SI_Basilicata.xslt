@@ -53,9 +53,13 @@
        <xsl:attribute name="hint">OGGETTO</xsl:attribute>
        <xsl:element name="OGT">
         <xsl:attribute name="hint">OGGETTO</xsl:attribute>
-        <xsl:if test="ogr:tipo">
-         <xsl:element name="OGTD"><xsl:attribute name="hint">Definizione</xsl:attribute><xsl:value-of select="ogr:tipo"/></xsl:element>
-        </xsl:if>
+        <xsl:element name="OGTD">
+         <xsl:attribute name="hint">Definizione</xsl:attribute>
+         <xsl:choose>
+          <xsl:when test="ogr:tipo"><xsl:value-of select="ogr:tipo"/></xsl:when>
+          <xsl:otherwise>aree archeologiche tutelate per decreto</xsl:otherwise>
+         </xsl:choose>  
+        </xsl:element>
         <xsl:element name="OGTN"><xsl:attribute name="hint">Denominazione</xsl:attribute><xsl:value-of select="*[lower-case(local-name())='denom']"/></xsl:element>
        </xsl:element>
       </xsl:element>
