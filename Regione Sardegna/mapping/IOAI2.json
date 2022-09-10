@@ -1,0 +1,22 @@
+{
+    "NCTR": ["record", "metadata","schede", "A", "CD", "NCT", "NCTR"],
+    "NCTN": ["record", "metadata","schede", "A", "CD", "NCT", "NCTN"],
+    "NCE": ["record", "metadata","schede", "A", "AC", "ACC"],
+    "OGTT": ["record", "metadata","schede", "A", "OG", "OGT", "OGTD"],
+    "OGTN": ["record", "metadata","schede", "A", "OG", "OGT", "OGTN"],
+    "PVCP": ["record", "metadata","schede", "A", "LC", "PVC", "PVCP"],
+    "PVCC": ["record", "metadata","schede", "A", "LC", "PVC", "PVCC"],
+    "RENR": ["record", "metadata","schede", "A", "RE", "REN", "RENR"], 
+    "RENN": ["record", "metadata","schede", "A", "RE", "REN", "RENN"],
+   	"RELI": ["record", "metadata","schede", "A", "RE", "REL", "RELI"], 
+	"REVS": ["record", "metadata","schede", "A", "RE", "REV", "REVS"], 
+	"REVI": ["record", "metadata","schede", "A", "RE", "REV", "REVI"], 
+    "STCC": ["record", "metadata","schede", "A", "CO", "STC", "STCC"],
+    "CDGG": ["record", "metadata","schede", "A", "TU", "CDG", "CDGG"],
+    "CDGS": ["record", "metadata","schede", "A", "TU", "CDG", "CDGS"],
+    "CMPD": ["record", "metadata","schede", "A", "CM", "CMP", "CMPD"], 
+    "CMPN": ["record", "metadata","schede", "A", "CM", "CMP", "CMPN"], 
+	"IMGF": ["record", "metadata","schede", "harvesting", "linkMedia"],
+    "DIRITTI":[],
+    "URL": ["record", "metadata","schede", "harvesting", "linkSource"]
+}

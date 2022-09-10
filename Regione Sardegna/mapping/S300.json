@@ -20,5 +20,5 @@
     "CMPN": ["record", "metadata", "schede", "S", "CM", "CMP", "CMPN"],
     "FTA0": ["record", "metadata","schede", "harvesting", "linkMedia"],
     "DIRITTI":[],
-    "URL": ["record", "metadata","schede", "harvesting", "linkSource"]
+    "LINK": ["record", "metadata","schede", "harvesting", "linkSource"]
 }

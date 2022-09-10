@@ -1,0 +1,20 @@
+{
+    "NCTR": ["record", "metadata","schede", "A", "CD", "NCT", "NCTR"],
+    "NCTN": ["record", "metadata","schede", "A", "CD", "NCT", "NCTN"],
+    "NCE": ["record", "metadata","schede", "A", "AC", "ACC"],
+    "OGTD": ["record", "metadata","schede", "A", "OG", "OGT", "OGTD"],
+    "OGTL": ["record", "metadata","schede", "A", "OG", "OGA", "OGAD"],
+    "PVCP": ["record", "metadata","schede", "A", "LC", "PVC", "PVCP"],
+    "PVCC": ["record", "metadata","schede", "A", "LC", "PVC", "PVCC"],
+    "EPOC": ["record", "metadata","schede", "A", "US", "USO", "USOC"],
+    "EPOF": [],
+    "EPOI": [],
+    "USOD": ["record", "metadata","schede", "A", "US", "USO", "USOD"],
+    "CDGG": ["record", "metadata","schede", "A", "TU", "CDG", "CDGG"],
+    "CDGS": ["record", "metadata","schede", "A", "TU", "CDG", "CDGS"],
+    "CMPD": ["record", "metadata","schede", "A", "CM", "CMP", "CMPD"],
+    "CMPN": ["record", "metadata","schede", "A", "CM", "CMP", "CMPN"],
+    "FTA0": ["record", "metadata","schede", "harvesting", "linkMedia"],
+    "DIRITTI":[],
+    "URL": ["record", "metadata","schede", "harvesting", "linkSource"]
+}

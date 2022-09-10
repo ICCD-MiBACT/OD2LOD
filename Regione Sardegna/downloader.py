@@ -65,8 +65,13 @@ def handle_CSV(csv_file, mapping_file, nctn2url):
         counter = ''
 
         for data_row in csv_data_reader:
+        
+            if 'NCTN' in data_row.keys() and data_row['NCTN'].find('// ') >= 0:
+                print('skip @NCTN ', data_row['NCTN'])
+                continue
             
-            if data_row['NCTN'] == '':
+            #if data_row['NCTN'] == '':
+            if 'NCTN' not in data_row.keys() or data_row['NCTN'] == '':
                 data_row['NCTN'] = hashlib.md5(''.join(data_row.values()).encode()).hexdigest()
 
             if data_row['NCTN'] == previous_NCTN:
