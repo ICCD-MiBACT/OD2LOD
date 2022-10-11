@@ -5,6 +5,7 @@
     "SGTI": ["record", "metadata", "schede", "S", "OG", "SGT", "SGTI"],
     "SGTT": ["record", "metadata", "schede", "S", "OG", "SGT", "SGTT"],
     "AUTN": ["record", "metadata", "schede", "S", "AU", "AUT", "AUTN"],
+    "PVCR": ["record", "metadata", "schede", "S", "LC", "PVC", "PVCR"],
     "PVCP": ["record", "metadata", "schede", "S", "LC", "PVC", "PVCP"],
     "PVCC": ["record", "metadata", "schede", "S", "LC", "PVC", "PVCC"],
     "LDCN": ["record", "metadata", "schede", "S", "LC", "LDC", "LDCN"],

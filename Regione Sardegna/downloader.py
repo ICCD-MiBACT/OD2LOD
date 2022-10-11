@@ -34,7 +34,10 @@ def CSV_to_dict(data, mapping_file):
             if data['LONGITUDINE'].find('.') == 2:
                 data['LONGITUDINE'], data['LATITUDINE'] = data['LATITUDINE'], data['LONGITUDINE']
             
-    data['NCTR'] = '20'
+    data['NCTR'] = '20'    
+    data['PVCR'] = 'Sardegna'
+    #aggiungere ESC nei mapping e R20 in db
+    #data['ESC'] = 'R20'
 
     obj = dict()
     for key, value in data.items():

@@ -4,6 +4,7 @@
     "NCE": ["record", "metadata","schede", "A", "AC", "ACC"],
     "OGTT": ["record", "metadata","schede", "A", "OG", "OGT", "OGTD"],
     "OGTN": ["record", "metadata","schede", "A", "OG", "OGT", "OGTN"],
+    "PVCR": ["record", "metadata","schede", "A", "LC", "PVC", "PVCR"],
     "PVCP": ["record", "metadata","schede", "A", "LC", "PVC", "PVCP"],
     "PVCC": ["record", "metadata","schede", "A", "LC", "PVC", "PVCC"],
     "RENR": ["record", "metadata","schede", "A", "RE", "REN", "RENR"], 

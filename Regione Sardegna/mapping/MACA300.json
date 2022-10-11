@@ -3,6 +3,7 @@
     "NCTN": ["record", "metadata", "schede", "MA", "CD", "NCT", "NCTN"],
     "OGTD": ["record", "metadata", "schede", "MA", "OG", "OGT", "OGTD"],
     "OGTN": ["record", "metadata", "schede", "MA", "OG", "OGT", "OGTN"],
+    "PVCR": ["record", "metadata", "schede", "MA", "LC", "PVC", "PVCR"],
     "PVCP": ["record", "metadata", "schede", "MA", "LC", "PVC", "PVCP"],
     "PVCC": ["record", "metadata", "schede", "MA", "LC", "PVC", "PVCC"],
     "LATITUDINE": ["record", "metadata", "schede", "harvesting", "geocoding", "y"],

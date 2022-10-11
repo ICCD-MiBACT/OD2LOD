@@ -3,6 +3,7 @@
     "NCTN": ["record", "metadata", "schede", "PST", "CD", "NCT", "NCTN"],
     "OGTD": ["record", "metadata", "schede", "PST", "OG", "OGT", "OGTD"],
     "OGTT": ["record", "metadata", "schede", "PST", "OG", "OGT", "OGTT"],
+    "PVCR": ["record", "metadata", "schede", "PST", "LC", "PVC", "PVCR"],
     "PVCP": ["record", "metadata", "schede", "PST", "LC", "PVC", "PVCP"],
     "PVCC": ["record", "metadata", "schede", "PST", "LC", "PVC", "PVCC"],
     "LDCN": ["record", "metadata", "schede", "PST", "LC", "LDC", "LDCN"],

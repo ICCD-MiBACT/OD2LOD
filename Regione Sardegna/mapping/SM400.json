@@ -4,6 +4,7 @@
     "OGTD": ["record", "metadata", "schede", "SM", "OG", "OGT", "OGTD"],
     "OGDN": ["record", "metadata", "schede", "SM", "OG", "OGD", "OGDN"],
     "OGDT": ["record", "metadata", "schede", "SM", "OG", "OGD", "OGDT"],
+    "PVCR": ["record", "metadata", "schede", "SM", "LC", "PVC", "PVCR"],
     "PVCP": ["record", "metadata", "schede", "SM", "LC", "PVC", "PVCP"],
     "PVCC": ["record", "metadata", "schede", "SM", "LC", "PVC", "PVCC"],
     "LDCN": ["record", "metadata", "schede", "SM", "LC", "LDC", "LDCN"],

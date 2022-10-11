@@ -21,7 +21,7 @@ with open(outfile, mode='w+', encoding="utf-8") as out:
     with gzip.open(fileName, mode='rt', encoding="utf-8") as f:
         for line in f:
             #
-            # deactivated following code
+            # unneeded code
             #  baseURL => rdfizer command line
             #  dc:source => xtra.xslt
             #
@@ -42,8 +42,11 @@ with open(outfile, mode='w+', encoding="utf-8") as out:
             #                    line = ' '.join(components)
             #                    out.write(line)
             #elif '<https://w3id.org/italia/onto/CLV/Address> .' in line:
-            if '<https://w3id.org/italia/onto/CLV/Address> .' in line:
-                out.write(line.split(' ')[0] + ' <https://w3id.org/italia/onto/CLV/hasRegion> <https://w3id.org/arco/resource/Region/sardegna> .')
-                out.write('\n' + line)
-            else:
+            
+            # unneeded code
+            #  PVCR => region
+            #if '<https://w3id.org/italia/onto/CLV/Address> .' in line:
+            #    out.write(line.split(' ')[0] + ' <https://w3id.org/italia/onto/CLV/hasRegion> <https://w3id.org/arco/resource/Region/sardegna> .')
+            #    out.write('\n' + line)
+            #else:
                 out.write(line)
