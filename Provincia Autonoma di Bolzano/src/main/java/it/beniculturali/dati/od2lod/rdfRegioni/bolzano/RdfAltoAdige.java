@@ -420,7 +420,6 @@ public class RdfAltoAdige {
       for (int pass = dataIndex > 0 ? dataIndex : 1;; pass++) {
         if (dataIndex > 0 && pass > dataIndex) break;
         String passDate = null;
-        //Set<String>filter = null;
         String itemPath = properties.getProperty("" + pass + ".itemId"); //System.out.println("@id " + id);
         if (itemPath == null) break;
         String datePath = properties.getProperty("" + pass + ".date");
@@ -474,13 +473,10 @@ public class RdfAltoAdige {
         /*String rmp = properties.getProperty("" + pass + ".rmDup");
         if (rmp!=null) System.out.println("INFO - remove duplicates " + rmp + " @" + dataset);//String rmp = "row/cell[@name='NCTN']";
         Set<String>rmSet = new HashSet<String>();*/
+        ////String skipkey = properties.getProperty("" + pass + ".skip.key"), skipvalue = properties.getProperty("" + pass + ".skip.value");
         for (Document row; (row = r2d.next()) != null; rows++) {
           String rowitemId = null;
-          try {/*
-               if (filter!=null) {
-                String filterValue = ((String)xPath.evaluate(filterPath, row, XPathConstants.STRING)).trim().toLowerCase();
-                if (!filter.contains(filterValue)) {rows--; continue;}
-               }*/
+          try {
             rowitemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
             //"AA_CG_"+itemId;
             //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);
@@ -549,7 +545,8 @@ public class RdfAltoAdige {
           if (passDate != null && (lastDate == null || lastDate.compareTo(passDate) < 0)) lastDate = passDate;
           //if (line==2) break; // test
         }
-        System.out.println("STATUS - got " + r2d.line() + " lines @dataset " + dataset);
+        System.out
+            .println("STATUS - got " + (r2d.skip() > 0 ? "" + (r2d.line() - r2d.skip() - 1) + "/" : "") + (r2d.line() - 1) + " lines @dataset " + dataset);
         r2d.close();
       }
       closeContent();

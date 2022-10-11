@@ -29,73 +29,81 @@
  <metadata>
   <schede>
 
-	<xsl:element name="CF">
-    <xsl:attribute name="version">4.00_IICD0</xsl:attribute>
-		<xsl:element name="CD">
-		<xsl:attribute name="hint">CODICI</xsl:attribute>
-			<xsl:element name="TSK">
-			<xsl:attribute name="hint">Tipo scheda</xsl:attribute>CF</xsl:element>
-			<xsl:element name="LIR">
-			<xsl:attribute name="hint">Livello</xsl:attribute>P</xsl:element>
-			<xsl:element name="ESC">
-			<xsl:attribute name="hint">Ente schedatore</xsl:attribute>P021</xsl:element>
-			<xsl:element name="ACC">
-			<xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
-				<xsl:element name="ACCE">
-				<xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>P021</xsl:element>
-				<xsl:element name="ACCC">
-				<xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="$identifier"/></xsl:element>
-			</xsl:element>
+ <xsl:element name="CF">
+  <xsl:attribute name="version">4.00_IICD0</xsl:attribute>
+  <xsl:element name="CD">
+  <xsl:attribute name="hint">CODICI</xsl:attribute>
+   <xsl:element name="TSK">
+   <xsl:attribute name="hint">Tipo scheda</xsl:attribute>CF</xsl:element>
+   <xsl:element name="LIR">
+   <xsl:attribute name="hint">Livello</xsl:attribute>P</xsl:element>
+   <xsl:element name="ESC">
+   <xsl:attribute name="hint">Ente schedatore</xsl:attribute>P021</xsl:element>
+   <xsl:element name="ACC">
+   <xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
+    <xsl:element name="ACCE">
+    <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>P021</xsl:element>
+    <xsl:element name="ACCC">
+    <xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="$identifier"/></xsl:element>
+   </xsl:element>
    <xsl:element name="CCF"><xsl:value-of select="$identifier"/></xsl:element>
    <xsl:element name="CCG"><xsl:value-of select="concat('AA_CG_',cell[@name='Sigla'])"/></xsl:element>
-		</xsl:element>
-		
-		<xsl:element name="CF">
-		<xsl:attribute name="hint">CONTENITORE FISICO</xsl:attribute>
-			<xsl:choose>
-				<xsl:when test="contains(cell[@name='Denominazione'],'Museo') or contains(cell[@name='Denominazione'],'Museum')">
-					<xsl:element name="CFT">
-					<xsl:attribute name="hint">Tipologia</xsl:attribute>museo</xsl:element>
-				</xsl:when>
-				<xsl:when test="contains(cell[@name='Denominazione'],'Archivio')">
-					<xsl:element name="CFT">
-					<xsl:attribute name="hint">Tipologia</xsl:attribute>archivio</xsl:element>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:element name="CFT">
-					<xsl:attribute name="hint">Tipologia</xsl:attribute>non identificato</xsl:element>
-				</xsl:otherwise>
-			</xsl:choose>
-			<xsl:element name="CFN">
-			<xsl:attribute name="hint">Denominazione attuale</xsl:attribute><xsl:value-of select="cell[@name='Denominazione']"/></xsl:element>
-		</xsl:element>
-		
-		<xsl:element name="LC">
-		<xsl:attribute name="hint">LOCALIZZAZIONE GEOGRAFICO - AMMINISTRATIVA</xsl:attribute>
-			<xsl:element name="PVC">
-			<xsl:attribute name="hint">LOCALIZZAZIONE</xsl:attribute>
-				<xsl:element name="PVCS">
-				<xsl:attribute name="hint">Stato</xsl:attribute>Italia</xsl:element>
-				<xsl:element name="PVCR">
-				<xsl:attribute name="hint">Regione</xsl:attribute>Regione Trentino-Alto Adige</xsl:element>
-				<xsl:element name="PVCP">
-				<xsl:attribute name="hint">Provincia</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
-			</xsl:element>
-		</xsl:element>
-		
-		<xsl:element name="CM">
-		<xsl:attribute name="hint">CERTIFICAZIONE E GESTIONE DEI DATI</xsl:attribute>
-			<xsl:element name="CMP">
-			<xsl:attribute name="hint">REDAZIONE E VERIFICA SCIENTIFICA</xsl:attribute>
-				<xsl:element name="CMPD">
-				<xsl:attribute name="hint">Anno di redazione</xsl:attribute>2015</xsl:element>
-			</xsl:element>
-		</xsl:element>		
-				
-	</xsl:element>
+  </xsl:element>
+  
+  <xsl:element name="CF">
+  <xsl:attribute name="hint">CONTENITORE FISICO</xsl:attribute>
+   <xsl:choose>
+    <xsl:when test="contains(cell[@name='Denominazione'],'Museo') or contains(cell[@name='Denominazione'],'Museum')">
+     <xsl:element name="CFT">
+     <xsl:attribute name="hint">Tipologia</xsl:attribute>museo</xsl:element>
+    </xsl:when>
+    <xsl:when test="contains(cell[@name='Denominazione'],'Archivio')">
+     <xsl:element name="CFT">
+     <xsl:attribute name="hint">Tipologia</xsl:attribute>archivio</xsl:element>
+    </xsl:when>
+    <xsl:otherwise>
+     <xsl:element name="CFT">
+     <xsl:attribute name="hint">Tipologia</xsl:attribute>non identificato</xsl:element>
+    </xsl:otherwise>
+   </xsl:choose>
+   <xsl:element name="CFN">
+   <xsl:attribute name="hint">Denominazione attuale</xsl:attribute><xsl:value-of select="cell[@name='Denominazione']"/></xsl:element>
+  </xsl:element>
+  
+  <xsl:element name="LC">
+  <xsl:attribute name="hint">LOCALIZZAZIONE GEOGRAFICO - AMMINISTRATIVA</xsl:attribute>
+   <xsl:element name="PVC">
+   <xsl:attribute name="hint">LOCALIZZAZIONE</xsl:attribute>
+    <xsl:element name="PVCS">
+    <xsl:attribute name="hint">Stato</xsl:attribute>Italia</xsl:element>
+    <xsl:element name="PVCR">
+    <xsl:attribute name="hint">Regione</xsl:attribute>Regione Trentino-Alto Adige</xsl:element>
+    <xsl:element name="PVCP">
+    <xsl:attribute name="hint">Provincia</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+    
+    <xsl:element name="PVCC">
+    <xsl:attribute name="hint">Comune</xsl:attribute><xsl:value-of select="cell[@name='COMUNE_IT']"/></xsl:element>
+    <xsl:element name="PVCI">
+    <xsl:attribute name="hint">Indirizzo</xsl:attribute><xsl:value-of select="cell[@name='INDIRIZZO_IT']"/></xsl:element>
+    
+   </xsl:element>
+  </xsl:element>
+  
+  <xsl:element name="CM">
+  <xsl:attribute name="hint">CERTIFICAZIONE E GESTIONE DEI DATI</xsl:attribute>
+   <xsl:element name="CMP">
+   <xsl:attribute name="hint">REDAZIONE E VERIFICA SCIENTIFICA</xsl:attribute>
+    <xsl:element name="CMPD">
+    <xsl:attribute name="hint">Anno di redazione</xsl:attribute>2015</xsl:element>
+   </xsl:element>
+  </xsl:element>  
+    
+ </xsl:element>
  
  <xsl:element name="harvesting">
   <xsl:element name="label_de"><xsl:value-of select="cell[@name='DENOMINAZIONE_DE']"/></xsl:element>
+  <xsl:element name="city_de"><xsl:value-of select="cell[@name='COMUNE_DE']"/></xsl:element>
+  <xsl:element name="address_de"><xsl:value-of select="cell[@name='INDIRIZZO_DE']"/></xsl:element>
  </xsl:element>
  
 </schede>

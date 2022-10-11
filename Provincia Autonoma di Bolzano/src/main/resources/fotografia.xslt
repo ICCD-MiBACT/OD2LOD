@@ -17,7 +17,7 @@
   <xsl:apply-templates/>
  </xsl:template>
  
- <xsl:template match="row">
+ <xsl:template match="row[cell[@name='MUS']!='TAP']">
 <record>
  <header>
   <xsl:element name="identifier">
@@ -56,9 +56,9 @@
        <xsl:attribute name="hint">Codice regione</xsl:attribute>04</xsl:element>
      </xsl:element>
      <xsl:element name="ESC">
-      <xsl:attribute name="hint">Ente schedatore</xsl:attribute>P021</xsl:element>
-      <xsl:element name="ECP">
-       <xsl:attribute name="hint">Ente competente</xsl:attribute>P021</xsl:element>
+      <xsl:attribute name="hint">Ente schedatore</xsl:attribute><xsl:value-of select="cell[@name='MUS']"/></xsl:element>
+      <!--<xsl:element name="ECP">
+       <xsl:attribute name="hint">Ente competente</xsl:attribute>P021</xsl:element>-->
     </xsl:element>
    
     <xsl:element name="OG">
@@ -88,6 +88,25 @@
      </xsl:element>
     </xsl:element>
     
+    <xsl:element name="LR">
+     <xsl:attribute name="hint">LUOGO E DATA DELLA RIPRESA</xsl:attribute>
+     <xsl:element name="LRC">
+      <xsl:attribute name="hint">LOCALIZZAZIONE</xsl:attribute>
+      <xsl:element name="LRCS">
+       <xsl:attribute name="hint">Stato</xsl:attribute>Italia</xsl:element>
+      <xsl:element name="LRCR">
+       <xsl:attribute name="hint">Regione</xsl:attribute>Trentino-Alto Adige</xsl:element>
+      <xsl:element name="LRCP">
+       <xsl:attribute name="hint">Provincia</xsl:attribute>BZ</xsl:element>
+      
+      <xsl:for-each select="cell[@name='CP_it_syn'][normalize-space()=$comuniBZ//comune][1]">
+       <xsl:element name="LRCC">
+        <xsl:attribute name="hint">Comune</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
+      </xsl:for-each>
+       
+     </xsl:element>
+    </xsl:element>
+
     <xsl:element name="LC">
      <xsl:attribute name="hint">LOCALIZZAZIONE GEOGRAFICO-AMMINISTRATIVA</xsl:attribute>
      <xsl:element name="PVC">
@@ -98,13 +117,18 @@
        <xsl:attribute name="hint">Regione</xsl:attribute>Trentino-Alto Adige</xsl:element>
       <xsl:element name="PVCP">
        <xsl:attribute name="hint">Provincia</xsl:attribute>BZ</xsl:element>
-      
+      <!--
       <xsl:for-each select="cell[@name='CP_it_syn'][normalize-space()=$comuniBZ//comune][1]">
        <xsl:element name="PVCC">
         <xsl:attribute name="hint">Comune</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
       </xsl:for-each>
-       
+       -->
      </xsl:element>
+     
+     <xsl:element name="LDC">
+      <xsl:attribute name="hint">COLLOCAZIONE SPECIFICA</xsl:attribute>
+      
+      </xsl:element>
     </xsl:element>
     
     <xsl:element name="UB">
@@ -148,6 +172,14 @@
        <xsl:if test="cell[@name='B3_it']">. <xsl:value-of select="cell[@name='B3_it']"/></xsl:if>
        </xsl:element>                                                                                                             
      </xsl:element>
+     
+     <xsl:if test="cell[@name='TI_it']">
+      <xsl:element name="SGL">
+       <xsl:attribute name="hint">TITOLO</xsl:attribute>
+       <xsl:element name="SGLT">
+        <xsl:attribute name="hint">Titolo proprio</xsl:attribute><xsl:value-of select="normalize-space(cell[@name='TI_it'])"/></xsl:element>
+      </xsl:element>
+     </xsl:if>
     </xsl:element>
     
     <xsl:if test="string-length(cell[@name='DS']) or string-length(cell[@name='DE'])">
@@ -175,10 +207,10 @@
        <xsl:element name="MTCM">
         <xsl:attribute name="hint">Materia</xsl:attribute><xsl:value-of select="cell[@name='MA_it']"/></xsl:element>
       </xsl:if>
-   			<xsl:for-each select="cell[@name='TK_it']">
-	 	  		<xsl:element name="MTCT">
-		 		   <xsl:attribute name="hint">Tecnica</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
-			   </xsl:for-each>
+     	<xsl:for-each select="cell[@name='TK_it']">
+       <xsl:element name="MTCT">
+        <xsl:attribute name="hint">Tecnica</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
+      </xsl:for-each>
      </xsl:element>
      
      <xsl:apply-templates select="cell[@name='dim_it']"/>
@@ -199,24 +231,24 @@
    </xsl:when>
    
    <xsl:otherwise>
-	<xsl:element name="MODI">
-	
+    <xsl:element name="MODI">
+    
 		<xsl:element name="CD">
 		<xsl:attribute name="hint">IDENTIFICAZIONE</xsl:attribute>
 			<xsl:element name="TSK">
-			<xsl:attribute name="hint">Tipo modulo</xsl:attribute>MODI</xsl:element>
+			 <xsl:attribute name="hint">Tipo modulo</xsl:attribute>MODI</xsl:element>
 			<xsl:element name="CDR">
-			<xsl:attribute name="hint">Codice Regione</xsl:attribute>04</xsl:element>
+			 <xsl:attribute name="hint">Codice Regione</xsl:attribute>04</xsl:element>
 			<xsl:element name="ESC">
-			<xsl:attribute name="hint">Ente schedatore</xsl:attribute>P021</xsl:element>
-			<xsl:element name="ECP">
-			<xsl:attribute name="hint">Ente competente</xsl:attribute>P021</xsl:element>
+			 <xsl:attribute name="hint">Ente schedatore</xsl:attribute>P021</xsl:element>
+			<!--<xsl:element name="ECP">
+			 <xsl:attribute name="hint">Ente competente</xsl:attribute>P021</xsl:element>-->
 			<xsl:element name="ACC">
-			<xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
+			 <xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
 				<xsl:element name="ACCE">
-				<xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+				 <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
 				<xsl:element name="ACCC">
-				<xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="cell[@name='priref']"/></xsl:element>
+				 <xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="cell[@name='priref']"/></xsl:element>
 			</xsl:element>
 		</xsl:element>
 		
@@ -732,6 +764,15 @@ contains($OB_it,'Gästebuch')">
 			</xsl:element>
 		</xsl:element>
 		
+		<xsl:if test="cell[@name='BE_it']">
+			<xsl:element name="DA">
+			<xsl:attribute name="hint">DATI ANALITICI</xsl:attribute>
+				<xsl:element name="DES">
+				<xsl:attribute name="hint">Descrizione</xsl:attribute><xsl:value-of select="cell[@name='BE_it']"/><xsl:if test="cell[@name='B3_it']">. <xsl:value-of select="cell[@name='B3_it']"/></xsl:if>
+				</xsl:element>
+			</xsl:element>
+		</xsl:if>
+		
 		<xsl:element name="MT">
 		<xsl:attribute name="hint">DATI TECNICI</xsl:attribute>
 			<xsl:element name="MTC">
@@ -786,10 +827,10 @@ contains($OB_it,'Gästebuch')">
 		</xsl:element>
 		</xsl:if>
 	
-	</xsl:element>
+    </xsl:element>
    
    </xsl:otherwise>
-   </xsl:choose>
+</xsl:choose>
    
    <xsl:element name="harvesting">
     <xsl:for-each select="cell[@name='B1p_url' and string-length(normalize-space())]">

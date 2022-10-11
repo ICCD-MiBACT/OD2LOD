@@ -120,10 +120,14 @@ public class CsvRow2domReader {
     row.appendChild(cell);
   }
 
-  private int lines = 1;
+  private int lines = 1, skip = 0;
 
   int line() {
     return lines;
+  }
+
+  int skip() {
+    return skip;
   }
 
   private Set<String> multi = new HashSet<String>();
@@ -159,7 +163,9 @@ public class CsvRow2domReader {
       if (fieldValues.length != fieldNames.length)
         System.err.println("field count mismatch at line " + lines + " " + fieldValues.length + "!=" + fieldNames.length + " (line starts with '"
             + fieldValues[0] + "')");
-      if (filter == null || filter.contains(cellValue(fieldValues, cellFilter).trim().toLowerCase())) return row2document(fieldValues);
+      //if (filter==null||filter.contains(cellValue(fieldValues,cellFilter).trim().toLowerCase()))
+      if (filter == null || !filter.contains(cellValue(fieldValues, cellFilter).trim().toLowerCase())) return row2document(fieldValues);
+      skip++;
     }
   }
 
