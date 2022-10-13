@@ -1,4 +1,6 @@
 {
+    "ESC":  ["record", "metadata", "schede", "RA", "CD", "ESC"],
+    "ECP":  ["record", "metadata", "schede", "RA", "CD", "ECP"],
     "NCTR": ["record", "metadata", "schede", "RA", "CD", "NCT", "NCTR"],
     "NCTN": ["record", "metadata", "schede", "RA", "CD", "NCT", "NCTN"],
     "OGTD": ["record", "metadata", "schede", "RA", "OG", "OGT", "OGTD"],

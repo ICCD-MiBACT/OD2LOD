@@ -36,8 +36,8 @@ def CSV_to_dict(data, mapping_file):
             
     data['NCTR'] = '20'    
     data['PVCR'] = 'Sardegna'
-    #aggiungere ESC nei mapping e R20 in db
-    #data['ESC'] = 'R20'
+    data['ESC'] = 'R20'
+    data['ECP'] = 'R20'
 
     obj = dict()
     for key, value in data.items():
