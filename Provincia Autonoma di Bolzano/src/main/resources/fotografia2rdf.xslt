@@ -29,7 +29,22 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    >  
    <xsl:element name="rdf:Description">
-    <xsl:attribute name="rdf:about">PhotographicHeritage/<xsl:value-of select="translate(*/AC/ACC[1]/ACCC,'/ ','_')"/></xsl:attribute>
+    <xsl:attribute name="rdf:about">
+     <xsl:choose>
+      <xsl:when test="name(*[1])='F'">PhotographicHeritage/<xsl:value-of select="translate(*/AC/ACC[1]/ACCC,'/ ','_')"/></xsl:when>
+      <xsl:otherwise>
+       <xsl:variable name="amb" select="MODI/OG/AMB"/>
+       <xsl:choose>
+        <xsl:when test="$amb='archeologico'">ArchaeologicalProperty</xsl:when>
+        <xsl:when test="$amb='architettonico e paesaggistico'">ArchitecturalOrLandscapeHeritage</xsl:when>
+        <xsl:when test="$amb='etnoantropologico'">DemoEthnoAnthropologicalHeritage</xsl:when>
+        <xsl:when test="$amb='storico artistico'">HistoricOrArtisticProperty</xsl:when>
+        <xsl:when test="$amb='non individuabile'">CulturalProperty</xsl:when>
+       </xsl:choose>
+       <xsl:value-of select="concat('/', translate(*/CD/ACC[1]/ACCC,'/ ','_'))" />
+      </xsl:otherwise>
+     </xsl:choose>
+    </xsl:attribute>
     <xsl:for-each select="harvesting/media">
      <xsl:element name="foaf:depiction">
       <xsl:attribute name="rdf:resource"><xsl:value-of select="replace(.,' ','%20')"/></xsl:attribute>
