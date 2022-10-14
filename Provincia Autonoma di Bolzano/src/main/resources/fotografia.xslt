@@ -138,6 +138,13 @@
       <xsl:element name="UBFP">
        <xsl:attribute name="hint">Fondo</xsl:attribute><xsl:value-of select="cell[@name='CL_it']"/></xsl:element>
      </xsl:element>
+     
+     <xsl:element name="INV">
+      <xsl:attribute name="hint">ALTRI INVENTARI</xsl:attribute>
+      <xsl:element name="INVN">
+       <xsl:attribute name="hint">Codice inventario</xsl:attribute><xsl:value-of select="cell[@name='IN']"/></xsl:element>
+     </xsl:element>  
+     
     </xsl:element>
     
     <xsl:element name="AU">
