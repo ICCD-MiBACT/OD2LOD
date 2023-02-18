@@ -147,24 +147,27 @@
      
     </xsl:element>
     
-    <xsl:element name="AU">
-     <xsl:attribute name="hint">DEFINIZIONE CULTURALE</xsl:attribute>
-     <xsl:element name="AUT">
-      <xsl:attribute name="hint">AUTORE/RESPONSABILITA'</xsl:attribute>
-      <xsl:element name="AUTN">
-       <xsl:attribute name="hint">Nome di persona o ente</xsl:attribute><xsl:value-of select="cell[@name='VV_it']"/></xsl:element>
-      <xsl:choose>
-       <xsl:when test="contains(cell[@name='VV_it'],',')">
-        <xsl:element name="AUTP">
-         <xsl:attribute name="hint">Tipo intestazione</xsl:attribute>P</xsl:element>
-       </xsl:when>
-       <xsl:otherwise>
-        <xsl:element name="AUTP">
-         <xsl:attribute name="hint">Tipo intestazione</xsl:attribute>E</xsl:element>
-       </xsl:otherwise>
-      </xsl:choose>
+    <xsl:variable name="vv" select="normalize-space(cell[@name='VV_it'])"/>
+    <xsl:if test="string-length($vv)>0">
+     <xsl:element name="AU">
+      <xsl:attribute name="hint">DEFINIZIONE CULTURALE</xsl:attribute>
+      <xsl:element name="AUT">
+       <xsl:attribute name="hint">AUTORE/RESPONSABILITA'</xsl:attribute>
+       <xsl:element name="AUTN">
+        <xsl:attribute name="hint">Nome di persona o ente</xsl:attribute><xsl:value-of select="$vv"/></xsl:element>
+       <xsl:choose>
+        <xsl:when test="contains($vv,',')">
+         <xsl:element name="AUTP">
+          <xsl:attribute name="hint">Tipo intestazione</xsl:attribute>P</xsl:element>
+        </xsl:when>
+        <xsl:otherwise>
+         <xsl:element name="AUTP">
+          <xsl:attribute name="hint">Tipo intestazione</xsl:attribute>E</xsl:element>
+        </xsl:otherwise>
+       </xsl:choose>
+      </xsl:element>
      </xsl:element>
-    </xsl:element>
+    </xsl:if>
     
     <xsl:element name="SG">
      <xsl:attribute name="hint">SOGGETTO</xsl:attribute>
