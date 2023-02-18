@@ -417,11 +417,13 @@ public class RdfAltoAdige {
       PreprocessedData pd = PreprocessedData.getInstance(false);
       Map<String, String> cfMap = pd.getContenitoreFisicoSystemRecordCode2CCF();
       Map<String, String> cgMap = pd.getContenitoreGiuridicoSystemRecordCode2CCG();
+      Map<String, String> ceMap = pd.getCodiceEnteToNomeEnte();
       for (int pass = dataIndex > 0 ? dataIndex : 1;; pass++) {
         if (dataIndex > 0 && pass > dataIndex) break;
         String passDate = null;
         String itemPath = properties.getProperty("" + pass + ".itemId"); //System.out.println("@id " + id);
         if (itemPath == null) break;
+        String itemDenom = properties.getProperty("" + pass + ".itemDenom");
         String datePath = properties.getProperty("" + pass + ".date");
         String dataset = properties.getProperty("" + pass + ".dataset", "#" + pass);
         System.out.println("INFO - dataset " + dataset);
@@ -535,6 +537,7 @@ public class RdfAltoAdige {
               // la trasformazione usa una mappa per risalire dal bene al contenitore
               if (cgmap != null && Boolean.valueOf(cgmap[xj])) cgMap.put(rowitemId, itemId);
               if (cfmap != null && Boolean.valueOf(cfmap[xj])) cfMap.put(rowitemId, itemId);
+              if (itemDenom != null) ceMap.put(rowitemId, (String) xPath.evaluate(itemDenom, row, XPathConstants.STRING));
             }
           } catch (Exception e) {
             writeException(outFolder, rowitemId, row, r2d.line(), e);
