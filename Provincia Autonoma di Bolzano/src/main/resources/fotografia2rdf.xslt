@@ -50,6 +50,15 @@
       <xsl:attribute name="rdf:resource"><xsl:value-of select="replace(.,' ','%20')"/></xsl:attribute>
      </xsl:element>
     </xsl:for-each>
+     
+     <xsl:if test="*/SG/SGT/SGTD">
+		  <xsl:element name="rdfs:comment"><xsl:value-of select="*/SG/SGT/SGTD"/></xsl:element>
+	   </xsl:if>
+	   
+	   <xsl:for-each select="harvesting/rights">
+      <xsl:element name="dc:rights"><xsl:value-of select="."/></xsl:element>
+     </xsl:for-each>
+     
    </xsl:element>
   </rdf:RDF>
  </xsl:template>
