@@ -863,6 +863,18 @@ contains($OB_it,'Gästebuch')">
      <xsl:element name="idContenitoreGiuridico"><xsl:value-of select="$mus"/></xsl:element>
      <xsl:element name="idContenitoreFisico"><xsl:value-of select="$mus"/></xsl:element>
     </xsl:if>
+	   
+	<xsl:choose>
+		<xsl:when test="cell[@name='RI']">
+			<xsl:element name="rights"> 
+				<xsl:value-of select="cell[@name='RI']"/>
+			</xsl:element>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:element name="rights">Copyright <xsl:value-of select="normalize-space(cell[@name='MUS'])"/></xsl:element>
+		</xsl:otherwise>
+	</xsl:choose> 
+   
    </xsl:element>
    
   </schede>
