@@ -169,18 +169,26 @@
      </xsl:element>
     </xsl:if>
     
+    <xsl:if test="cell[@name='ip_it'] or cell[@name='BE_it'] or cell[@name='B3_it'] or cell[@name='TI_it']">
     <xsl:element name="SG">
      <xsl:attribute name="hint">SOGGETTO</xsl:attribute>
+     
      <xsl:element name="SGT">
       <xsl:attribute name="hint">SOGGETTO</xsl:attribute>
       <xsl:for-each select="cell[@name='ip_it']">
        <xsl:element name="SGTI">
         <xsl:attribute name="hint">Identificazione</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element> 
       </xsl:for-each>
+      <xsl:if test="cell[@name='BE_it'] or cell[@name='B3_it']">
       <xsl:element name="SGTD">
-       <xsl:attribute name="hint">Indicazioni sul soggetto</xsl:attribute><xsl:value-of select="cell[@name='BE_it']"/>
-       <xsl:if test="cell[@name='B3_it']">. <xsl:value-of select="cell[@name='B3_it']"/></xsl:if>
-       </xsl:element>                                                                                                             
+       <xsl:attribute name="hint">Indicazioni sul soggetto</xsl:attribute>
+       <xsl:if test="cell[@name='BE_it']">
+        <xsl:value-of select="cell[@name='BE_it']"/>
+        <xsl:if test="cell[@name='B3_it']">. </xsl:if>
+       </xsl:if>
+       <xsl:if test="cell[@name='B3_it']"><xsl:value-of select="cell[@name='B3_it']"/></xsl:if>
+      </xsl:element>
+      </xsl:if>
      </xsl:element>
      
      <xsl:if test="cell[@name='TI_it']">
@@ -191,7 +199,7 @@
       </xsl:element>
      </xsl:if>
     </xsl:element>
-    
+    </xsl:if>
     <xsl:if test="string-length(cell[@name='DS']) or string-length(cell[@name='DE'])">
      <xsl:element name="DT">
       <xsl:attribute name="hint">CRONOLOGIA</xsl:attribute>
@@ -859,22 +867,26 @@ contains($OB_it,'Gästebuch')">
      </xsl:element>
     </xsl:if>
     <xsl:variable name="mus" select="normalize-space(cell[@name='MUS'])"/>
-    <xsl:if test="string-length($mus)">
+    <xsl:if test="string-length($mus)>0">
      <xsl:element name="idContenitoreGiuridico"><xsl:value-of select="$mus"/></xsl:element>
      <xsl:element name="idContenitoreFisico"><xsl:value-of select="$mus"/></xsl:element>
     </xsl:if>
-	   
-	<xsl:choose>
-		<xsl:when test="cell[@name='RI']">
-			<xsl:element name="rights"> 
-				<xsl:value-of select="cell[@name='RI']"/>
-			</xsl:element>
-		</xsl:when>
-		<xsl:otherwise>
-			<xsl:element name="rights">Copyright <xsl:value-of select="normalize-space(cell[@name='MUS'])"/></xsl:element>
-		</xsl:otherwise>
-	</xsl:choose> 
    
+    <xsl:variable name="ri" select="normalize-space(cell[@name='RI_it'])"/>
+    <xsl:if test="string-length($mus)>0 or string-length($ri)>0">
+     <xsl:element name="rights"> 
+      <xsl:choose>
+       <xsl:when test="string-length($ri)>0">
+        <xsl:attribute name="decode">false</xsl:attribute>
+        <xsl:value-of select="$ri"/>
+       </xsl:when>
+       <xsl:otherwise>
+        <xsl:attribute name="decode">true</xsl:attribute>
+        <xsl:value-of select="$mus"/>
+       </xsl:otherwise>
+      </xsl:choose> 
+     </xsl:element>
+    </xsl:if>
    </xsl:element>
    
   </schede>

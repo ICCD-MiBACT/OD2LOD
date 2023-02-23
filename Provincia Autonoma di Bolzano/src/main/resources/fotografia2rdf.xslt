@@ -10,6 +10,7 @@
   xmlns:dc="http://purl.org/dc/elements/1.1/"
   xmlns:foaf="http://xmlns.com/foaf/0.1/"
   xmlns:arco="https://w3id.org/arco/ontology/arco/"
+  xmlns:arco-fn="https://w3id.org/arco/saxon-extension"
   exclude-result-prefixes="fn">
   
  <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
@@ -17,7 +18,7 @@
  <xsl:template match="*">
   <xsl:apply-templates select="*"/>
  </xsl:template>
-
+ 
  <xsl:template match="schede">
   <rdf:RDF 
    xml:base="https://w3id.org/arco/resource/AltoAdige/"
@@ -50,13 +51,30 @@
       <xsl:attribute name="rdf:resource"><xsl:value-of select="replace(.,' ','%20')"/></xsl:attribute>
      </xsl:element>
     </xsl:for-each>
-     
+    
      <xsl:if test="*/SG/SGT/SGTD">
-		  <xsl:element name="rdfs:comment"><xsl:value-of select="*/SG/SGT/SGTD"/></xsl:element>
-	   </xsl:if>
-	   
-	   <xsl:for-each select="harvesting/rights">
-      <xsl:element name="dc:rights"><xsl:value-of select="."/></xsl:element>
+      <xsl:element name="rdfs:comment"><xsl:value-of select="*/SG/SGT/SGTD"/></xsl:element>
+     </xsl:if>
+     
+     <xsl:for-each select="harvesting/rights">
+      <xsl:element name="dc:rights">
+       <xsl:variable name="rights">
+        <xsl:choose>
+         <xsl:when test="@decode='true'">
+          <xsl:variable name="nome">
+           <xsl:value-of select="arco-fn:get-nome-ente-from-codice(.)"/>
+          </xsl:variable>
+          <xsl:text>Copyright </xsl:text>
+          <xsl:choose>
+           <xsl:when test="string-length($nome)>0"><xsl:value-of select="$nome"/></xsl:when>
+           <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+          </xsl:choose>
+         </xsl:when>
+          <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+        </xsl:choose>
+       </xsl:variable>
+       <xsl:value-of select="$rights"/>
+      </xsl:element>
      </xsl:for-each>
      
    </xsl:element>

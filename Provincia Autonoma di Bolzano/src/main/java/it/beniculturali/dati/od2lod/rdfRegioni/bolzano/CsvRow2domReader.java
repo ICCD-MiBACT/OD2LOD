@@ -9,9 +9,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -68,7 +70,7 @@ public class CsvRow2domReader {
       }
       // nella cella le sequenze "\," vanno sostituite con "," mentre virgole non precedute da "\" vanno usate come splitter
       this.splitter = "(?<!\\\\),"; // TODO andrebbe letto da properties
-      System.out.println("splitter is '" + splitter + "'");
+      System.out.println("splitter is '" + this.splitter + "'");
     }
     //reader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream(), StandardCharsets.UTF_8))).withCSVParser(new RFC4180ParserBuilder().build()).build();
     URL targetURL = new URL(url);
@@ -105,6 +107,21 @@ public class CsvRow2domReader {
   static String stripReplacer = "";
   static boolean leaveEmpty = false, trimFields = true;
 
+  String massage(String name, String value) {
+    if (name.compareTo("RI_it") == 0) { // più istanze probabilmente in relazione al numero di immagini che
+      // non vengono trattate come individui nella trasformazione, elimina duplicati e dati non significativi
+      String[] a = value.split(splitter);
+      Set<String> r = new HashSet<String>();
+      for (String v : a) {
+        String t = v.replaceAll("[ -]+", "");
+        if (t.length() > 0) r.add(v.replaceAll("\\\\,", ","));
+      }
+      return String.join("; ", r);
+    }
+    // vedi il commento precedente per splitter
+    return value.replaceAll("\\\\,", ","); // TODO andrebbe letto da properties
+  }
+
   private void addCell(Element row, String name, String value) {
     addCell(row, name, value, leaveEmpty);
   }
@@ -112,11 +129,11 @@ public class CsvRow2domReader {
   private void addCell(Element row, String name, String value, boolean leaveEmpty) {
     if (stripReplacer != null) value = stripChar(value, stripReplacer);
     if (trimFields) value = value.trim();
+    value = massage(name, value);
     if (!leaveEmpty && value.length() == 0) return;
     Element cell = row.getOwnerDocument().createElement("cell");
     cell.setAttribute("name", name);
-    // vedi il commento precedente per splitter
-    cell.appendChild(row.getOwnerDocument().createTextNode(value.replaceAll("\\\\,", ","))); // TODO andrebbe letto da properties
+    cell.appendChild(row.getOwnerDocument().createTextNode(value));
     row.appendChild(cell);
   }
 
