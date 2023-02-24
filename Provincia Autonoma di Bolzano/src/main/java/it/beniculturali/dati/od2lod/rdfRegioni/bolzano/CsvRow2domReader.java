@@ -107,34 +107,54 @@ public class CsvRow2domReader {
   static String stripReplacer = "";
   static boolean leaveEmpty = false, trimFields = true;
 
-  String massage(String name, String value) {
+  //String massage(String name, String value, String[]values) {
+  String massage(String name, String value, Element row) {
     if (name.compareTo("RI_it") == 0) { // più istanze probabilmente in relazione al numero di immagini che
       // non vengono trattate come individui nella trasformazione, elimina duplicati e dati non significativi
       String[] a = value.split(splitter);
       Set<String> r = new HashSet<String>();
+      int count = 0;
       for (String v : a) {
         String t = v.replaceAll("[ -]+", "");
-        if (t.length() > 0) r.add(v.replaceAll("\\\\,", ","));
+        if (t.length() > 0) {
+          count++;
+          r.add(v.replaceAll("\\\\,", ","));
+        }
       }
-      return String.join("; ", r);
+      String joiner = "; ";
+      String result = String.join(joiner, r);
+      //if (values!=null && result.length()>0 && count<a.length) { // aggiunge MUS se istanze prive di valore esplicito e non
+      // String mus = cellValue(values, "MUS"); if (mus!=null) { mus = mus.trim(); if (mus.length()>0) result = mus + "; " + result; }
+      //}
+      if (result.length() > 0 && count < a.length) cell2elem(row, "XRI", joiner);
+      return result;
     }
     // vedi il commento precedente per splitter
     return value.replaceAll("\\\\,", ","); // TODO andrebbe letto da properties
+  }
+
+  private void cell2elem(Element row, String name, String value) {
+    Element cell = row.getOwnerDocument().createElement("cell");
+    cell.setAttribute("name", name);
+    cell.appendChild(row.getOwnerDocument().createTextNode(value));
+    row.appendChild(cell);
   }
 
   private void addCell(Element row, String name, String value) {
     addCell(row, name, value, leaveEmpty);
   }
 
+  //private void addCell(Element row, String name, String value, String[]values) { addCell(row, name, value, leaveEmpty, values); }
   private void addCell(Element row, String name, String value, boolean leaveEmpty) {
+    addCell(row, name, value, leaveEmpty, null);
+  }
+
+  private void addCell(Element row, String name, String value, boolean leaveEmpty, String[] values) {
     if (stripReplacer != null) value = stripChar(value, stripReplacer);
     if (trimFields) value = value.trim();
-    value = massage(name, value);
+    value = massage(name, value, row);//massage(name, value, values);
     if (!leaveEmpty && value.length() == 0) return;
-    Element cell = row.getOwnerDocument().createElement("cell");
-    cell.setAttribute("name", name);
-    cell.appendChild(row.getOwnerDocument().createTextNode(value));
-    row.appendChild(cell);
+    cell2elem(row, name, value);
   }
 
   private int lines = 1, skip = 0;
@@ -163,7 +183,7 @@ public class CsvRow2domReader {
         for (String value : values)
           addCell(row, fieldNames[j], value, values.length > 1);
       } else
-        addCell(row, fieldNames[j], fieldValues[j]);
+        addCell(row, fieldNames[j], fieldValues[j]);//addCell(row, fieldNames[j], fieldValues[j], fieldValues);
     }
     return document;
   }

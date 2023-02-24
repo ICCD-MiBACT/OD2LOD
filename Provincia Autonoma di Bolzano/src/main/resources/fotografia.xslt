@@ -870,6 +870,10 @@ contains($OB_it,'Gästebuch')">
     <xsl:if test="string-length($mus)>0">
      <xsl:element name="idContenitoreGiuridico"><xsl:value-of select="$mus"/></xsl:element>
      <xsl:element name="idContenitoreFisico"><xsl:value-of select="$mus"/></xsl:element>
+     <xsl:element name="mus"><xsl:value-of select="$mus"/></xsl:element>
+     <xsl:if test="cell[@name='XRI']">
+      <xsl:element name="xri"><xsl:value-of select="cell[@name='XRI']"/></xsl:element>
+     </xsl:if>
     </xsl:if>
    
     <xsl:variable name="ri" select="normalize-space(cell[@name='RI_it'])"/>

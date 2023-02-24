@@ -19,6 +19,16 @@
   <xsl:apply-templates select="*"/>
  </xsl:template>
  
+ <xsl:template name="mus">
+  <xsl:variable name="nome">
+   <xsl:value-of select="arco-fn:get-nome-ente-from-codice(.)"/>
+  </xsl:variable>
+  <xsl:choose>
+   <xsl:when test="string-length($nome)>0"><xsl:value-of select="$nome"/></xsl:when>
+   <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+  </xsl:choose>
+ </xsl:template>
+ 
  <xsl:template match="schede">
   <rdf:RDF 
    xml:base="https://w3id.org/arco/resource/AltoAdige/"
@@ -61,16 +71,16 @@
        <xsl:variable name="rights">
         <xsl:choose>
          <xsl:when test="@decode='true'">
-          <xsl:variable name="nome">
-           <xsl:value-of select="arco-fn:get-nome-ente-from-codice(.)"/>
-          </xsl:variable>
           <xsl:text>Copyright </xsl:text>
-          <xsl:choose>
-           <xsl:when test="string-length($nome)>0"><xsl:value-of select="$nome"/></xsl:when>
-           <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
-          </xsl:choose>
+          <xsl:call-template name="mus"/>
          </xsl:when>
-          <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+          <xsl:otherwise>
+           <xsl:value-of select="."/>
+           <xsl:if test="../xri and ../mus">
+            <xsl:value-of select="../xri"/>
+            <xsl:for-each select="../mus"><xsl:call-template name="mus"/></xsl:for-each>
+           </xsl:if>
+          </xsl:otherwise>
         </xsl:choose>
        </xsl:variable>
        <xsl:value-of select="$rights"/>
