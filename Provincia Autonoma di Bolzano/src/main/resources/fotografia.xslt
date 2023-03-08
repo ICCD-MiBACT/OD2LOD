@@ -219,6 +219,8 @@
     
     <xsl:element name="MT">
      <xsl:attribute name="hint">DATI TECNICI</xsl:attribute>
+	    
+     <xsl:if test="cell[@name='MA_it'] or cell[@name='TK_it']"> 
      <xsl:element name="MTC">
       <xsl:attribute name="hint">MATERIA E TECNICA</xsl:attribute>
       <xsl:if test="cell[@name='MA_it']">
@@ -230,7 +232,8 @@
         <xsl:attribute name="hint">Tecnica</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
       </xsl:for-each>
      </xsl:element>
-     
+     </xsl:if>
+	    
      <xsl:apply-templates select="cell[@name='dim_it']"/>
      
     </xsl:element>
@@ -267,6 +270,13 @@
 				 <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
 				<xsl:element name="ACCC">
 				 <xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="cell[@name='priref']"/></xsl:element>
+			</xsl:element>
+			<xsl:element name="ACC">
+			<xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
+				<xsl:element name="ACCE">
+				<xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+				<xsl:element name="ACCC">
+				<xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="cell[@name='IN']"/></xsl:element>
 			</xsl:element>
 		</xsl:element>
 		
@@ -793,6 +803,8 @@ contains($OB_it,'Gästebuch')">
 		
 		<xsl:element name="MT">
 		<xsl:attribute name="hint">DATI TECNICI</xsl:attribute>
+			
+			<xsl:if test="cell[@name='MA_it'] or cell[@name='TK_it']">
 			<xsl:element name="MTC">
 			<xsl:attribute name="hint">MATERIA E TECNICA</xsl:attribute>
 				<xsl:if test="cell[@name='MA_it']">
@@ -804,7 +816,8 @@ contains($OB_it,'Gästebuch')">
 					<xsl:attribute name="hint">Tecnica</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
 				</xsl:for-each>
 			</xsl:element>
-     
+     			</xsl:if>
+			
 			<xsl:apply-templates select="cell[@name='dim_it']"/>
 		</xsl:element>
 		
