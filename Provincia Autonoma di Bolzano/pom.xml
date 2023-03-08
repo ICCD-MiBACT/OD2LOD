@@ -50,7 +50,7 @@
           <finalName>${project.artifactId}-${project.version}</finalName>
           <archive>
             <manifest>
-              <mainClass>it.beniculturali.dati.od2lod.rdfRegioni.RdfAltoAdige</mainClass>
+              <mainClass>it.beniculturali.dati.od2lod.rdfRegioni.bolzano.RdfAltoAdige</mainClass>
             </manifest>
           </archive>          
         </configuration>
