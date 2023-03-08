@@ -563,7 +563,7 @@ public class RdfAltoAdige {
   }
 
   static void uso() {
-    System.err.println("uso: java -jar rdfAltoAdige-0.0.1-full.jar <output folder> [-dump] [-datestamp] [-dataset:<index>]");
+    System.err.println("uso: java -jar rdfAltoAdige-0.0.1-jar-with-dependencies.jar <output folder> [-dump] [-datestamp] [-dataset:<index>]");
     System.exit(-1);
   }
 
