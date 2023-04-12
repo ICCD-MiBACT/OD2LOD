@@ -34,7 +34,7 @@
 <xsl:variable name="OB_it" select="normalize-space(cell[@name='OB_it'])"/>
 <xsl:variable name="lc_OB_it" select="lower-case($OB_it)"/> 
 <xsl:choose>
-	<xsl:when test="$dataset='fotografie storiche' or
+ <xsl:when test="$dataset='fotografie storiche' or
                  $lc_OB_it='fotografia' or 
                  $lc_OB_it='cartolina illustrata' or 
                  $lc_OB_it='diapositiva' or 
@@ -490,28 +490,27 @@ contains($OB_it,'Plan') or
 contains($OB_it,'Gästebuch')">storico artistico</xsl:when>
 				<xsl:when test="contains($OB_it,'Zither')">storico artistico</xsl:when>
 				<xsl:when test="contains($OB_it,'Sopraveste') or contains($OB_it,'Scarpe') or contains($OB_it,'cappello') or contains($OB_it,'borsa') or contains($OB_it,'Bänderhut')">etnoantropologico</xsl:when>
-    <xsl:otherwise>non individuabile</xsl:otherwise>
+				<xsl:otherwise>non individuabile</xsl:otherwise>
 				</xsl:choose>
 			</xsl:element>
 			<xsl:element name="OGD">
-			<xsl:attribute name="hint">Definizione</xsl:attribute><xsl:value-of select="$OB_it"/></xsl:element>
+				<xsl:attribute name="hint">Definizione</xsl:attribute><xsl:value-of select="$OB_it"/></xsl:element>
 			<xsl:element name="OGT">
-			<xsl:attribute name="hint">Tipologia</xsl:attribute><xsl:value-of select="cell[@name='OB_it_syn']"/></xsl:element>
-			
+				<xsl:attribute name="hint">Tipologia</xsl:attribute><xsl:value-of select="cell[@name='OB_it_syn']"/></xsl:element>
 		</xsl:element>
 		
 		<xsl:element name="LC">
 		<xsl:attribute name="hint">LOCALIZZAZIONE</xsl:attribute>
 			<xsl:element name="LCS">
-			<xsl:attribute name="hint">Stato</xsl:attribute>Italia</xsl:element>
+				<xsl:attribute name="hint">Stato</xsl:attribute>Italia</xsl:element>
 			<xsl:element name="LCR">
-			<xsl:attribute name="hint">Regione</xsl:attribute>Trentino-Alto Adige</xsl:element>
+				<xsl:attribute name="hint">Regione</xsl:attribute>Trentino-Alto Adige</xsl:element>
 			<xsl:element name="LCP">
-			<xsl:attribute name="hint">Provincia</xsl:attribute>BZ</xsl:element>
+				<xsl:attribute name="hint">Provincia</xsl:attribute>BZ</xsl:element>
       
 			<xsl:for-each select="cell[@name='CP_it_syn'][normalize-space()=$comuniBZ//comune][1]">
 				<xsl:element name="LCC">
-				<xsl:attribute name="hint">Comune</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
+					<xsl:attribute name="hint">Comune</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
 			</xsl:for-each>
 		</xsl:element>
 		
@@ -519,17 +518,17 @@ contains($OB_it,'Gästebuch')">storico artistico</xsl:when>
 		<!-- ci sarebbe DTR-Riferimento cronologico (obbligatorio) per mettere il secolo di riferimento (calcolare in base a primi 2 numeri della data?) -->
 		
 		<xsl:element name="DT">
-		<xsl:attribute name="hint">CRONOLOGIA</xsl:attribute>
+			<xsl:attribute name="hint">CRONOLOGIA</xsl:attribute>
 			<xsl:element name="DTS">
-			<xsl:attribute name="hint">CRONOLOGIA SPECIFICA</xsl:attribute>
-			<xsl:if test="string-length(cell[@name='DS'])">
-			<xsl:element name="DTSI">
-			<xsl:attribute name="hint">Da</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DS'], '.')"/>/<xsl:value-of select="substring(cell[@name='DS'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DS'], string-length(cell[@name='DS']) - 1)"/></xsl:element>
-			</xsl:if> 
-			<xsl:if test="string-length(cell[@name='DS'])">
-			<xsl:element name="DTSF">
-			<xsl:attribute name="hint">A</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DE'], '.')"/>/<xsl:value-of select="substring(cell[@name='DE'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DE'], string-length(cell[@name='DE']) - 1)"/></xsl:element>
-			</xsl:if> 
+				<xsl:attribute name="hint">CRONOLOGIA SPECIFICA</xsl:attribute>
+				<xsl:if test="string-length(cell[@name='DS'])">
+					<xsl:element name="DTSI">
+						<xsl:attribute name="hint">Da</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DS'], '.')"/>/<xsl:value-of select="substring(cell[@name='DS'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DS'], string-length(cell[@name='DS']) - 1)"/></xsl:element>
+				</xsl:if> 
+				<xsl:if test="string-length(cell[@name='DS'])">
+					<xsl:element name="DTSF">
+						<xsl:attribute name="hint">A</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DE'], '.')"/>/<xsl:value-of select="substring(cell[@name='DE'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DE'], string-length(cell[@name='DE']) - 1)"/></xsl:element>
+				</xsl:if> 
 			</xsl:element>
 		</xsl:element>
 		</xsl:if>
@@ -537,9 +536,9 @@ contains($OB_it,'Gästebuch')">storico artistico</xsl:when>
 		<xsl:element name="CM">
 		<xsl:attribute name="hint">CERTIFICAZIONE E GESTIONE DEI DATI</xsl:attribute>
 			<xsl:element name="CMA">
-			<xsl:attribute name="hint">Anno di redazione</xsl:attribute><xsl:value-of select="substring-before(cell[@name='modification'], '-')"/></xsl:element>
+				<xsl:attribute name="hint">Anno di redazione</xsl:attribute><xsl:value-of select="substring-before(cell[@name='modification'], '-')"/></xsl:element>
 			<xsl:element name="IMD">
-			<xsl:attribute name="hint">MIGRAZIONE DATI NELLE SCHEDE DI CATALOGO</xsl:attribute>
+				<xsl:attribute name="hint">MIGRAZIONE DATI NELLE SCHEDE DI CATALOGO</xsl:attribute>
 				<xsl:choose>
 				<xsl:when test="contains($OB_it,'giocattolo') or 
 contains($OB_it,'Mangiare e bere') or 
