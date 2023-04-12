@@ -17,7 +17,7 @@
  
  <xsl:template match="row">
  
- <xsl:variable name="identifier" select="concat('AA_CG_',cell[@name='Sigla'])"/>
+ <xsl:variable name="identifier" select="concat('AA_CG_',cell[@name='CODE'])"/>
  
 <record>
  <header>
@@ -46,18 +46,18 @@
     <xsl:element name="ACCC">
     <xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="$identifier"/></xsl:element>
    </xsl:element>
-   <xsl:element name="CCF"><xsl:value-of select="concat('AA_CF_',cell[@name='Sigla'])"/></xsl:element>
+   <xsl:element name="CCF"><xsl:value-of select="concat('AA_CF_',cell[@name='CODE'])"/></xsl:element>
    <xsl:element name="CCG"><xsl:value-of select="$identifier"/></xsl:element>
   </xsl:element>
   
   <xsl:element name="CG">
   <xsl:attribute name="hint">CONTENITORE GIURIDICO</xsl:attribute>
    <xsl:choose>
-    <xsl:when test="contains(cell[@name='Denominazione'],'Museo') or contains(cell[@name='Denominazione'],'Museum')">
+    <xsl:when test="contains(cell[@name='NAME_IT'],'Museo') or contains(cell[@name='NAME_IT'],'Museum')">
      <xsl:element name="CGT">
      <xsl:attribute name="hint">Tipologia</xsl:attribute>museo</xsl:element>
     </xsl:when>
-    <xsl:when test="contains(cell[@name='Denominazione'],'Archivio')">
+    <xsl:when test="contains(cell[@name='NAME_IT'],'Archivio')">
      <xsl:element name="CGT">
      <xsl:attribute name="hint">Tipologia</xsl:attribute>archivio</xsl:element>
     </xsl:when>
@@ -67,7 +67,7 @@
     </xsl:otherwise>
    </xsl:choose>
    <xsl:element name="CGN">
-   <xsl:attribute name="hint">Denominazione attuale</xsl:attribute><xsl:value-of select="cell[@name='Denominazione']"/></xsl:element>
+   <xsl:attribute name="hint">Denominazione attuale</xsl:attribute><xsl:value-of select="cell[@name='NAME_IT']"/></xsl:element>
   </xsl:element>
   
   <xsl:element name="CM">
@@ -82,9 +82,9 @@
  </xsl:element>
  
  <xsl:element name="harvesting">
-  <xsl:element name="label_de"><xsl:value-of select="cell[@name='DENOMINAZIONE_DE']"/></xsl:element>
-  <xsl:element name="city_de"><xsl:value-of select="cell[@name='COMUNE_DE']"/></xsl:element>
-  <xsl:element name="address_de"><xsl:value-of select="cell[@name='INDIRIZZO_DE']"/></xsl:element>
+  <xsl:element name="label_de"><xsl:value-of select="cell[@name='NAME_DE']"/></xsl:element>
+  <xsl:element name="city_de"><xsl:value-of select="cell[@name='CITY_DE']"/></xsl:element>
+  <xsl:element name="address_de"><xsl:value-of select="cell[@name='ADDRESS_DE']"/></xsl:element>
  </xsl:element>
  
 </schede>
