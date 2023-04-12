@@ -131,21 +131,27 @@
       </xsl:element>
     </xsl:element>
     
-    <xsl:element name="UB">
-     <xsl:attribute name="hint">DATI PATRIMONIALI/INVENTARI/STIME/COLLEZIONI</xsl:attribute>
-     <xsl:element name="UBF">
-      <xsl:attribute name="hint">UBICAZIONE BENE</xsl:attribute>
-      <xsl:element name="UBFP">
-       <xsl:attribute name="hint">Fondo</xsl:attribute><xsl:value-of select="cell[@name='CL_it']"/></xsl:element>
+    <xsl:variable name="cl" select="normalize-space(cell[@name='CL_it'])"/>
+    <xsl:variable name="in" select="normalize-space(cell[@name='IN'])"/>
+    <xsl:if test="string-length($cl)>0 or string-length($in)>0">
+     <xsl:element name="UB">
+      <xsl:attribute name="hint">DATI PATRIMONIALI/INVENTARI/STIME/COLLEZIONI</xsl:attribute>
+      <xsl:if test="string-length($cl)>0">
+       <xsl:element name="UBF">
+        <xsl:attribute name="hint">UBICAZIONE BENE</xsl:attribute>
+        <xsl:element name="UBFP">
+         <xsl:attribute name="hint">Fondo</xsl:attribute><xsl:value-of select="$cl"/></xsl:element>
+       </xsl:element>
+      </xsl:if>
+      <xsl:if test="string-length($in)>0">
+       <xsl:element name="INV">
+        <xsl:attribute name="hint">ALTRI INVENTARI</xsl:attribute>
+        <xsl:element name="INVN">
+         <xsl:attribute name="hint">Codice inventario</xsl:attribute><xsl:value-of select="$in"/></xsl:element>
+       </xsl:element>  
+      </xsl:if>
      </xsl:element>
-     
-     <xsl:element name="INV">
-      <xsl:attribute name="hint">ALTRI INVENTARI</xsl:attribute>
-      <xsl:element name="INVN">
-       <xsl:attribute name="hint">Codice inventario</xsl:attribute><xsl:value-of select="cell[@name='IN']"/></xsl:element>
-     </xsl:element>  
-     
-    </xsl:element>
+    </xsl:if>
     
     <xsl:variable name="vv" select="normalize-space(cell[@name='VV_it'])"/>
     <xsl:if test="string-length($vv)>0">
