@@ -70,7 +70,7 @@ public class CsvRow2domReader {
       }
       // nella cella le sequenze "\," vanno sostituite con "," mentre virgole non precedute da "\" vanno usate come splitter
       this.splitter = "(?<!\\\\),"; // TODO andrebbe letto da properties
-      System.out.println("splitter is '" + this.splitter + "'");
+      System.out.println("INFO - splitter is '" + this.splitter + "'");
     }
     //reader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream(), StandardCharsets.UTF_8))).withCSVParser(new RFC4180ParserBuilder().build()).build();
     URL targetURL = new URL(url);
@@ -118,7 +118,7 @@ public class CsvRow2domReader {
         String t = v.replaceAll("[ -]+", "");
         if (t.length() > 0) {
           count++;
-          r.add(v.replaceAll("\\\\,", ","));
+          r.add(v.replaceAll("\\\\,", ",").replaceAll("\\\\n", "\n"));
         }
       }
       String joiner = "; ";
@@ -130,7 +130,7 @@ public class CsvRow2domReader {
       return result;
     }
     // vedi il commento precedente per splitter
-    return value.replaceAll("\\\\,", ","); // TODO andrebbe letto da properties
+    return value.replaceAll("\\\\,", ",").replaceAll("\\\\n", "\n"); // TODO andrebbe letto da properties
   }
 
   private void cell2elem(Element row, String name, String value) {
