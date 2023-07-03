@@ -1,0 +1,13 @@
+
+ MUS.csv
+ 
+ generato confrontando il dataset "Servizio web dei Musei in Alto Adige" (http://daten.buergernetz.bz.it/services/musport/v1/csv nel
+ file musei.ods alla data), e le tabelle MUS_Descrizione_Contatto_v2 (fornito dalla provincia) e MUSPORT_MUS (contributo della provincia
+ nell'assegnare il dato MUS a "Servizio web dei Musei in Alto Adige"); alcune delle associazioni in MUSPORT_MUS sono state corrette o
+ aggiunte dal confronto dei dati attuali dei due dataset
+  
+ l'elaborazione di "Servizio web dei Musei in Alto Adige" (che deve precedere l'elaborazione di MUS_Descrizione_Contatto_v2 generando un
+ unico grafo) lascia traccia dell'associazione tra la quarta colonna (BEZEICHNUNG_I del dataset "Servizio web dei Musei in Alto Adige")
+ e la prima (codice MUS di MUS_Descrizione_Contatto_v2) in MUS.csv se presente (not null and not empty)
+ la successiva elaborazione di MUS_Descrizione_Contatto_v2 non processa i record di cui trova corrispondenza nella traccia
+
