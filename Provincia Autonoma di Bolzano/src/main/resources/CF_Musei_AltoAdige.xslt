@@ -10,6 +10,7 @@
 
  <xsl:param name="datestamp" select="'2022-05-14T00:00:00Z'"/>  
  <xsl:param name="xsltBase" select="''"/>  
+ <xsl:param name="itemid" select="''"/>
 
  <xsl:template match="/">
   <xsl:apply-templates/>
@@ -18,8 +19,9 @@
  <xsl:template match="row">
  
  <xsl:variable name="translateIdFrom"> àèéìòù."'“”’`#@?![]():;,+=/\|%{}^&amp;&lt;&gt;&#160;</xsl:variable>
- <xsl:variable name="translateIdTo"  >_aeeiou_______________________________</xsl:variable>
+ <xsl:variable name="translateIdTo"  >_aeeiou_______________________________</xsl:variable><!--
  <xsl:variable name="ID"><xsl:value-of select="translate(normalize-space(cell[@name='BEZEICHNUNG_I']),$translateIdFrom,$translateIdTo)"/></xsl:variable>
+ --><xsl:variable name="ID" select="translate(normalize-space($itemid),$translateIdFrom,$translateIdTo)"/>
  <xsl:variable name="identifier" select="concat('AA_CF_',$ID)"/> 
  
 <record>
@@ -54,59 +56,57 @@
   </xsl:element>
   
   <xsl:element name="CF">
-  <xsl:attribute name="hint">CONTENITORE FISICO</xsl:attribute>
-     <xsl:element name="CFT">
-     <xsl:attribute name="hint">Tipologia</xsl:attribute>museo</xsl:element>
-     <xsl:element name="CFN">
-		<xsl:attribute name="hint">Denominazione attuale</xsl:attribute><xsl:value-of select="cell[@name='BEZEICHNUNG_I']"/></xsl:element>
-		<xsl:element name="CFD">
-		<xsl:attribute name="hint">Descrizione</xsl:attribute><xsl:value-of select="cell[@name='BESCHREIBUNG_I']"/></xsl:element>
-		<xsl:element name="CFW">
-		<xsl:attribute name="hint">Sito web</xsl:attribute><xsl:value-of select="cell[@name='HOMEPAGE_I']"/></xsl:element>
+   <xsl:attribute name="hint">CONTENITORE FISICO</xsl:attribute>
+   <xsl:element name="CFT">
+    <xsl:attribute name="hint">Tipologia</xsl:attribute>museo</xsl:element>
+   <xsl:element name="CFN">
+	  	<xsl:attribute name="hint">Denominazione attuale</xsl:attribute><xsl:value-of select="cell[@name='BEZEICHNUNG_I']"/></xsl:element>
+		 <xsl:element name="CFD">
+ 		 <xsl:attribute name="hint">Descrizione</xsl:attribute><xsl:value-of select="cell[@name='BESCHREIBUNG_I']"/></xsl:element>
+		 <xsl:element name="CFW">
+		  <xsl:attribute name="hint">Sito web</xsl:attribute><xsl:value-of select="cell[@name='HOMEPAGE_I']"/></xsl:element>
   </xsl:element>
   
   <xsl:element name="LC">
-  <xsl:attribute name="hint">LOCALIZZAZIONE GEOGRAFICO - AMMINISTRATIVA</xsl:attribute>
+   <xsl:attribute name="hint">LOCALIZZAZIONE GEOGRAFICO - AMMINISTRATIVA</xsl:attribute>
    <xsl:element name="PVC">
-   <xsl:attribute name="hint">LOCALIZZAZIONE</xsl:attribute>
+    <xsl:attribute name="hint">LOCALIZZAZIONE</xsl:attribute>
     <xsl:element name="PVCS">
-    <xsl:attribute name="hint">Stato</xsl:attribute>Italia</xsl:element>
+     <xsl:attribute name="hint">Stato</xsl:attribute>Italia</xsl:element>
     <xsl:element name="PVCR">
-    <xsl:attribute name="hint">Regione</xsl:attribute>Regione Trentino-Alto Adige</xsl:element>
+     <xsl:attribute name="hint">Regione</xsl:attribute>Regione Trentino-Alto Adige</xsl:element>
     <xsl:element name="PVCP">
-    <xsl:attribute name="hint">Provincia</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+     <xsl:attribute name="hint">Provincia</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
     
     <xsl:element name="PVCC">
-    <xsl:attribute name="hint">Comune</xsl:attribute><xsl:value-of select="cell[@name='ORTSCHAFT_I']"/></xsl:element>
+     <xsl:attribute name="hint">Comune</xsl:attribute><xsl:value-of select="cell[@name='ORTSCHAFT_I']"/></xsl:element>
     <xsl:element name="PVCI">
-    <xsl:attribute name="hint">Indirizzo</xsl:attribute><xsl:value-of select="cell[@name='ADRESSE_I']"/></xsl:element>
+     <xsl:attribute name="hint">Indirizzo</xsl:attribute><xsl:value-of select="cell[@name='ADRESSE_I']"/></xsl:element>
     
    </xsl:element>
   </xsl:element>
   
-   <xsl:element name="GE">	
-  <xsl:attribute name="hint">GEOREFERENZIAZIONE</xsl:attribute>
+  <xsl:element name="GE">	
+   <xsl:attribute name="hint">GEOREFERENZIAZIONE</xsl:attribute>
    <xsl:element name="GEL">
-   <xsl:attribute name="hint">Tipo di localizzazione</xsl:attribute>localizzazione fisica</xsl:element>
-    <xsl:element name="GET">
+    <xsl:attribute name="hint">Tipo di localizzazione</xsl:attribute>localizzazione fisica</xsl:element>
+   <xsl:element name="GET">
     <xsl:attribute name="hint">Tipo di georeferenziazione</xsl:attribute>georeferenziazione puntuale</xsl:element>
-	<xsl:element name="GEC">
+   <xsl:element name="GEC">
     <xsl:attribute name="hint">COORDINATE</xsl:attribute>
-		<xsl:element name="GECX">
-		<xsl:attribute name="hint">Coordinata x</xsl:attribute><xsl:value-of select="cell[@name='GEOKOORDINATE_X']"/></xsl:element>
-		<xsl:element name="GECY">
-		<xsl:attribute name="hint">Coordinata y</xsl:attribute><xsl:value-of select="cell[@name='GEOKOORDINATE_Y']"/></xsl:element>
-	</xsl:element>
-	
-	
+    <xsl:element name="GECX">
+  		 <xsl:attribute name="hint">Coordinata x</xsl:attribute><xsl:value-of select="cell[@name='GEOKOORDINATE_X']"/></xsl:element>
+    <xsl:element name="GECY">
+     <xsl:attribute name="hint">Coordinata y</xsl:attribute><xsl:value-of select="cell[@name='GEOKOORDINATE_Y']"/></xsl:element>
+   </xsl:element>
   </xsl:element>  
   
   <xsl:element name="CM">	
-  <xsl:attribute name="hint">CERTIFICAZIONE E GESTIONE DEI DATI</xsl:attribute>
+   <xsl:attribute name="hint">CERTIFICAZIONE E GESTIONE DEI DATI</xsl:attribute>
    <xsl:element name="CMP">
-   <xsl:attribute name="hint">REDAZIONE E VERIFICA SCIENTIFICA</xsl:attribute>
+    <xsl:attribute name="hint">REDAZIONE E VERIFICA SCIENTIFICA</xsl:attribute>
     <xsl:element name="CMPD">
-    <xsl:attribute name="hint">Anno di redazione</xsl:attribute>2016</xsl:element>
+     <xsl:attribute name="hint">Anno di redazione</xsl:attribute>2016</xsl:element>
    </xsl:element>
   </xsl:element>  
     

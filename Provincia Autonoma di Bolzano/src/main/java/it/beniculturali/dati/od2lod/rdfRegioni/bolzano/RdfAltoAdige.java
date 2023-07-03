@@ -455,7 +455,7 @@ public class RdfAltoAdige {
           System.out.println("INFO - skip @" + code);
           id = null;
         } else
-          id = code;
+          id = code;// {System.out.println("INFO - @" + code); id = code;}
       }
     } else
       System.err.println("unknown filter " + filter);
@@ -573,6 +573,7 @@ public class RdfAltoAdige {
               if (xtr != null) {
                 baos.reset();
                 xtr[xj].setParameter(new QName("datestamp"), new XdmAtomicValue(rowDate));
+                xtr[xj].setParameter(new QName("itemid"), new XdmAtomicValue(rowitemId));
                 if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row), "_" + pass);
                 xtr[xj].setSource(new DOMSource(row)); //System.out.println("@id " + itemId);      
                 xtr[xj].transform();

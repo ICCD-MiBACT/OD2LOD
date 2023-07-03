@@ -8,8 +8,9 @@
   exclude-result-prefixes="fn">
  <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
 
- <xsl:param name="datestamp" select="'2022-05-14T00:00:00Z'"/>  
- <xsl:param name="xsltBase" select="''"/>  
+ <xsl:param name="datestamp" select="'2022-05-14T00:00:00Z'"/>
+ <xsl:param name="xsltBase" select="''"/>
+ <xsl:param name="itemid" select="''"/>
 
  <xsl:template match="/">
   <xsl:apply-templates/>
@@ -18,8 +19,9 @@
  <xsl:template match="row">
  
  <xsl:variable name="translateIdFrom"> àèéìòù."'“”’`#@?![]():;,+=/\|%{}^&amp;&lt;&gt;&#160;</xsl:variable>
- <xsl:variable name="translateIdTo"  >_aeeiou_______________________________</xsl:variable>
+ <xsl:variable name="translateIdTo"  >_aeeiou_______________________________</xsl:variable><!--
  <xsl:variable name="ID"><xsl:value-of select="translate(normalize-space(cell[@name='BEZEICHNUNG_I']),$translateIdFrom,$translateIdTo)"/></xsl:variable>
+ --><xsl:variable name="ID" select="translate(normalize-space($itemid),$translateIdFrom,$translateIdTo)"/>
  <xsl:variable name="identifier" select="concat('AA_CG_',$ID)"/> 
  
 <record>

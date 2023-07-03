@@ -143,7 +143,7 @@
     <xsl:element name="smapit:OnlineContactPoint">
      <xsl:attribute name="rdf:about"><xsl:value-of select="$NS"/>OnlineContactPoint/<xsl:if test="email">-<xsl:value-of select="translate(normalize-space(email),$translateIdFrom,$translateIdTo)"/></xsl:if><xsl:if test="telefono2">-<xsl:value-of select="translate(normalize-space(telefono2),$translateIdFrom,$translateIdTo)"/></xsl:if><xsl:if test="telefono">-<xsl:value-of select="translate(normalize-space(telefono),$translateIdFrom,$translateIdTo)"/></xsl:if><xsl:if test="fax">-<xsl:value-of select="translate(normalize-space(fax),$translateIdFrom,$translateIdTo)"/></xsl:if></xsl:attribute>
      <xsl:element name="rdfs:label">
-      <xsl:attribute name="xml:lang">it</xsl:attribute>Contatti di: <xsl:value-of select="../../*/CG/CG/CGN"/>
+      <xsl:attribute name="xml:lang">it</xsl:attribute>Contatti di: <xsl:value-of select="/record/metadata/schede/CG/CG/CGN"/>
      </xsl:element>
      <xsl:if test="email">
       <xsl:element name="smapit:hasEmail">
