@@ -57,8 +57,9 @@
      </xsl:choose>
     </xsl:attribute>
     <xsl:for-each select="harvesting/media">
-     <xsl:element name="foaf:depiction">
+     <xsl:element name="foaf:depiction"><!-- @see fotografia.xslt
       <xsl:attribute name="rdf:resource"><xsl:value-of select="replace(.,' ','%20')"/></xsl:attribute>
+--><xsl:attribute name="rdf:resource"><xsl:value-of select="."/></xsl:attribute>
      </xsl:element>
     </xsl:for-each>
     
