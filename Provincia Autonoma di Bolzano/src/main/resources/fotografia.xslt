@@ -871,8 +871,10 @@ contains($OB_it,'Gästebuch')">
    <xsl:element name="harvesting">
     <xsl:for-each select="cell[@name='B1p_url' and string-length(normalize-space())]"><!--
      <xsl:element name="media"><xsl:value-of select="concat(.,'&amp;size=l')"/></xsl:element>
---><!-- add parameters to keep position () and set resolution -->
-     <xsl:element name="media"><xsl:value-of select="concat(replace(replace(.,' ','%20'),'/image.file=',concat('/image?~=',format-number(position(),'00'),'&amp;file=')),'&amp;size=l')"/></xsl:element>
+--><!-- url encode bad plus sign and add parameters to keep position and set resolution
+        nota bene: la sostituzione + => %2B è mirata sui dati dove al momento con la regola al contorno non compare mai come "url encoding" del "blank"
+-->
+     <xsl:element name="media"><xsl:value-of select="concat(replace(replace(replace(.,' ','%20'),'/image.file=',concat('/image?~=',format-number(position(),'00'),'&amp;file=')),'([a-z0-9])\+([a-z0-9](\.jpg|%20))','$1%2B$2'),'&amp;size=l')"/></xsl:element>
     </xsl:for-each>
     <xsl:if test="string-length(normalize-space(cell[@name='CP_geo']))">
      <xsl:element name="puntoPrincipale">
