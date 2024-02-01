@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -27,6 +28,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,6 +81,7 @@ import net.sf.saxon.s9api.XsltTransformer;
 public class RdfAltoAdige {
   private DocumentBuilder db;
   private Transformer nullTransformer;
+  static String encoding = StandardCharsets.UTF_8.toString();
 
   RdfAltoAdige() throws IOException, TransformerConfigurationException, TransformerFactoryConfigurationError, ParserConfigurationException {
     db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -108,7 +111,7 @@ public class RdfAltoAdige {
   static void fatal(String outFolder, Throwable t) throws UnsupportedEncodingException, FileNotFoundException {
     String filename = "" + new Date().getTime() + ".exception";
     System.err.println("ERROR - Exception " + t + " written to " + filename);
-    PrintStream ps = new PrintStream(new FileOutputStream(new File(outFolder, filename)), false, StandardCharsets.UTF_8.toString());
+    PrintStream ps = new PrintStream(new FileOutputStream(new File(outFolder, filename)), false, encoding);
     t.printStackTrace(ps);
     ps.close();
   }
@@ -164,15 +167,15 @@ public class RdfAltoAdige {
       bos = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(new File(outFolder, filename), false)));
       lastStartRow = rows;
     }
-    bos.write(("# " + itemId + "\n").getBytes(StandardCharsets.UTF_8.toString()));
+    bos.write(("# " + itemId + "\n").getBytes(encoding));
     bos.write(content);
     /*
-    String lines[] = new String(content, StandardCharsets.UTF_8.toString()).split("\\r\\n|\\n|\\r");
+    String lines[] = new String(content, encoding).split("\\r\\n|\\n|\\r");
     Set<String>xlines = new HashSet<String>(1024);
     for (String line:lines) xlines.add(line);
     xlines = new TreeSet<String>(xlines); // sort
     Iterator<String>it = xlines.iterator(); 
-    while (it.hasNext()) bos.write((it.next()+"\n").getBytes(StandardCharsets.UTF_8.toString()));
+    while (it.hasNext()) bos.write((it.next()+"\n").getBytes(encoding));
      */
   }
 
@@ -189,7 +192,11 @@ public class RdfAltoAdige {
 
   private void writeContent(String itemId, int pass, /*int passes,*/int csvLine, int rows, String outFolder, int dataIndex, ByteArrayOutputStream result)
       throws IOException {
-    flushContent(itemId, rows, outFolder, dataIndex, result.toByteArray());
+    writeContent(itemId, pass, /*passes,*/csvLine, rows, outFolder, dataIndex, result.toByteArray());
+  }
+
+  private void writeContent(String itemId, int pass, /*int passes,*/int csvLine, int rows, String outFolder, int dataIndex, byte[] result) throws IOException {
+    flushContent(itemId, rows, outFolder, dataIndex, result);
     if ((rows % 2048) == 0) {
       long now = new Date().getTime();
       System.out.println("STATUS - got " + rows + " rows " + writeRate(rows, now - startMillis)
@@ -402,7 +409,7 @@ public class RdfAltoAdige {
   }
 
   void writeDateStamp(String date, String outFolder) throws UnsupportedEncodingException, IOException {
-    Files.write(Paths.get(outFolder, "datestamp.isodate"), date.getBytes(StandardCharsets.UTF_8.toString()));
+    Files.write(Paths.get(outFolder, "datestamp.isodate"), date.getBytes(encoding));
   }
 
   void datestamp(String outFolder, int dataIndex) throws Exception {
@@ -603,9 +610,18 @@ public class RdfAltoAdige {
                 else
                   model = xModel;
               }
-              model.write(result, "N-TRIPLES");
-              //writeContent(itemId, pass, ids.size(), r2d.line(), rows, outFolder, dataIndex, result);
-              writeContent(itemId, pass, r2d.line(), rows, outFolder, dataIndex, result);
+              //before sort 20230923
+              //model.write(result, "N-TRIPLES");
+              ////writeContent(itemId, pass, ids.size(), r2d.line(), rows, outFolder, dataIndex, result);
+              //writeContent(itemId, pass, r2d.line(), rows, outFolder, dataIndex, result);
+              ///before sort 20230923
+              //sort 20230923
+              StringWriter sw = new StringWriter();
+              model.write(sw, "N-TRIPLES");
+              String[] triples = sw.toString().split("\n");
+              Arrays.sort(triples);
+              writeContent(itemId, pass, r2d.line(), rows, outFolder, dataIndex, (String.join("\n", triples) + "\n").getBytes(encoding));
+              ///sort 20230923
               result.reset();
               baos.reset();
               // la trasformazione usa una mappa per risalire dal bene al contenitore
