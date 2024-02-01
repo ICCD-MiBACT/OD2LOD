@@ -869,8 +869,10 @@ contains($OB_it,'Gästebuch')">
 </xsl:choose>
    
    <xsl:element name="harvesting">
-    <xsl:for-each select="cell[@name='B1p_url' and string-length(normalize-space())]">
+    <xsl:for-each select="cell[@name='B1p_url' and string-length(normalize-space())]"><!--
      <xsl:element name="media"><xsl:value-of select="concat(.,'&amp;size=l')"/></xsl:element>
+--><!-- add parameters to keep position () and set resolution -->
+     <xsl:element name="media"><xsl:value-of select="concat(replace(replace(.,' ','%20'),'/image.file=',concat('/image?~=',format-number(position(),'00'),'&amp;file=')),'&amp;size=l')"/></xsl:element>
     </xsl:for-each>
     <xsl:if test="string-length(normalize-space(cell[@name='CP_geo']))">
      <xsl:element name="puntoPrincipale">
