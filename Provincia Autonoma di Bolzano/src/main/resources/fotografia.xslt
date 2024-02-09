@@ -16,6 +16,14 @@
  <xsl:template match="/">
   <xsl:apply-templates/>
  </xsl:template>
+
+ <xsl:template name="definizione">
+  <xsl:param name="val" select="''"/>
+  <xsl:choose>
+   <xsl:when test="contains($val,'negativo')">Negativo</xsl:when>
+   <xsl:otherwise>Positivo</xsl:otherwise>
+  </xsl:choose>
+ </xsl:template>
  
  <xsl:template match="row[cell[@name='MUS']!='TAP']">
 <record>
@@ -29,20 +37,105 @@
   <datestamp><xsl:value-of select="$datestamp"/></datestamp>
  </header>
  <metadata>
-  <schede>
-
+  <schede><!--
+ Istruzioni all’uso dei parametri per il webservice del catalogo dei beni culturali dell’Alto Adige Versione: IT-1.00 Data: 14.03.2017 Autore: Informatica Alto Adige S.p.A.
+ https://data.civis.bz.it/it/dataset/7bd739a1-a270-4c6c-85ac-04548fb2f2cc/resource/fdfdfca9-fb11-4e3c-8f83-bbba5133e759/download/pbz-parametriwebservicebeniculturali.pdf
+ =====================================================================
+ Descrizione del campo    Tag      obbligatorio ripetibile Annotazioni
+ =====================================================================
+ Priref                   priref        X                  Chiave primaria alfanumerica
+ Numero d‘inventario      IN            X
+ Nome oggetto DE          OB_de                     X
+ Nome oggetto IT          OB_it                     X
+ Sinonimo nome oggetto DE OB_de_syn                 X      Contiene anche sinonimi e iperonimi
+ Sinonimo nome oggetto IT OB_it_syn                 X      Contiene anche sinonimi e iperonimi
+ Titolo DE                TI_de                     X
+ Titolo IT                TI_it                     X
+ Descrizione DE           BE_de                     X
+ Descrizione IT           BE_it                     X
+ Info stor. crit. DE      B3_de                     X      Informazioni storicamente critiche in lingua tedesca
+ Info stor. crit. IT      B3_it                     X      Informazioni storicamente critiche in lingua italiana
+ Produttore DE            VV_de                     X
+ Produttore IT            VV_it                     X
+ Categoria tematica DE    OC_de                     X
+ Categoria tematica IT    OC_it                     X
+ Sinonimi categoria
+ tematica DE              OC_de_syn                 X      Contiene anche sinonimi e iperonimi
+ Sinonimi categoria 
+ tematica IT              OC_it_syn                 X      Contiene anche sinonimi e iperonimi
+ Datazione da             DS                               Data nel formato yyyy.mmdd. Esempio: 1995.1231
+ Datazione a              DE                               Data nel formato yyyy.mmdd. Esempio: 1995.1231
+ Luogo rappresentato DE   CP_de                     X
+ Luogo rappresentato IT   CP_it                     X
+ Sinonimo luogo
+ rappresentato DE         CP_de_syn                 X      Contiene anche sinonimi e iperonimi
+ Sinonimo luogo
+ rappresentato IT         CP_it_syn                 X      Contiene anche sinonimi e iperonimi
+ Materiale DE             MA_de                     X
+ Materiale IT             MA_it                     X
+ Sinonimo materiale DE    MA_de_syn                 X      Contiene anche sinonimi e iperonimi
+ Sinonimo materiale IT    MA_it_syn                 X      Contiene anche sinonimi e iperonimi
+ Tecnica DE               TK_de                     X
+ Tecnica IT               TK_it                     X
+ Sinonimo tecnica DE      TK_de_syn                 X      Contiene anche sinonimi e iperonimi
+ Sinonimo tecnica IT      TK_it_syn                 X      Contiene anche sinonimi e iperonimi
+ Parola chiave DE         ip_de                     X
+ Parola chiave IT         ip_it                     X
+ Dimensioni DE            dim_de                    X
+ Dimensioni IT            dim_it                    X
+ Immagine/percorso
+ video                    B1p                       X      immagini / video
+ Sigla istituzione        MUS                              Questo campo contiene la sigla composta da 3 lettere che indica l’istituzione che espone l‘oggetto.
+ Nome museo DE            MUS_de
+ Nome museo IT            MUS_it
+ Relazione con altri
+ oggetti (parte)          ntp                       X      Contiene il numero di inventario di oggetti parziali (“parte”)
+ Relazione con altri
+ oggetti (appartenenza)   btp                       X      Contiene il numero di inventario di oggetti ai quali appartiene l’oggetto in questione (“parte di”)
+ Data creazione           creation                         Data in formato ISO in UTC. I millisecondi sono opzionali
+ Data ultima modifica     modification                     Data in formato ISO in UTC. I millisecondi sono opzionali
+ Timestamp                timestamp                        Marcatempo di quando l’oggetto è stato aggiornato nell’indice. Data in formato ISO in UTC. I millisecondi sono opzionali
+ Score                    Score                            Specifica la rilevanza dell’oggetto nella ricerca.
+ =====================================================================
+  
+ NORMATIVA F - FOTOGRAFIA VERSIONE 4.00 http://www.iccd.beniculturali.it/getFile.php?id=9136
+ *OGTD Definizione
+ Specificare il termine o la locuzione che individua il bene oggetto della catalogazione, espressa secondo la tradizione degli studi.
+ I beni fotografici, che corrispondono a momenti diversi dell’elaborazione di un’immagine, si possono distinguere tipologicamente in base alla funzione assolta in tale processo creativo.
+ Ci si riferisce, in particolare, alle diverse categorie dei negativi e dei positivi, alle quali occorre aggiungere quella dei processi fotografici che danno origine a prodotti
+  unici (dagherrotipi, ferrotipi, polaroid, chimigrammi, ecc.), e a quella della fotografia digitale.
+ Anche nel caso in cui l’opera catalogata sia costituita da diversi elementi appartenenti alla stessa categoria (ad es., una serie, una cartella, un album, ecc.), o qualora si
+  cataloghino unitariamente più beni uguali, si adotterà la forma al singolare.
+ Nel caso in cui si cataloghi, invece, un bene complesso o composito comprendente elementi di diversa natura (ad es. un album con albumine e ferrotipi, o un’installazione con positivi e
+  fotografie digitali, ecc.), nella scheda madre si adotterà la voce “vario” seguita dalla specificazione delle diverse categorie cui appartengono gli elementi componenti il bene.
+ La compilazione del sottocampo è obbligatoria.
+ Vocabolario aperto
+ =====================================================================
+ valore da inserire
+ nel sottocampo OGTD  note esplicative
+ =====================================================================
+ negativo             per fototipi i cui valori tonali e/o cromatici risultino invertiti rispetto a quelli del soggetto raffigurato, solitamente destinati a svolgere
+                       funzione di matrice per produrre un numero illimitato di positivi.
+ positivo             per fototipi, su supporto opaco o trasparente (es. diapositive) i cui valori tonali e/o cromatici corrispondano a quelli del soggetto raffigurato.
+ unicum               per fototipi unici, ottenuti cioè senza mediazione di negativi e che, a loro volta, non possono essere utilizzati come matrici; sono da
+                      considerarsi unicum, ad esempio, dagherrotipi, ambrotipi, ferrotipi, polaroid ed inoltre le immagini ottenute con processi off camera
+ fotografia digitale  file immagine conservato su un supporto di memorizzazione
+ vario: …/…           per oggetti complessi e/o compositi costituiti da elementi appartenenti a categorie diverse.
+                       Es.: vario: positivo/unicum
+                            vario: unicum/positivo/fotografia digitale
+ ===================================================================== -->
 <xsl:variable name="OB_it" select="normalize-space(cell[@name='OB_it'])"/>
 <xsl:variable name="lc_OB_it" select="lower-case($OB_it)"/> 
 <xsl:choose>
  <xsl:when test="$dataset='fotografie storiche' or
-                 $lc_OB_it='fotografia' or 
+                 starts-with($lc_OB_it,'fotografia') or 
                  $lc_OB_it='cartolina illustrata' or 
                  $lc_OB_it='diapositiva' or 
                  $lc_OB_it='diapositive' or 
                  $lc_OB_it='cartolina postale' or 
                  $lc_OB_it='stereofotografie' or 
                  $lc_OB_it='album' or 
-                 $lc_OB_it='negativo'">
+                 starts-with($lc_OB_it,'negativo')">
 <!--	<xsl:when test="contains(cell[@name='OB_it'],'fotografia')">-->
    <xsl:element name="F">
     <xsl:attribute name="version">4.00</xsl:attribute>
@@ -65,8 +158,9 @@
      <xsl:attribute name="hint">BENE CULTURALE</xsl:attribute>
      <xsl:element name="OGT">
       <xsl:attribute name="hint">DEFINIZIONE BENE</xsl:attribute>
-      <xsl:element name="OGTD">
-      <xsl:attribute name="hint">Definizione</xsl:attribute>Positivo</xsl:element>
+      <xsl:element name="OGTD"><!--
+      <xsl:attribute name="hint">Definizione</xsl:attribute>Positivo</xsl:element> -->
+      <xsl:attribute name="hint">Definizione</xsl:attribute><xsl:call-template name="definizione"><xsl:with-param name="val" select="$lc_OB_it"/></xsl:call-template></xsl:element>
      </xsl:element>
     </xsl:element>
     
@@ -215,7 +309,7 @@
         <xsl:element name="DTSI">
          <xsl:attribute name="hint">Da</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DS'], '.')"/>/<xsl:value-of select="substring(cell[@name='DS'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DS'], string-length(cell[@name='DS']) - 1)"/></xsl:element>
        </xsl:if> 
-       <xsl:if test="string-length(cell[@name='DS'])">
+       <xsl:if test="string-length(cell[@name='DE'])">
         <xsl:element name="DTSF">
          <xsl:attribute name="hint">A</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DE'], '.')"/>/<xsl:value-of select="substring(cell[@name='DE'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DE'], string-length(cell[@name='DE']) - 1)"/></xsl:element>
         </xsl:if> 
@@ -531,7 +625,7 @@ contains($OB_it,'Gästebuch')">storico artistico</xsl:when>
 					<xsl:element name="DTSI">
 						<xsl:attribute name="hint">Da</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DS'], '.')"/>/<xsl:value-of select="substring(cell[@name='DS'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DS'], string-length(cell[@name='DS']) - 1)"/></xsl:element>
 				</xsl:if> 
-				<xsl:if test="string-length(cell[@name='DS'])">
+				<xsl:if test="string-length(cell[@name='DE'])">
 					<xsl:element name="DTSF">
 						<xsl:attribute name="hint">A</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DE'], '.')"/>/<xsl:value-of select="substring(cell[@name='DE'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DE'], string-length(cell[@name='DE']) - 1)"/></xsl:element>
 				</xsl:if> 
@@ -929,7 +1023,7 @@ contains($OB_it,'Gästebuch')">
 		 <xsl:element name="MISZ">
 		  <xsl:attribute name="hint">Tipo di misura</xsl:attribute>altezzaxlunghezza</xsl:element>
 		 <xsl:element name="MISU">
-		  <xsl:attribute name="hint">Unità di misura</xsl:attribute><xsl:value-of select="substring(., string-length(.) - 1)"/></xsl:element>
+		  <xsl:attribute name="hint">Unità di misura</xsl:attribute><xsl:value-of select="substring(., string-length(.) - 1)"/></xsl:element>
 		 <xsl:choose>
 		  <xsl:when test="contains(.,'larghezza')">
   			<xsl:variable name="ALTcc" select="substring-after(.,',')"/>
