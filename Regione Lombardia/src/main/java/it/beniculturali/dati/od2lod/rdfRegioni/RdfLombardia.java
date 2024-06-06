@@ -214,6 +214,7 @@ public class RdfLombardia {
     addMap(db, "uniqueIdentifier2URIs");
     addMap(db, "contenitoreFisicoSystemRecordCode2CCF");
     addMap(db, "contenitoreGiuridicoSystemRecordCode2CCG");
+    addMap(db, "codiceEnteToNomeEnte");
     db.commit();
     db.close();
   }
@@ -323,6 +324,16 @@ public class RdfLombardia {
       int rows = 1;
       startMillis = new Date().getTime();
       String resourcePrefix = properties.getProperty("resourcePrefix", "https://w3id.org/arco/resource/Lombardia/").trim();
+      String rmp = properties.getProperty("rmDup");
+      if (rmp != null) System.out.println("INFO - remove duplicates " + rmp);//String rmp = "row/cell[@name='NCTN']";
+      String rmr = properties.getProperty("rmRange");
+      int rml = 0, rmh = 0;
+      if (rmr != null) {
+        System.out.println("INFO - remove outside range " + rmr);
+        String[] r = rmr.split("<=>");
+        rml = Integer.parseUnsignedInt(r[0]);
+        rmh = Integer.parseUnsignedInt(r[1]);
+      }
       for (int pass = 1; pass <= ids.size(); pass++) {
         if (dataIndex > 0 && pass != dataIndex) continue;
         int line = 1;
@@ -343,8 +354,6 @@ public class RdfLombardia {
           xtrRdf.setDestination(out);
         }
         CsvRow2domReader r2d = getPassReader(id, pass);
-        String rmp = properties.getProperty("" + pass + ".rmDup");
-        if (rmp != null) System.out.println("INFO - remove duplicates " + rmp + " @" + dataset);//String rmp = "row/cell[@name='NCTN']";
         Set<String> rmSet = new HashSet<String>();
         for (Document row; (row = r2d.next()) != null; line++, rows++) {
           String itemId = null;
@@ -352,11 +361,20 @@ public class RdfLombardia {
             itemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
             //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);
             if (rmp != null) {
-              String rmc = (String) xPath.evaluate(rmp, row, XPathConstants.STRING);
-              if (rmc.length() > 0 && !rmSet.add(rmc)) { // avoid duplicate IRI
-                Node dead = (Node) xPath.evaluate(rmp, row, XPathConstants.NODE);
-                dead.getParentNode().removeChild(dead);
-                System.out.println("duplicate " + rmp + " " + rmc + " removed");
+              int count = ((Double) xPath.evaluate("count(" + rmp + ")", row, XPathConstants.NUMBER)).intValue();
+              if (count > 0) {
+                String rmc = (String) xPath.evaluate(rmp, row, XPathConstants.STRING);
+                int rmv = 0;
+                try {
+                  rmv = Integer.parseUnsignedInt(rmc);
+                } catch (Exception e) {
+                  ;
+                }
+                if (rmc.length() == 0 || !rmSet.add(rmc) || (rmr != null && (rmv < rml || rmv > rmh))) { // avoid duplicate/outside range IRI
+                  Node dead = (Node) xPath.evaluate(rmp, row, XPathConstants.NODE);
+                  dead.getParentNode().removeChild(dead);
+                  System.out.println("INFO - duplicate/outside range " + rmp + " " + rmc + " removed");
+                }
               }
             }
             if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row));

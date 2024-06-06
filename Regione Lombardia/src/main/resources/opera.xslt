@@ -31,10 +31,10 @@
        <xsl:element name="NCT">
         <xsl:attribute name="hint">CODICE UNIVOCO</xsl:attribute>
         <xsl:element name="NCTR">
-         <xsl:attribute name="hint">Codice regione</xsl:attribute><xsl:value-of select="cell[@name='NCTR']"/></xsl:element>
+         <xsl:attribute name="hint">Codice regione</xsl:attribute><xsl:if test="string-length(cell[@name='NCTR'])=1">0</xsl:if><xsl:value-of select="cell[@name='NCTR']"/></xsl:element>
         <xsl:if test="cell[@name='NCTN']">
          <xsl:element name="NCTN">
-         <xsl:attribute name="hint">Numero catalogo generale</xsl:attribute><xsl:value-of select="cell[@name='NCTN']"/></xsl:element>
+          <xsl:attribute name="hint">Numero catalogo generale</xsl:attribute><xsl:value-of select="cell[@name='NCTN']"/></xsl:element>
         </xsl:if>
        </xsl:element>
        <xsl:element name="ESC">
@@ -337,25 +337,25 @@
  <xsl:template match="cell[@name='AUTS']">
   <xsl:element name="AUTS">
    <xsl:attribute name="hint">Riferimento all'autore</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>	
  <xsl:template match="cell[@name='AUTN']">
   <xsl:element name="AUTN">
    <xsl:attribute name="hint">Nome scelto</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>	
  <xsl:template match="cell[@name='AUTA']">
   <xsl:element name="AUTA">
    <xsl:attribute name="hint">Dati anagrafici</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>	
  <xsl:template match="cell[@name='AUTB']">
   <xsl:element name="AUTB">
    <xsl:attribute name="hint">Nome scelto (ente collettivo)</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>	
 

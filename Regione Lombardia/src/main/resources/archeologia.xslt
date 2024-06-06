@@ -31,7 +31,7 @@
        <xsl:element name="NCT">
         <xsl:attribute name="hint">CODICE UNIVOCO</xsl:attribute>
         <xsl:element name="NCTR">
-         <xsl:attribute name="hint">Codice regione</xsl:attribute><xsl:value-of select="cell[@name='NCTR']"/></xsl:element>
+         <xsl:attribute name="hint">Codice regione</xsl:attribute><xsl:if test="string-length(cell[@name='NCTR'])=1">0</xsl:if><xsl:value-of select="cell[@name='NCTR']"/></xsl:element>
         <xsl:if test="cell[@name='NCTN']">
          <xsl:element name="NCTN">
           <xsl:attribute name="hint">Numero catalogo generale</xsl:attribute><xsl:value-of select="cell[@name='NCTN']"/></xsl:element>
