@@ -1,12 +1,10 @@
 
 # Regione Veneto
-Procedure per la trasformazione dei dataset dalla Regione Veneto esposti dal servizio
+Procedure per la trasformazione delle schede dei [beni culturali della Regione Veneto](https://beniculturali.regione.veneto.it) esposti dal servizio
 
   https://beniculturali.regione.veneto.it/xway-front/application/crv/engine/crv.jsp
 
-I dati in ingresso sono resi conformi agli schema elaborati per le schede ICCD e modellati in ArCo / RDF.
-
-I parametri per la la configurazione del processo sono dichiarati in src/main/resources/rdfVeneto.properties
+I dati in ingresso sono resi conformi ai modelli delle normative ICCD per la rappresentazione in RDF mediante le ontologie e le trasformazioni del progetto [ArCo](https://github.com/ICCD-MiBACT/ArCo).
 
 ### requisiti
 Java 8 + maven
