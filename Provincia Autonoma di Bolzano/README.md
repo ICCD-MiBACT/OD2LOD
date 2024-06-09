@@ -2,7 +2,7 @@
 # Open Data Alto Adige
 Procedure per la trasformazione dei [dataset dei beni culturali pubblicati dalla Provincia autonoma di Bolzano](https://data.civis.bz.it/it/dataset?groups=culture&q=&_groups_limit=0)
 
-I contenuti dei dataset vengono ricondotti dal formatio csv a modelli conformi alle normative ICCD per la rappresentazione in rdf mediante le ontologie e le trasformazioni del progetto [ArCo](https://github.com/ICCD-MiBACT/ArCo).
+I contenuti dei dataset sono ricondotti dal formatio csv a modelli conformi alle normative ICCD per la rappresentazione in RDF mediante le ontologie e le trasformazioni del progetto [ArCo](https://github.com/ICCD-MiBACT/ArCo).
 
 - [Fotografie storiche](http://daten.buergernetz.bz.it/services/kksSearch/collect/lichtbild?q=*:*&fl=*&rows=999999&wt=csv "collegamento al dataset in formato csv")
 
