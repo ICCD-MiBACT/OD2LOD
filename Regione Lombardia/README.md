@@ -1,14 +1,12 @@
 
-# Regione Lombardia
-Procedure per la trasformazione di dataset pubblicati dalla Regione Lombardia sul sito https://www.dati.lombardia.it/
+# Open Data Lombardia
+Procedure per la trasformazione di [dataset dei beni culturali pubblicati dalla Regione Lombardia](https://www.dati.lombardia.it/)
 
-I dati di input si trasformano in dati in formato xml, in base agli schema elaborati per le schede ICCD.
+I contenuti dei dataset sono ricondotti dal formatio csv a modelli conformi alle normative ICCD per la rappresentazione in RDF mediante le ontologie e le trasformazioni del progetto [ArCo](https://github.com/ICCD-MiBACT/ArCo).
 
-I dati di input (formato csv) per le procedure sono:
-  - Architetture https://www.dati.lombardia.it/api/views/kf9b-rj2t/rows.csv?accessType=DOWNLOAD
-  - Reperti Archeologici conservati nei Musei https://www.dati.lombardia.it/api/views/97ng-v559/rows.csv?accessType=DOWNLOAD
-  - Opere d'Arte conservate nei Musei https://www.dati.lombardia.it/api/views/dsrv-9ish/rows.csv?accessType=DOWNLOAD
-  - Patrimonio Scientifico Tecnologico conservato nei Musei https://www.dati.lombardia.it/api/views/2k8u-uj4r/rows.csv?accessType=DOWNLOAD
+- [Architetture](https://www.dati.lombardia.it/api/views/kf9b-rj2t/rows.csv?accessType=DOWNLOAD)
+- [Reperti Archeologici conservati nei Musei](https://www.dati.lombardia.it/api/views/97ng-v559/rows.csv?accessType=DOWNLOAD)
+- [Opere d'Arte conservate nei Musei](https://www.dati.lombardia.it/api/views/dsrv-9ish/rows.csv?accessType=DOWNLOAD)
 
 ### requisiti
 Java 8 + maven
