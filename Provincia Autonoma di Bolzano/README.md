@@ -1,11 +1,15 @@
 
-# Alto Adige
-Procedure per la trasformazione di dataset pubblicati dalla Provincia autonoma di Bolzano sul sito http://daten.buergernetz.bz.it/
+# Open Data Alto Adige
+Procedure per la trasformazione dei [dataset dei beni culturali pubblicati dalla Provincia autonoma di Bolzano](https://data.civis.bz.it/it/dataset?groups=culture&q=&_groups_limit=0)
 
-I dati di input si trasformano in dati in formato xml, in base agli schema elaborati per le schede ICCD.
+I contenuti dei dataset vengono ricondotti dal formatio csv a modelli conformi alle normative ICCD per la rappresentazione in rdf mediante le ontologie e le trasformazioni del progetto [ArCo](https://github.com/ICCD-MiBACT/ArCo).
 
-I dati di input (formato csv) per le procedure sono:
-  - Fotografie http://daten.buergernetz.bz.it/services/kksSearch/collect/lichtbild?q=*:*&fl=*&rows=999999&wt=csv
+- [Fotografie storiche](http://daten.buergernetz.bz.it/services/kksSearch/collect/lichtbild?q=*:*&fl=*&rows=999999&wt=csv "collegamento al dataset in formato csv")
+
+- [Beni culturali](http://dati.retecivica.bz.it/services/kksSearch/collect/select?q=%28B1p_url:*%29%20AND%20%28OB_it:*%29&fl=*&rows=999999&wt=csv "collegamento al dataset in formato csv")
+
+- [Musei](http://daten.buergernetz.bz.it/services/musport/v1/csv "collegamento al dataset in formato csv") (con integrazioni fornite dai referenti della provincia)
+
 
 ### requisiti
 Java 8 + maven
