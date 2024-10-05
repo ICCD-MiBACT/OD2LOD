@@ -37,7 +37,7 @@
          <xsl:attribute name="hint">Codice regione</xsl:attribute>04</xsl:element>
        </xsl:element>
        <xsl:element name="ESC">
-        <xsl:attribute name="hint">Ente schedatore</xsl:attribute>S222</xsl:element> <!-- provere se rdfizer accetta valore https://w3id.org/arco/resource/Agent/3ef9e38e8e7b2efad522334071919911 -->
+        <xsl:attribute name="hint">Ente schedatore</xsl:attribute>S222</xsl:element> <!-- provare se rdfizer accetta valore https://w3id.org/arco/resource/Agent/3ef9e38e8e7b2efad522334071919911 -->
        <xsl:element name="ECP">
         <xsl:attribute name="hint">Ente competente</xsl:attribute>S222</xsl:element>
       </xsl:element>
@@ -140,7 +140,7 @@
        
      </xsl:element>
      <xsl:variable name="idb" select="*[local-name()='id_bene']"/><!-- 404 -->   
-     <xsl:if test="not(contains(' 7242 5716 3698 6055 6174 6159 8790 10677 7492 7212 5638 6491 ',concat(' ',$idb,' ')))">
+     <xsl:if test="string-length(normalize-space($idb)) and not(contains(' 7242 5716 3698 6055 6174 6159 8790 10677 7492 7212 5638 6491 ',concat(' ',$idb,' ')))">
       <xsl:element name="harvesting">
        <xsl:element name="media">
         <xsl:value-of select="concat('https://webgis.provincia.tn.it/wgt/services/static/immagini/sbc/bea/',$idb,'/',$idb,'.jpg')"/>
