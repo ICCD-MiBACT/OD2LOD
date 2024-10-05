@@ -17,6 +17,7 @@
     "CMPD": ["record", "metadata", "schede", "SI", "CM", "CMP", "CMPD"],
     "CMPN": ["record", "metadata", "schede", "SI", "CM", "CMP", "CMPN"],
     "FTA0": ["record", "metadata","schede", "harvesting", "linkMedia"],
+    "IMGF": ["record", "metadata","schede", "harvesting", "linkMedia"],
     "DIRITTI":[],
     "URL": ["record", "metadata","schede", "harvesting", "linkSource"]
 }
