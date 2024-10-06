@@ -76,6 +76,9 @@ def handle_CSV(csv_file, mapping_file, nctn2url):
             #if data_row['NCTN'] == '':
             if 'NCTN' not in data_row.keys() or data_row['NCTN'] == '':
                 data_row['NCTN'] = hashlib.md5(''.join(data_row.values()).encode()).hexdigest()
+            else:
+                while len(data_row['NCTN']) < 8:
+                    data_row['NCTN'] = '0' + data_row['NCTN']
 
             if data_row['NCTN'] == previous_NCTN:
                 data_row['NCTN'] += "-" + str(counter)
