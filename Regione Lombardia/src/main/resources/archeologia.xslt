@@ -274,22 +274,22 @@
        </xsl:if>
       </xsl:element>
       
-      <xsl:if test="cell[@name='GPDPX'] and cell[@name='GPDPY']">
+      <xsl:if test="cell[@name='GPDPX' or @name='GPDX'] and cell[@name='GPDPY' or @name='GPDY']">
       <xsl:element name="GP">
        <xsl:attribute name="hint">GEOREFERENZIAZIONE TRAMITE PUNTO</xsl:attribute>
        <xsl:element name="GPD">
         <xsl:attribute name="hint">DESCRIZIONE DEL PUNTO</xsl:attribute>
          <xsl:element name="GPDP">
           <xsl:attribute name="hint">PUNTO</xsl:attribute>
-          <xsl:apply-templates select="cell[@name='GPDPX']"/>
-          <xsl:apply-templates select="cell[@name='GPDPY']"/>
+          <xsl:apply-templates select="cell[@name='GPDPX' or @name='GPDX']"/>
+          <xsl:apply-templates select="cell[@name='GPDPY' or @name='GPDY']"/>
          </xsl:element>
         </xsl:element>
       </xsl:element>
       </xsl:if>
 
      </xsl:element>
-
+<!--
      <xsl:if test="cell[@name='WGS84_X'] and cell[@name='WGS84_Y']">
      <xsl:element name="harvesting">
       <xsl:element name="geocoding">
@@ -297,7 +297,31 @@
        <xsl:element name="y"><xsl:value-of select="cell[@name='WGS84_Y']"/></xsl:element>
       </xsl:element>
      </xsl:element>
-     </xsl:if>
+     </xsl:if> -->
+
+     <xsl:choose>
+     
+     <xsl:when test="cell[@name='WGS84_X'] and cell[@name='WGS84_Y']"><!-- Before -->
+     <xsl:element name="harvesting">
+      <xsl:element name="geocoding">
+       <xsl:element name="x"><xsl:value-of select="cell[@name='WGS84_X']"/></xsl:element>		
+       <xsl:element name="y"><xsl:value-of select="cell[@name='WGS84_Y']"/></xsl:element>
+      </xsl:element>
+     </xsl:element>
+     </xsl:when>
+     
+     <xsl:when test="cell[@name='GPDX'] and cell[@name='GPDY']"><!-- After -->
+     <xsl:element name="harvesting">
+      <xsl:element name="geocoding">
+       <xsl:element name="x"><xsl:value-of select="cell[@name='GPDX']"/></xsl:element>		
+       <xsl:element name="y"><xsl:value-of select="cell[@name='GPDY']"/></xsl:element>
+      </xsl:element>
+     </xsl:element>
+     </xsl:when>
+     
+     <xsl:otherwise/>
+     
+     </xsl:choose>
 
     </schede>
        
@@ -357,20 +381,23 @@
     
  <xsl:template match="cell[@name='AUTS']">
   <xsl:element name="AUTS">
-   <xsl:attribute name="hint">Riferimento all'autore</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:attribute name="hint">Riferimento all'autore</xsl:attribute><!--
+   <xsl:value-of select="."/> -->
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>	
  <xsl:template match="cell[@name='AUTN']">
   <xsl:element name="AUTN">
-   <xsl:attribute name="hint">Nome scelto</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:attribute name="hint">Nome scelto</xsl:attribute><!--
+   <xsl:value-of select="."/> -->
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>	
  <xsl:template match="cell[@name='AUTA']">
   <xsl:element name="AUTA">
-   <xsl:attribute name="hint">Dati anagrafici</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:attribute name="hint">Dati anagrafici</xsl:attribute><!--
+   <xsl:value-of select="."/> -->
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>	
      
@@ -478,13 +505,13 @@
   </xsl:element>
  </xsl:template>
       
- <xsl:template match="cell[@name='GPDPX']">
+ <xsl:template match="cell[@name='GPDPX' or @name='GPDX']">
   <xsl:element name="GPDPX">
    <xsl:attribute name="hint">Coordinata X</xsl:attribute>
    <xsl:value-of select="."/>
   </xsl:element>
  </xsl:template>
- <xsl:template match="cell[@name='GPDPY']">
+ <xsl:template match="cell[@name='GPDPY' or @name='GPDY']">
   <xsl:element name="GPDPY">
    <xsl:attribute name="hint">Coordinata Y</xsl:attribute>
    <xsl:value-of select="."/>

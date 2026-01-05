@@ -6,6 +6,7 @@
   xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
   xmlns:dcterms="http://purl.org/dc/terms/"
   xmlns:dc="http://purl.org/dc/elements/1.1/"
   xmlns:arco="https://w3id.org/arco/ontology/arco/"
@@ -59,7 +60,15 @@
 		  	<xsl:attribute name="rdf:resource">ArchitecturalOrLandscapeHeritage/<xsl:value-of select="cell[@name='NUM_SCHEDA_BENE_COMPLESSO']"/>_R03</xsl:attribute>
 		 	</xsl:element>
 	 	</xsl:if>
-	 </xsl:element>		
+   
+   <xsl:for-each select="cell[starts-with(@name,'URLIMG')][string-length(normalize-space(.)) &gt; 0]">
+    <xsl:element name="foaf:depiction"><!--
+     <xsl:attribute name="rdf:resource"><xsl:value-of select="replace(.,' ','%20')"/></xsl:attribute> -->
+     <xsl:attribute name="rdf:resource"><xsl:value-of select="."/></xsl:attribute>
+    </xsl:element>
+   </xsl:for-each>
+   
+	 </xsl:element>
   <!--
   <xsl:if test="cell[@name='COMPLESSITA_DEL_BENE']='bene componente'">
    <xsl:element name="rdf:Description">
@@ -68,8 +77,14 @@
      <xsl:attribute name="rdf:resource">ArchitecturalOrLandscapeHeritage/<xsl:value-of select="cell[@name='NUM_SCHEDA_BENE_COMPLESSO']"/>/R03</xsl:attribute>
     </xsl:element>
    </xsl:element>
-	 </xsl:if>
-  -->
+	 </xsl:if> -->
+  <!--
+  <xsl:for-each select="harvesting/media">
+   <xsl:element name="foaf:depiction">
+    <xsl:attribute name="rdf:resource"><xsl:value-of select="."/></xsl:attribute>
+   </xsl:element>
+  </xsl:for-each> -->
+
  </xsl:template>
 
 </xsl:stylesheet>

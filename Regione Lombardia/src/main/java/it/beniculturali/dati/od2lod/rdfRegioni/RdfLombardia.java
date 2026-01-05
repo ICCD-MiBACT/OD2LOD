@@ -354,7 +354,7 @@ public class RdfLombardia {
           xtrRdf.setDestination(out);
         }
         CsvRow2domReader r2d = getPassReader(id, pass);
-        Set<String> rmSet = new HashSet<String>();
+        Set<String> rmSet = new HashSet<String>();// TODO duplicati tra dataset?
         for (Document row; (row = r2d.next()) != null; line++, rows++) {
           String itemId = null;
           try {
@@ -364,16 +364,22 @@ public class RdfLombardia {
               int count = ((Double) xPath.evaluate("count(" + rmp + ")", row, XPathConstants.NUMBER)).intValue();
               if (count > 0) {
                 String rmc = (String) xPath.evaluate(rmp, row, XPathConstants.STRING);
+                // TODO ? int dotpos = rmc.indexOf('.'); if (dotpos>0) rmc = rmc.substring(0, dotpos); // elimina suffisso .*
                 int rmv = 0;
                 try {
                   rmv = Integer.parseUnsignedInt(rmc);
                 } catch (Exception e) {
                   ;
                 }
+                Node target = (Node) xPath.evaluate(rmp, row, XPathConstants.NODE);
                 if (rmc.length() == 0 || !rmSet.add(rmc) || (rmr != null && (rmv < rml || rmv > rmh))) { // avoid duplicate/outside range IRI
-                  Node dead = (Node) xPath.evaluate(rmp, row, XPathConstants.NODE);
-                  dead.getParentNode().removeChild(dead);
+                  target.getParentNode().removeChild(target);
                   System.out.println("INFO - duplicate/outside range " + rmp + " " + rmc + " removed");
+                } else { // zero fill
+                  String nctn = "" + rmv;
+                  while (nctn.length() < 8)
+                    nctn = "0" + nctn;
+                  target.setTextContent(nctn);
                 }
               }
             }
@@ -409,6 +415,7 @@ public class RdfLombardia {
             baos.reset();
           }
           //if (line==2) break; // test
+          //if (line==1024) break; // test
         }
         System.out.println("STATUS - got " + line + " lines @dataset " + dataset);
         r2d.close();

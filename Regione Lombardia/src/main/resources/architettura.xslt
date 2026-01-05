@@ -8,7 +8,7 @@
   exclude-result-prefixes="fn">
   
  <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
- <xsl:param name="datestamp" select="'2020-05-07T00:00:00Z'"/>
+ <xsl:param name="datestamp" select="'2025-09-28T09:00:00Z'"/>
   
  <xsl:template match="/">
   <xsl:apply-templates mode="a"/>
@@ -164,7 +164,12 @@
 
      </xsl:element>
 
-     <xsl:apply-templates select="cell[@name='lat']"/>
+     <xsl:element name="harvesting">
+     
+      <xsl:apply-templates select="cell[@name='lat' or @name='COORDINATA_Y']"/><!--
+      <xsl:apply-templates select="cell[starts-with(@name,'URLIMG')]"/> -->
+      
+     </xsl:element>
 
     </schede>
        
@@ -172,15 +177,21 @@
   </record>
  </xsl:template>
 
- <xsl:template match="cell[@name='lat']">
-  <xsl:element name="harvesting">
+ <xsl:template match="cell[@name='lat' or @name='COORDINATA_Y']"><!--
+  <xsl:element name="harvesting"> -->
 	  <xsl:element name="geocoding">
 		  <xsl:element name="y"><xsl:value-of select="."/></xsl:element>		
-		  <xsl:element name="x"><xsl:value-of select="../cell[@name='lng']"/></xsl:element>
-	  </xsl:element>
-  </xsl:element>
+		  <xsl:element name="x"><xsl:value-of select="../cell[@name='lng' or @name='COORDINATA_X']"/></xsl:element>
+	  </xsl:element><!--
+  </xsl:element> -->
  </xsl:template>
-
+ <!--
+ <xsl:template match="cell[starts-with(@name,'URLIMG')]">
+  <xsl:if test="string-length(normalize-space(.)) &gt; 0">
+   <xsl:element name="media"><xsl:value-of select="."/></xsl:element>
+  </xsl:if>
+ </xsl:template>
+ -->
  <xsl:template match="cell[@name='DATAZIONE']">
   <xsl:variable name="translateIdFrom">sec.</xsl:variable>
   <xsl:variable name="translateIdTo"  >    </xsl:variable>
