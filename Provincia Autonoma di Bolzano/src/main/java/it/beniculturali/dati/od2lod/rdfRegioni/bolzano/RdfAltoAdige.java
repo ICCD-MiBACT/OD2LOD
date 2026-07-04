@@ -22,8 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileTime;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,6 +43,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -142,7 +150,7 @@ public class RdfAltoAdige {
 
   private void writeException(String outFolder, String id, byte[] content, int line, Exception e) throws Exception {
     String filename = "offending_node_" + id + ".xml";
-    System.err.println("ERROR - Exception " + e + " caught @row " + line + " written to " + filename);
+    System.err.println("ERROR - Exception " + e + " caught @row " + line + " written to " + filename); //e.printStackTrace();
     writeContent(new File(outFolder, filename), content);
   }
 
@@ -160,15 +168,26 @@ public class RdfAltoAdige {
   }
 
   private void flushContent(String itemId, int rows, String outFolder, int dataIndex, byte[] content) throws IOException {
-    if (lastStartRow == 0 || rows - lastStartRow >= rowCountFlush) {
+    /* nt.gz
+    if (lastStartRow==0 || rows-lastStartRow>=rowCountFlush) { if (bos!=null) closeContent();
+     String filename = "arco-knowledge-graph-1.0_R04_" + (dataIndex>0?""+dataIndex+"_":"") + df7.format(rows) + ".nt.gz";
+     System.out.println("STATUS - writing @" + filename);
+     bos = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(new File(outFolder, filename),false)));
+     lastStartRow = rows;
+    }
+    /nt.gz */
+    /* nt */
+    if (lastStartRow == 0 || rows - lastStartRow >= rowCountFlush / 4) {
       if (bos != null) closeContent();
-      String filename = "arco-knowledge-graph-1.0_R04_" + (dataIndex > 0 ? "" + dataIndex + "_" : "") + df7.format(rows) + ".nt.gz";
+      String filename = "arco-knowledge-graph-1.0_R04_" + (dataIndex > 0 ? "" + dataIndex + "_" : "") + df7.format(rows) + ".nt";
       System.out.println("STATUS - writing @" + filename);
-      bos = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(new File(outFolder, filename), false)));
+      bos = new BufferedOutputStream(new FileOutputStream(new File(outFolder, filename), false));
       lastStartRow = rows;
     }
+    /* /nt */
     bos.write(("# " + itemId + "\n").getBytes(encoding));
     bos.write(content);
+
     /*
     String lines[] = new String(content, encoding).split("\\r\\n|\\n|\\r");
     Set<String>xlines = new HashSet<String>(1024);
@@ -190,17 +209,18 @@ public class RdfAltoAdige {
     return "@" + df.format(n * 1000. / md) + " rows/sec";
   }
 
-  private void writeContent(String itemId, int pass, /*int passes,*/int csvLine, int rows, String outFolder, int dataIndex, ByteArrayOutputStream result)
+  private void writeContent(String itemId, int pass, /*int passes,*/int sourceLine, int rows, String outFolder, int dataIndex, ByteArrayOutputStream result)
       throws IOException {
-    writeContent(itemId, pass, /*passes,*/csvLine, rows, outFolder, dataIndex, result.toByteArray());
+    writeContent(itemId, pass, /*passes,*/sourceLine, rows, outFolder, dataIndex, result.toByteArray());
   }
 
-  private void writeContent(String itemId, int pass, /*int passes,*/int csvLine, int rows, String outFolder, int dataIndex, byte[] result) throws IOException {
+  private void writeContent(String itemId, int pass, /*int passes,*/int sourceLine, int rows, String outFolder, int dataIndex, byte[] result)
+      throws IOException {
     flushContent(itemId, rows, outFolder, dataIndex, result);
     if ((rows % 2048) == 0) {
       long now = new Date().getTime();
       System.out.println("STATUS - got " + rows + " rows " + writeRate(rows, now - startMillis)
-          + (dataIndex > 0 ? "" : (pass > 1 ? " @line " + csvLine : "") + " @pass " + pass/*"/"+passes*/) + " (arco "
+          + (dataIndex > 0 ? "" : (pass > 1 ? " @line " + sourceLine : "") + " @pass " + pass/*"/"+passes*/) + " (arco "
           + writePercentage(arcoMillis, now - startMillis) + ")");
     }
   }
@@ -218,7 +238,9 @@ public class RdfAltoAdige {
   };
 
   static void zWrite(String outFolder, String name, byte[] content, String suffix) throws IOException {
-    Files.write(zfs(outFolder, suffix).getPath(name), content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE); // jre 1.8 bug: needs explicit option
+    Path path = zfs(outFolder, suffix).getPath(name);
+    Files.write(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE); // jre 1.8 bug: needs explicit option
+    Files.setLastModifiedTime(path, FileTime.fromMillis(System.currentTimeMillis()));
   }
 
   @SuppressWarnings("unchecked")
@@ -242,21 +264,24 @@ public class RdfAltoAdige {
 
   int maxTry = 3, tryWait = 15, timeout = 30;
 
-  String csvProperty(int pass) {
-    return properties.getProperty("" + pass + ".csv");
+  String sourceProperty(int pass) {
+    return properties.getProperty("" + pass + ".source");
   }
 
-  CsvRow2domReader getPassReader(int pass) throws Exception {
-    String csvUrl = csvProperty(pass), /*splitter = properties.getProperty("" + pass + ".splitter"), split = properties.getProperty("" + pass + ".split"),*/
+  RowReader getPassReader(int pass) throws Exception {
+    String sourceUrl = sourceProperty(pass), /*splitter = properties.getProperty("" + pass + ".splitter"), split = properties.getProperty("" + pass + ".split"),*/
     filterCell = properties.getProperty("" + pass + ".filterCell", "").trim()/*, charset = properties.getProperty("" + pass + ".charset"), separator = properties.getProperty("" + pass + ".separator")*/;
-    Set<String> filter = filterCell != null ? filter(filterCell, pass) : null;
+    Set<String> filter = filterCell.length() > 0 ? filter(filterCell, pass) : null;
+    String passClass = properties.getProperty("" + pass + ".class", "").trim();
     for (int tryCount = 1;; tryCount++) {
       try { //System.out.println("STATUS - reading @" + csvUrl);
         //return new CsvRow2domReader(csvUrl, splitter, split, true, timeout, true, filter, filterCell, charset, separator); 
-        return new CsvRow2domReader(csvUrl, true, timeout, true, filter, filterCell, properties, "" + pass);
+        return ((RowReader) Class.forName("it.beniculturali.dati.od2lod.rdfRegioni.bolzano." + (passClass.length() > 0 ? passClass : "CsvRow2domReader"))
+            .newInstance()).get(sourceUrl, true, timeout, true, filter, filterCell, properties, "" + pass);
       } catch (Exception e) {
         if (tryCount == maxTry) throw e;
         System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry + " " + e);
+        e.printStackTrace();
         Thread.sleep(tryWait * 1000);
       }
     }
@@ -344,9 +369,61 @@ public class RdfAltoAdige {
     return result;
   }
 
+  boolean checksumasdate(int dataIndex) {
+    String checksumasdate = properties.getProperty("" + dataIndex + ".checksumasdate");
+    return checksumasdate != null && (checksumasdate.compareToIgnoreCase("true") == 0 || checksumasdate.compareTo("1") == 0);
+  }
+
+  byte[] inputstream2bytes(InputStream inputStream) throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    int readLen, bufLen = 4 * 0x400; /* 4KB */
+    byte[] buf = new byte[bufLen];
+    while ((readLen = inputStream.read(buf, 0, bufLen)) != -1)
+      baos.write(buf, 0, readLen);
+    return baos.toByteArray();
+  }
+
+  String tohexString(byte[] b) {
+    StringBuffer sb = new StringBuffer();
+    for (int j = 0; j < b.length; j++) {
+      sb.append(Integer.toHexString((b[j] & 0xFF) | 0x100).substring(1, 3));
+    } //System.out.println("out:'"+sb.toString()+"'");
+    return sb.toString();
+  }
+
   String dateStamp(int dataIndex, boolean read) throws Exception {
     String dateDocument = properties.getProperty("" + dataIndex + ".dateDocument");
-    if (dateDocument != null) {
+    if (checksumasdate(dataIndex) && dateDocument != null) { // file: può usare data della risorsa
+      for (int tryCount = 1;; tryCount++) {
+        try {
+          System.out.println("STATUS - reading @" + dateDocument);
+          /*Http*/URLConnection connection = (/*Http*/URLConnection) (new URL(dateDocument)).openConnection();
+          connection.connect();
+          InputStream inputStream = connection.getInputStream();
+          if (connection instanceof HttpURLConnection) {
+            int status = ((HttpURLConnection) connection).getResponseCode();
+            if (status != 200) {
+              inputStream.close();
+              throw new IOException("ERROR - bad response code: " + status);
+            }
+          }
+          String result = null;
+          try {
+            result = tohexString(MessageDigest.getInstance("MD5").digest(inputstream2bytes(inputStream)));
+          } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            throw (e);
+          } finally {
+            inputStream.close();
+          }
+          return result;
+        } catch (Exception e) {
+          if (tryCount == maxTry) throw e;
+          System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry);
+          Thread.sleep(tryWait * 1000);
+        }
+      }
+    } else if (dateDocument != null) {
       for (int tryCount = 1;; tryCount++) {
         try {
           System.out.println("STATUS - reading @" + dateDocument);
@@ -366,12 +443,12 @@ public class RdfAltoAdige {
     if (!read) return null;
     String datePath = properties.getProperty("" + dataIndex + ".date");
     if (datePath == null) {
-      URL url = new URL(csvProperty(dataIndex));
+      URL url = new URL(sourceProperty(dataIndex));
       if (url.getProtocol().compareToIgnoreCase("file") == 0) return datestampFormat().format(new Date(new File(url.getPath()).lastModified()));
       return null;
     }
     String passDate = null;
-    CsvRow2domReader r2d = getPassReader(dataIndex);
+    RowReader r2d = getPassReader(dataIndex);
     for (Document row; (row = r2d.next()) != null;) {
       String rowDate = (String) xPath.evaluate(datePath, row, XPathConstants.STRING);
       if (rowDate != null && rowDate.length() > 0 && (passDate == null || passDate.compareTo(rowDate) < 0)) passDate = rowDate;
@@ -387,13 +464,11 @@ public class RdfAltoAdige {
     return result;
   }
 
-  String lastUpdateDate(int dataIndex) throws Exception {
-    return lastUpdateDate(dataIndex, false);
-  }
-
+  //String lastUpdateDate(int dataIndex) throws Exception {return lastUpdateDate(dataIndex, false);}
   String lastUpdateDate(int dataIndex, boolean read) throws Exception {
     List<String>/*ids = passes(),*/dates = new ArrayList<String>();
-    for (int pass = dataIndex > 0 ? dataIndex : 1;; pass++) {
+    for (int pass = dataIndex > 0 ? dataIndex : 1;; pass++) { // not working when mixing dates and checksum but currently not an use case
+      // invoking class CSV2RDF has always dataset as monitorParam in toRDF.properties and result check is != (not equal)   
       if (dataIndex > 0 && pass > dataIndex) break;
       String date = dateStamp(pass, read);
       if (date == null) break;
@@ -409,6 +484,7 @@ public class RdfAltoAdige {
   }
 
   void writeDateStamp(String date, String outFolder) throws UnsupportedEncodingException, IOException {
+    if (date == null) date = datestampFormat().format(new Date());
     Files.write(Paths.get(outFolder, "datestamp.isodate"), date.getBytes(encoding));
   }
 
@@ -537,7 +613,7 @@ public class RdfAltoAdige {
           converter.addXSTLConverter(uri.getScheme().equals("jar") ? FileSystems.newFileSystem(uri, new HashMap<String, String>()).getPath(rdfizerXslt) : Paths
               .get(uri));
         }
-        CsvRow2domReader r2d = getPassReader(pass);
+        RowReader r2d = getPassReader(pass);
         /*String rmp = properties.getProperty("" + pass + ".rmDup");
         if (rmp!=null) System.out.println("INFO - remove duplicates " + rmp + " @" + dataset);//String rmp = "row/cell[@name='NCTN']";
         Set<String>rmSet = new HashSet<String>();*/
@@ -545,15 +621,26 @@ public class RdfAltoAdige {
         String skiparco = properties.getProperty("" + pass + ".skip.arco");
         String filtercode = properties.getProperty("" + pass + ".filterCode");
         boolean convert = skiparco == null || skiparco.compareToIgnoreCase("true") != 0;
+        List<byte[]> source = null;
         int skip = 0;
-        for (Document row; (row = r2d.next()) != null; rows++) {
+        for (Document row; (row = r2d.next(source = dump ? new ArrayList<byte[]>() : null)) != null; rows++) {
           String rowitemId = null;
           try {
             rowitemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
+            /* inventario con prefisso lav univoco ma andrebbe risolto riferimento in dc:source
+            String inventario = (String)xPath.evaluate("row/cell[@name='IN']", row, XPathConstants.STRING);
+            if (inventario!=null && inventario.toLowerCase().startsWith("lav")) rowitemId = inventario;
+             */
             if (filtercode != null) {
-              rowitemId = filtercode(rowitemId, row, filtercode);
-              if (rowitemId == null) {
+              String filterId = filtercode(rowitemId, row, filtercode);
+              if (filterId == null) {
                 skip++;
+                if (dump && source != null && !source.isEmpty()) {
+                  String itemId = rowitemId + "_skip_" + rows + "_";
+                  for (int k = 0; k < source.size(); k++) {
+                    zWrite(outFolder, itemId + k + ".source.xml", source.get(k), "_" + pass);
+                  }
+                }
                 continue;
               }
             }
@@ -581,11 +668,19 @@ public class RdfAltoAdige {
                 baos.reset();
                 xtr[xj].setParameter(new QName("datestamp"), new XdmAtomicValue(rowDate));
                 xtr[xj].setParameter(new QName("itemid"), new XdmAtomicValue(rowitemId));
-                if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row), "_" + pass);
+                if (dump) zWrite(outFolder, itemId + ".source2.xml", document2bytes(row), "_" + pass);
                 xtr[xj].setSource(new DOMSource(row)); //System.out.println("@id " + itemId);      
                 xtr[xj].transform();
                 ba = baos.toByteArray();
-                if (dump) zWrite(outFolder, itemId + ".xml", ba, "_" + pass);
+                if (dump) {
+                  zWrite(outFolder, itemId + ".xml", ba, "_" + pass);
+                  if (source != null && !source.isEmpty()) { //System.out.println("source.size() is " + source.size());
+                    for (int k = 0; k < source.size(); k++) {
+                      zWrite(outFolder, itemId + "." + k + ".source.xml", source.get(k), "_" + pass);
+                    }
+                  }
+                  //else if (source!=null) System.out.println("source is empty");
+                }
                 if (convert) {
                   long start = new Date().getTime();
                   try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
@@ -639,7 +734,8 @@ public class RdfAltoAdige {
           //if (line==2) break; // test
         }
         skip = r2d.skip() + skip;
-        System.out.println("STATUS - got " + (skip > 0 ? "" + (r2d.line() - skip - 1) + "/" : "") + (r2d.line() - 1) + " lines @dataset " + dataset);
+        //System.out.println("STATUS - got " + (skip>0?""+(/*r2d.line()-1*/r2d.rows()-skip)+"/":"") + /*(r2d.line()-1)*/r2d.rows() + " rows @dataset " + dataset);
+        System.out.println("STATUS - got " + (/*r2d.line()-1*/r2d.rows() - skip) + "/" + /*(r2d.line()-1)*/r2d.rows() + " rows @dataset " + dataset);
         r2d.close();
       }
       closeContent();
@@ -673,6 +769,29 @@ public class RdfAltoAdige {
       }
       if (args[j].startsWith("-dataset:")) {
         dataIndex = Integer.parseInt(args[j].substring(9));
+        continue;
+      }
+      if (args[j].compareTo("-nocert") == 0) {
+        // Create a trust manager that does not validate certificate chains
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+          public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            return null;
+          }
+
+          public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+          }
+
+          public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+          }
+        } };// Install the all-trusting trust manager
+        try {
+          SSLContext sc = SSLContext.getInstance("SSL");
+          sc.init(null, trustAllCerts, new java.security.SecureRandom());
+          HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+          System.err.println("got " + e);
+        }
+        // /Create a trust manager that does not validate certificate chains
         continue;
       }
       uso();

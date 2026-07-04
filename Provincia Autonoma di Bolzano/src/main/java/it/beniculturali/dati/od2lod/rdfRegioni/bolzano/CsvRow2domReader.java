@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -28,13 +25,15 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.RFC4180ParserBuilder;
 
-public class CsvRow2domReader {
+public class CsvRow2domReader implements RowReader {
+  CsvRow2domReader() {
+  };
+
   private CSVReader reader;
   private Set<String> splitFields = null, filter = null;
   private DocumentBuilder documentBuilder;
@@ -87,11 +86,8 @@ public class CsvRow2domReader {
   //CsvRow2domReader(String url, String splitter, String splitFields, boolean preload, int timeout, boolean RFC4180Parser) throws IOException, ParserConfigurationException {this(url, splitter, splitFields, false, timeout, true, null, null);}
   //CsvRow2domReader(String url, String splitter, String splitFields, boolean preload, int timeout, boolean RFC4180Parser, Set<String>filter, String cellFilter) throws IOException, ParserConfigurationException {this(url, splitter, splitFields, false, timeout, true, filter, cellFilter, null, null);}
   //CsvRow2domReader(String url, String splitter, String splitFields, boolean preload, int timeout, boolean RFC4180Parser, Set<String>filter, String cellFilter, String charset, String separator) throws IOException, ParserConfigurationException{
-  CsvRow2domReader(String url) throws IOException, ParserConfigurationException {
-    this(url, default_preload, default_timeout, default_RFC4180Parser, null, null, null, null);
-  }
-
-  CsvRow2domReader(String url, boolean preload, int timeout, boolean rfc4180Parser, Set<String> filter, String cellFilter, Properties p, String pp)
+  //public CsvRow2domReader get(String url)throws IOException, ParserConfigurationException{return get(url, default_preload, default_timeout, default_RFC4180Parser, null, null, null, null);}
+  public CsvRow2domReader get(String url, boolean preload, int timeout, boolean rfc4180Parser, Set<String> filter, String cellFilter, Properties p, String pp)
       throws IOException, ParserConfigurationException {
     String splitter = null, splitFields = null;
     if (p != null) {
@@ -117,7 +113,7 @@ public class CsvRow2domReader {
       System.out.println("INFO - splitter is '" + this.splitter + "'");
     }
     //reader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream(), StandardCharsets.UTF_8))).withCSVParser(new RFC4180ParserBuilder().build()).build();
-    uris = url.split(",");
+    uris = url.split(";");
     fieldmap = new ArrayList<Map<String, String>>();
     String fms = p != null ? p.getProperty(pp + ".fieldmap") : null;
     if (fms != null) {
@@ -150,6 +146,7 @@ public class CsvRow2domReader {
       }
       for (int j=0;j<fieldNames.length;j++)cell2index.put(fieldNames[j], new Integer(j));
      */
+    return this;
   }
 
   private Map<String, String> string2map(String s) {
@@ -224,11 +221,15 @@ public class CsvRow2domReader {
 
   private int lines = 1, skip = 0;
 
-  int line() {
+  public int line() {
     return lines;
   }
 
-  int skip() {
+  public int rows() {
+    return lines - 1;
+  }
+
+  public int skip() {
     return skip;
   }
 
@@ -257,7 +258,11 @@ public class CsvRow2domReader {
     return values[cell2index.get(cell)];
   }
 
-  Document next() throws IOException {
+  public Document next() throws IOException {
+    return next(null);
+  }
+
+  public Document next(List<byte[]> source) throws IOException {
     for (;;) {
       String[] fieldValues = reader.readNext();
       if (fieldValues == null) {
@@ -276,7 +281,7 @@ public class CsvRow2domReader {
     }
   }
 
-  void close() throws IOException {
+  public void close() throws IOException {
     if (reader == null) return;
     reader.close();
     reader = null;
