@@ -70,33 +70,27 @@
    <xsl:element name="CMP">
     <xsl:attribute name="hint">REDAZIONE E VERIFICA SCIENTIFICA</xsl:attribute>
     <xsl:element name="CMPD">
-     <xsl:attribute name="hint">Anno di redazione</xsl:attribute>2016</xsl:element>
+     <xsl:attribute name="hint">Anno di redazione</xsl:attribute>2026</xsl:element>
    </xsl:element>
   </xsl:element>  
     
  </xsl:element>
  
  <xsl:element name="harvesting">
-  <xsl:element name="label_de"><xsl:value-of select="cell[@name='BEZEICHNUNG_D']"/></xsl:element>
-  <xsl:element name="city_de"><xsl:value-of select="cell[@name='ORTSCHAFT_D']"/></xsl:element>
+  <xsl:element name="label_de"  ><xsl:value-of select="cell[@name='BEZEICHNUNG_D']"/></xsl:element>
+  <xsl:element name="city_de"   ><xsl:value-of select="cell[@name='ORTSCHAFT_D']"/></xsl:element>
   <xsl:element name="address_de"><xsl:value-of select="cell[@name='ADRESSE_D']"/></xsl:element>
   
-  <!-- NON INVIATO A FABIO -->
   <xsl:element name="info">
-   <xsl:if test="cell[@name='TELEFON'][text()!='']"><xsl:element name="telefono"><xsl:value-of select="cell[@name='TELEFON']"/></xsl:element>
-   </xsl:if>
-   <xsl:if test="cell[@name='TELEFON 2'][text()!='']"><xsl:element name="telefono2"><xsl:value-of select="cell[@name='TELEFON 2']"/></xsl:element>
-   </xsl:if>
-   <xsl:if test="cell[@name='FAX'][text()!='']"><xsl:element name="fax"><xsl:value-of select="cell[@name='FAX']"/></xsl:element>
-   </xsl:if>
-   <xsl:if test="cell[@name='EMAIL_I'][text()!='']"><xsl:element name="email"><xsl:value-of select="cell[@name='EMAIL_I']"/></xsl:element>
-   </xsl:if>
+   <xsl:if test="cell[@name='TELEFON'  ][text()!='']"><xsl:element name="telefono" ><xsl:value-of select="cell[@name='TELEFON']"/></xsl:element></xsl:if>
+   <xsl:if test="cell[@name='TELEFON 2'][text()!='']"><xsl:element name="telefono2"><xsl:value-of select="cell[@name='TELEFON 2']"/></xsl:element></xsl:if>
+   <xsl:if test="cell[@name='FAX'      ][text()!='']"><xsl:element name="fax"      ><xsl:value-of select="cell[@name='FAX']"/></xsl:element></xsl:if>
+   <xsl:if test="cell[@name='EMAIL_I'  ][text()!='']"><xsl:element name="email"    ><xsl:value-of select="cell[@name='EMAIL_I']"/></xsl:element></xsl:if>
   </xsl:element>
-  <xsl:if test="cell[@name='EINTRITT_I'][text()!='']"><xsl:element name="biglietto"><xsl:value-of select="cell[@name='EINTRITT_I']"/></xsl:element>
-  </xsl:if>
-  <xsl:if test="cell[@name='ÖFFNUNGSZEITEN_I'][text()!='']"><xsl:element name="orario"><xsl:value-of select="cell[@name='ÖFFNUNGSZEITEN_I']"/></xsl:element>
-  </xsl:if>
-  <!-- NON INVIATO A FABIO -->
+  <xsl:if test="cell[@name='EINTRITT_I'      ][text()!='']"><xsl:element name="biglietto"><xsl:value-of select="cell[@name='EINTRITT_I']"/></xsl:element></xsl:if>
+  <xsl:if test="cell[@name='ÖFFNUNGSZEITEN_I'][text()!='']"><xsl:element name="orario"   ><xsl:value-of select="cell[@name='ÖFFNUNGSZEITEN_I']"/></xsl:element></xsl:if>
+  <xsl:if test="cell[@name='main_image'][text()!='']"><xsl:element name="main_image"   ><xsl:value-of select="cell[@name='main_image']"/></xsl:element></xsl:if>
+  
  </xsl:element>
  
 </schede>

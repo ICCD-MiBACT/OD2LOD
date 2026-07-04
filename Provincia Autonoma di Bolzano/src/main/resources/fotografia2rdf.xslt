@@ -69,6 +69,7 @@
      
      <xsl:for-each select="harvesting/rights">
       <xsl:element name="dc:rights">
+
        <xsl:variable name="rights">
         <xsl:choose>
          <xsl:when test="@decode='true'">
@@ -76,15 +77,19 @@
           <xsl:call-template name="mus"/>
          </xsl:when>
           <xsl:otherwise>
+
            <xsl:value-of select="."/>
+           <!--
            <xsl:if test="../xri and ../mus">
             <xsl:value-of select="../xri"/>
             <xsl:for-each select="../mus"><xsl:call-template name="mus"/></xsl:for-each>
            </xsl:if>
+           -->
           </xsl:otherwise>
         </xsl:choose>
        </xsl:variable>
        <xsl:value-of select="$rights"/>
+       
       </xsl:element>
      </xsl:for-each>
      

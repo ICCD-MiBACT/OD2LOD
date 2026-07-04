@@ -86,6 +86,7 @@
    </xsl:element>
   </xsl:element>
   
+  <xsl:if test="cell[@name='GEOKOORDINATE_X']">
   <xsl:element name="GE">	
    <xsl:attribute name="hint">GEOREFERENZIAZIONE</xsl:attribute>
    <xsl:element name="GEL">
@@ -100,22 +101,24 @@
      <xsl:attribute name="hint">Coordinata y</xsl:attribute><xsl:value-of select="cell[@name='GEOKOORDINATE_Y']"/></xsl:element>
    </xsl:element>
   </xsl:element>  
+  </xsl:if>
   
   <xsl:element name="CM">	
    <xsl:attribute name="hint">CERTIFICAZIONE E GESTIONE DEI DATI</xsl:attribute>
    <xsl:element name="CMP">
     <xsl:attribute name="hint">REDAZIONE E VERIFICA SCIENTIFICA</xsl:attribute>
     <xsl:element name="CMPD">
-     <xsl:attribute name="hint">Anno di redazione</xsl:attribute>2016</xsl:element>
+     <xsl:attribute name="hint">Anno di redazione</xsl:attribute>2026</xsl:element>
    </xsl:element>
   </xsl:element>  
     
  </xsl:element>
  
  <xsl:element name="harvesting">
-  <xsl:element name="label_de"><xsl:value-of select="cell[@name='BEZEICHNUNG_D']"/></xsl:element>
-  <xsl:element name="city_de"><xsl:value-of select="cell[@name='ORTSCHAFT_D']"/></xsl:element>
+  <xsl:element name="label_de"  ><xsl:value-of select="cell[@name='BEZEICHNUNG_D']"/></xsl:element>
+  <xsl:element name="city_de"   ><xsl:value-of select="cell[@name='ORTSCHAFT_D']"/></xsl:element>
   <xsl:element name="address_de"><xsl:value-of select="cell[@name='ADRESSE_D']"/></xsl:element>
+  <xsl:if test="cell[@name='main_image'][text()!='']"><xsl:element name="main_image"   ><xsl:value-of select="cell[@name='main_image']"/></xsl:element></xsl:if>
  </xsl:element>
  
 </schede>

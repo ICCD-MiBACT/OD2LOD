@@ -25,7 +25,25 @@
   </xsl:choose>
  </xsl:template>
  
- <xsl:template match="row[cell[@name='MUS']!='TAP']">
+ <xsl:template name="accc1">
+  <xsl:choose>
+   <xsl:when test="starts-with(translate(cell[@name='IN'],'LAV','lav'),'lav')">
+    <xsl:value-of select="cell[@name='IN']"/></xsl:when>
+   <xsl:otherwise>
+    <xsl:value-of select="cell[@name='priref']"/></xsl:otherwise>
+  </xsl:choose>
+ </xsl:template>
+ <xsl:template name="accc2">
+  <xsl:choose>
+   <xsl:when test="starts-with(translate(cell[@name='IN'],'LAV','lav'),'lav')">
+    <xsl:value-of select="cell[@name='priref']"/></xsl:when>
+   <xsl:otherwise>
+    <xsl:value-of select="cell[@name='IN']"/></xsl:otherwise>
+  </xsl:choose>
+ </xsl:template>
+  
+ <xsl:template match="row[cell[@name='MUS']!='TAP']"><!-- Eliminare i dati attribuiti all'ente TAP (Archivio Tirolese per la documentazione e l'arte fotografica di Lienz (TAP) perchè non sono italiani e non devono stare nel Catalogo -->
+ 
 <record>
  <header>
   <xsl:element name="identifier">
@@ -166,20 +184,46 @@
     
     <xsl:element name="AC">                  <!-- CI SONO 2 ACCC. PROBLEMA PER rdfizer? -->
      <xsl:attribute name="hint">ALTRI CODICI</xsl:attribute>
+     
      <xsl:element name="ACC">
       <xsl:attribute name="hint">CODICE SCHEDA - ALTRI ENTI</xsl:attribute>
       <xsl:element name="ACCE">
        <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
       <xsl:element name="ACCC">
-       <xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="cell[@name='priref']"/></xsl:element>
+       <xsl:attribute name="hint">Codice identificativo</xsl:attribute>
+       <xsl:value-of select="cell[@name='priref']"/>
+      </xsl:element>
      </xsl:element>
      <xsl:element name="ACC">
       <xsl:attribute name="hint">CODICE SCHEDA - ALTRI ENTI</xsl:attribute>
       <xsl:element name="ACCE">
        <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
       <xsl:element name="ACCC">
-       <xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="cell[@name='IN']"/></xsl:element>
+       <xsl:attribute name="hint">Codice identificativo</xsl:attribute>
+       <xsl:value-of select="cell[@name='IN']"/>
+      </xsl:element>
      </xsl:element>
+    <!-- 
+     <xsl:element name="ACC">
+      <xsl:attribute name="hint">CODICE SCHEDA - ALTRI ENTI</xsl:attribute>
+      <xsl:element name="ACCE">
+       <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+      <xsl:element name="ACCC">
+       <xsl:attribute name="hint">Codice identificativo</xsl:attribute>
+       <xsl:call-template name="accc1"/>
+      </xsl:element>
+     </xsl:element>
+     <xsl:element name="ACC">
+      <xsl:attribute name="hint">CODICE SCHEDA - ALTRI ENTI</xsl:attribute>
+      <xsl:element name="ACCE">
+       <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+      <xsl:element name="ACCC">
+       <xsl:attribute name="hint">Codice identificativo</xsl:attribute>
+       <xsl:call-template name="accc2"/>
+      </xsl:element>
+     </xsl:element>
+     -->
+     
     </xsl:element>
     
     <xsl:element name="LR">
@@ -225,9 +269,9 @@
       </xsl:element>
     </xsl:element>
     
-    <xsl:variable name="cl" select="normalize-space(cell[@name='CL_it'])"/>
+    <xsl:variable name="cl" select="normalize-space(string-join(cell[@name='CL_it'], '; '))"/>
     <xsl:variable name="in" select="normalize-space(cell[@name='IN'])"/>
-    <xsl:if test="string-length($cl)>0 or string-length($in)>0">
+    <xsl:if test="string-length($cl)&gt;0 or string-length($in)&gt;0">
      <xsl:element name="UB">
       <xsl:attribute name="hint">DATI PATRIMONIALI/INVENTARI/STIME/COLLEZIONI</xsl:attribute>
       <xsl:if test="string-length($cl)>0">
@@ -256,7 +300,7 @@
        <xsl:element name="AUTN">
         <xsl:attribute name="hint">Nome di persona o ente</xsl:attribute><xsl:value-of select="$vv"/></xsl:element>
        <xsl:choose>
-        <xsl:when test="contains($vv,',')">
+        <xsl:when test="contains($vv,',') and not(contains($vv,'; '))">
          <xsl:element name="AUTP">
           <xsl:attribute name="hint">Tipo intestazione</xsl:attribute>P</xsl:element>
         </xsl:when>
@@ -300,19 +344,33 @@
      </xsl:if>
     </xsl:element>
     </xsl:if>
-    <xsl:if test="string-length(cell[@name='DS']) or string-length(cell[@name='DE'])">
+    <xsl:if test="count(cell[@name='DS']|cell[@name='DE'])&gt;0">
      <xsl:element name="DT">
       <xsl:attribute name="hint">CRONOLOGIA</xsl:attribute>
       <xsl:element name="DTS">
-       <xsl:attribute name="hint">CRONOLOGIA SPECIFICA</xsl:attribute>
-       <xsl:if test="string-length(cell[@name='DS'])">
+       <xsl:attribute name="hint">CRONOLOGIA SPECIFICA</xsl:attribute><!--
+       <xsl:if test="string-length(cell[@name='DS'])"> -->
+       <xsl:for-each select="cell[@name='DS'][string-length(normalize-space(.))&gt;0]">
+        <xsl:sort select="." data-type="number" />
+        <xsl:if test="position()=1">
         <xsl:element name="DTSI">
-         <xsl:attribute name="hint">Da</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DS'], '.')"/>/<xsl:value-of select="substring(cell[@name='DS'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DS'], string-length(cell[@name='DS']) - 1)"/></xsl:element>
+         <xsl:attribute name="hint">Da</xsl:attribute><!-- <xsl:value-of select="substring-before(cell[@name='DS'], '.')"/>/<xsl:value-of select="substring(cell[@name='DS'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DS'], string-length(cell[@name='DS']) - 1)"/> -->
+         <xsl:value-of select="translate(.,'-','/')"/>
+        </xsl:element>
+        </xsl:if>
+       </xsl:for-each><!--
        </xsl:if> 
-       <xsl:if test="string-length(cell[@name='DE'])">
+       <xsl:if test="string-length(cell[@name='DE'])"> -->
+       <xsl:for-each select="cell[@name='DE'][string-length(normalize-space(.))&gt;0]">
+        <xsl:sort select="." data-type="number" />
+        <xsl:if test="position()=last()">
         <xsl:element name="DTSF">
-         <xsl:attribute name="hint">A</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DE'], '.')"/>/<xsl:value-of select="substring(cell[@name='DE'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DE'], string-length(cell[@name='DE']) - 1)"/></xsl:element>
-        </xsl:if> 
+         <xsl:attribute name="hint">A</xsl:attribute><!-- <xsl:value-of select="substring-before(cell[@name='DE'], '.')"/>/<xsl:value-of select="substring(cell[@name='DE'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DE'], string-length(cell[@name='DE']) - 1)"/></xsl:element> -->
+         <xsl:value-of select="translate(.,'-','/')"/>
+        </xsl:element>
+        </xsl:if>
+       </xsl:for-each><!--
+       </xsl:if> -->
       </xsl:element>
      </xsl:element>
     </xsl:if>
@@ -325,7 +383,7 @@
       <xsl:attribute name="hint">MATERIA E TECNICA</xsl:attribute>
       <xsl:if test="cell[@name='MA_it']">
        <xsl:element name="MTCM">
-        <xsl:attribute name="hint">Materia</xsl:attribute><xsl:value-of select="cell[@name='MA_it']"/></xsl:element>
+        <xsl:attribute name="hint">Materia</xsl:attribute><xsl:value-of select="string-join(cell[@name='MA_it'],', ')"/></xsl:element>
       </xsl:if>
      	<xsl:for-each select="cell[@name='TK_it']">
        <xsl:element name="MTCT">
@@ -354,6 +412,8 @@
    <xsl:otherwise>
     <xsl:element name="MODI">
     
+    <xsl:attribute name="version">4.00</xsl:attribute>
+ 
 		<xsl:element name="CD">
 		<xsl:attribute name="hint">IDENTIFICAZIONE</xsl:attribute>
 			<xsl:element name="TSK">
@@ -364,20 +424,46 @@
 			 <xsl:attribute name="hint">Ente schedatore</xsl:attribute>P021</xsl:element>
 			<!--<xsl:element name="ECP">
 			 <xsl:attribute name="hint">Ente competente</xsl:attribute>P021</xsl:element>-->
-			<xsl:element name="ACC">
-			 <xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
-				<xsl:element name="ACCE">
-				 <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
-				<xsl:element name="ACCC">
-				 <xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="cell[@name='priref']"/></xsl:element>
-			</xsl:element>
-			<xsl:element name="ACC">
-			<xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
-				<xsl:element name="ACCE">
-				<xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
-				<xsl:element name="ACCC">
-				<xsl:attribute name="hint">Codice identificativo</xsl:attribute><xsl:value-of select="cell[@name='IN']"/></xsl:element>
-			</xsl:element>
+    
+   <xsl:element name="ACC">
+    <xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
+    <xsl:element name="ACCE">
+     <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+    <xsl:element name="ACCC">
+     <xsl:attribute name="hint">Codice identificativo</xsl:attribute>
+     <xsl:value-of select="cell[@name='priref']"/>
+    </xsl:element>
+   </xsl:element>
+   <xsl:element name="ACC">
+    <xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
+    <xsl:element name="ACCE">
+     <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+    <xsl:element name="ACCC">
+     <xsl:attribute name="hint">Codice identificativo</xsl:attribute>
+     <xsl:value-of select="cell[@name='IN']"/>
+    </xsl:element>
+   </xsl:element>
+   <!--
+   <xsl:element name="ACC">
+    <xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
+    <xsl:element name="ACCE">
+     <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+    <xsl:element name="ACCC">
+     <xsl:attribute name="hint">Codice identificativo</xsl:attribute>
+     <xsl:call-template name="accc1"/>
+    </xsl:element>
+   </xsl:element>
+   <xsl:element name="ACC">
+    <xsl:attribute name="hint">ALTRA IDENTIFICAZIONE</xsl:attribute>
+    <xsl:element name="ACCE">
+     <xsl:attribute name="hint">Ente/soggetto responsabile</xsl:attribute>Provincia autonoma di Bolzano</xsl:element>
+    <xsl:element name="ACCC">
+     <xsl:attribute name="hint">Codice identificativo</xsl:attribute>
+     <xsl:call-template name="accc2"/>
+    </xsl:element>
+   </xsl:element>
+   -->
+   
 		</xsl:element>
 		
 		<xsl:element name="OG">
@@ -593,12 +679,13 @@ contains($OB_it,'Gästebuch')">storico artistico</xsl:when>
 				<xsl:otherwise>non individuabile</xsl:otherwise>
 				</xsl:choose>
 			</xsl:element>
-			<xsl:element name="OGD">
-				<xsl:attribute name="hint">Definizione</xsl:attribute><xsl:value-of select="$OB_it"/></xsl:element>
-			<xsl:element name="OGT">
-				<xsl:attribute name="hint">Tipologia</xsl:attribute><xsl:value-of select="cell[@name='OB_it_syn']"/></xsl:element>
+			<xsl:element name="OGD"><xsl:attribute name="hint">Definizione</xsl:attribute><xsl:value-of select="$OB_it"/></xsl:element>
+   <xsl:if test="cell[@name='OB_it_syn']">
+ 			<xsl:element name="OGT"><xsl:attribute name="hint">Tipologia</xsl:attribute><xsl:value-of select="cell[@name='OB_it_syn']"/></xsl:element>
+   </xsl:if>
+   
 		</xsl:element>
-		
+  
 		<xsl:element name="LC">
 		<xsl:attribute name="hint">LOCALIZZAZIONE</xsl:attribute>
 			<xsl:element name="LCS">
@@ -614,21 +701,35 @@ contains($OB_it,'Gästebuch')">storico artistico</xsl:when>
 			</xsl:for-each>
 		</xsl:element>
 		
-		<xsl:if test="string-length(cell[@name='DS']) or string-length(cell[@name='DE'])">
+		<xsl:if test="count(cell[@name='DS']|cell[@name='DE'])&gt;0">
 		<!-- ci sarebbe DTR-Riferimento cronologico (obbligatorio) per mettere il secolo di riferimento (calcolare in base a primi 2 numeri della data?) -->
 		
 		<xsl:element name="DT">
 			<xsl:attribute name="hint">CRONOLOGIA</xsl:attribute>
 			<xsl:element name="DTS">
-				<xsl:attribute name="hint">CRONOLOGIA SPECIFICA</xsl:attribute>
-				<xsl:if test="string-length(cell[@name='DS'])">
+				<xsl:attribute name="hint">CRONOLOGIA SPECIFICA</xsl:attribute><!--
+				<xsl:if test="string-length(cell[@name='DS'])"> -->
+    <xsl:for-each select="cell[@name='DS'][string-length(normalize-space(.))&gt;0]">
+     <xsl:sort select="." data-type="number" />
+     <xsl:if test="position()=1">
 					<xsl:element name="DTSI">
-						<xsl:attribute name="hint">Da</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DS'], '.')"/>/<xsl:value-of select="substring(cell[@name='DS'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DS'], string-length(cell[@name='DS']) - 1)"/></xsl:element>
-				</xsl:if> 
-				<xsl:if test="string-length(cell[@name='DE'])">
+						<xsl:attribute name="hint">Da</xsl:attribute><!-- <xsl:value-of select="substring-before(cell[@name='DS'], '.')"/>/<xsl:value-of select="substring(cell[@name='DS'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DS'], string-length(cell[@name='DS']) - 1)"/> -->
+      <xsl:value-of select="translate(.,'-','/')"/>
+     </xsl:element>
+     </xsl:if>
+    </xsl:for-each><!--
+				</xsl:if>
+				<xsl:if test="string-length(cell[@name='DE'])"> -->
+    <xsl:for-each select="cell[@name='DE'][string-length(normalize-space(.))&gt;0]">
+     <xsl:sort select="." data-type="number" />
+     <xsl:if test="position()=last()">
 					<xsl:element name="DTSF">
-						<xsl:attribute name="hint">A</xsl:attribute><xsl:value-of select="substring-before(cell[@name='DE'], '.')"/>/<xsl:value-of select="substring(cell[@name='DE'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DE'], string-length(cell[@name='DE']) - 1)"/></xsl:element>
-				</xsl:if> 
+						<xsl:attribute name="hint">A</xsl:attribute><!-- <xsl:value-of select="substring-before(cell[@name='DE'], '.')"/>/<xsl:value-of select="substring(cell[@name='DE'], 6, 2)"/>/<xsl:value-of select="substring(cell[@name='DE'], string-length(cell[@name='DE']) - 1)"/> -->
+      <xsl:value-of select="translate(.,'-','/')"/>
+     </xsl:element>
+     </xsl:if>
+    </xsl:for-each><!--
+				</xsl:if> -->
 			</xsl:element>
 		</xsl:element>
 		</xsl:if>
@@ -901,21 +1002,19 @@ contains($OB_it,'Gästebuch')">
 		</xsl:if>
 		
 		<xsl:element name="MT">
-		<xsl:attribute name="hint">DATI TECNICI</xsl:attribute>
+		 <xsl:attribute name="hint">DATI TECNICI</xsl:attribute>
 			
 			<xsl:if test="cell[@name='MA_it'] or cell[@name='TK_it']">
 			<xsl:element name="MTC">
 			<xsl:attribute name="hint">MATERIA E TECNICA</xsl:attribute>
 				<xsl:if test="cell[@name='MA_it']">
-				<xsl:element name="MTCM">
-				<xsl:attribute name="hint">Materia</xsl:attribute><xsl:value-of select="cell[@name='MA_it']"/></xsl:element>
+				<xsl:element name="MTCM"><xsl:attribute name="hint">Materia</xsl:attribute><xsl:value-of select="string-join(cell[@name='MA_it'],', ')"/></xsl:element>
 				</xsl:if>
 				<xsl:for-each select="cell[@name='TK_it']">
-					<xsl:element name="MTCT">
-					<xsl:attribute name="hint">Tecnica</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
+					<xsl:element name="MTCT"><xsl:attribute name="hint">Tecnica</xsl:attribute><xsl:value-of select="normalize-space()"/></xsl:element>
 				</xsl:for-each>
 			</xsl:element>
-     			</xsl:if>
+			</xsl:if>
 			
 			<xsl:apply-templates select="cell[@name='dim_it']"/>
 		</xsl:element>
@@ -967,8 +1066,10 @@ contains($OB_it,'Gästebuch')">
      <xsl:element name="media"><xsl:value-of select="concat(.,'&amp;size=l')"/></xsl:element>
 --><!-- url encode bad plus sign and add parameters to keep position and set resolution
         nota bene: la sostituzione + => %2B è mirata sui dati dove al momento con la regola al contorno non compare mai come "url encoding" del "blank"
--->
      <xsl:element name="media"><xsl:value-of select="concat(replace(replace(replace(.,' ','%20'),'/image.file=',concat('/image?~=',format-number(position(),'00'),'&amp;file=')),'([a-z0-9])\+([a-z0-9](\.jpg|%20))','$1%2B$2'),'&amp;size=l')"/></xsl:element>
+--><!-- https://oggetti-musei-archivi.provincia.bz.it/Content/GetContent?command=getcontent&server=SVMimages&value=SVM/a%20879%201.jpg&folderId=876&width=1024&height=1024&imageformat=jpg
+        https://oggetti-musei-archivi.provincia.bz.it/Content/GetContent?command=getcontent&server=<*institution.code*>images&value=<*institution.code*>/<*Media/media.reference/reference_number*>&folderId=<*priref*>&width=1024&height=1024&imageformat=jpg  -->
+     <xsl:element name="media"><xsl:value-of select="."/></xsl:element>
     </xsl:for-each>
     <xsl:if test="string-length(normalize-space(cell[@name='CP_geo']))">
      <xsl:element name="puntoPrincipale">
@@ -991,7 +1092,7 @@ contains($OB_it,'Gästebuch')">
       <xsl:element name="xri"><xsl:value-of select="cell[@name='XRI']"/></xsl:element>
      </xsl:if>
     </xsl:if>
-   
+    
     <xsl:variable name="ri" select="normalize-space(cell[@name='RI_it'])"/>
     <xsl:if test="string-length($mus)>0 or string-length($ri)>0">
      <xsl:element name="rights"> 
@@ -1007,6 +1108,14 @@ contains($OB_it,'Gästebuch')">
       </xsl:choose> 
      </xsl:element>
     </xsl:if>
+    <!--
+    <xsl:for-each select="cell[@name='RI_it'][string-length(normalize-space())&gt;0]">
+     <xsl:element name="rights">
+      <xsl:value-of select="."/>
+     </xsl:element>
+    </xsl:for-each>
+    -->
+    
    </xsl:element>
    
   </schede>
@@ -1018,6 +1127,7 @@ contains($OB_it,'Gästebuch')">
 		
 	 <xsl:element name="MIS">
 	  <xsl:attribute name="hint">MISURE</xsl:attribute>
+   <!--
  		<xsl:element name="MISP">
 	  	<xsl:attribute name="hint">Riferimento alla parte</xsl:attribute>supporto primario</xsl:element>
 		 <xsl:element name="MISZ">
@@ -1053,6 +1163,15 @@ contains($OB_it,'Gästebuch')">
     		<xsl:attribute name="hint">Valore</xsl:attribute><xsl:value-of select="$ALT"/>x<xsl:value-of select="$LARG"/></xsl:element>
   		</xsl:otherwise>
 	  </xsl:choose>
+   -->
+	 	<xsl:element name="MISM"><xsl:attribute name="hint">Valore</xsl:attribute><xsl:value-of                  select="substring-before(.,'; ')"/></xsl:element>
+   <xsl:if test="string-length(normalize-space(substring-before(substring-after(.,'; '),'; ')))">
+ 		 <xsl:element name="MISU"><xsl:attribute name="hint">Unità di misura</xsl:attribute><xsl:value-of        select="substring-before(substring-after(.,'; '),'; ')"/></xsl:element></xsl:if>
+   <xsl:if test="string-length(normalize-space(substring-before(substring-after(substring-after(.,'; '),'; '),'; ')))">
+  		<xsl:element name="MISP"><xsl:attribute name="hint">Riferimento alla parte</xsl:attribute><xsl:value-of select="substring-before(substring-after(substring-after(.,'; '),'; '),'; ')"/></xsl:element></xsl:if>
+   <xsl:if test="string-length(normalize-space(substring-before(substring-after(substring-after(substring-after(.,'; '),'; '),'; '),'; ')))">
+		  <xsl:element name="MISZ"><xsl:attribute name="hint">Tipo di misura</xsl:attribute><xsl:value-of         select="substring-before(substring-after(substring-after(substring-after(.,'; '),'; '),'; '),'; ')"/></xsl:element></xsl:if>
+   
 		</xsl:element>
 
  </xsl:template>

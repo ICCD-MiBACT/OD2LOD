@@ -10,6 +10,7 @@
  xmlns:smapit="https://w3id.org/italia/onto/SM/"
  xmlns:accessCondition="https://w3id.org/italia/onto/AccessCondition/"
  xmlns:potapit="https://w3id.org/italia/onto/POT/"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
  version="2.0">
 
  <xsl:param name="NS" />
@@ -63,6 +64,7 @@
   </xsl:attribute>
   <rdfs:label xml:lang="de"><xsl:value-of select="$label-de" /></rdfs:label>
   <l0:name xml:lang="de"><xsl:value-of select="$label-de" /></l0:name>
+  
   <xsl:if test="$sheetType='CG'">
    <xsl:for-each select="record/metadata/schede[harvesting/orario]">
     <xsl:element name="accessCondition:hasAccessCondition">
@@ -82,7 +84,14 @@
    <xsl:apply-templates select="record/metadata/schede/harvesting/info" mode="info1"/><!--
    <xsl:apply-templates select="record/metadata/schede/harvesting/biglietto" mode="bigl1"/>
    -->
+   <xsl:for-each select="record/metadata/schede/harvesting/main_image">
+    <xsl:element name="foaf:depiction">
+     <xsl:attribute name="rdf:resource"><xsl:value-of select="."/></xsl:attribute>
+    </xsl:element>
+   </xsl:for-each>
+   
   </xsl:if>
+  
  </rdf:Description>
  
  <xsl:if test="$sheetType='CG'">
@@ -174,8 +183,7 @@
   <xsl:if test="email">
     <xsl:element name="smapit:Email">
       <xsl:attribute name="rdf:about"><xsl:value-of select="$NS"/>Email/<xsl:value-of select="translate(normalize-space(email),$translateIdFrom,$translateIdTo)"/></xsl:attribute>
-      <xsl:element name="smapit:emailAddress">mailto:<xsl:value-of select="email"/>
-      </xsl:element>
+      <xsl:element name="smapit:emailAddress"><xsl:value-of select="email"/></xsl:element>
       <xsl:element name="smapit:hasEmailType">
         <xsl:attribute name="rdf:resource">https://w3id.org/italia/controlled-vocabulary/classifications-for-public-services/channel/042</xsl:attribute>
       </xsl:element>
