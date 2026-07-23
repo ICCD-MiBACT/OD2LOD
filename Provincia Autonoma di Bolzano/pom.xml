@@ -15,8 +15,8 @@
         <artifactId>maven-install-plugin</artifactId>
         <version>2.5.1</version>
         <configuration>
-          <groupId>it.cnr.istc.stlab.arco</groupId>
-          <artifactId>rdfizer</artifactId>
+          <groupId>it.cnr.istc.stlab</groupId>
+          <artifactId>arco.rdfizer</artifactId>
           <version>1.0</version>
           <packaging>jar</packaging>
           <file>${project.basedir}/dependencies/arco.rdfizer.jar</file>
@@ -124,8 +124,8 @@
     </dependency>       
     <!-- position means packaging order (reversed) commons-lang3 3.11 opencsv > 3.0 rdfizer -->
     <dependency>
-      <groupId>it.cnr.istc.stlab.arco</groupId>
-      <artifactId>rdfizer</artifactId>
+      <groupId>it.cnr.istc.stlab</groupId>
+      <artifactId>arco.rdfizer</artifactId>
       <version>1.0</version>
       <!--
       <scope>provided</scope>
