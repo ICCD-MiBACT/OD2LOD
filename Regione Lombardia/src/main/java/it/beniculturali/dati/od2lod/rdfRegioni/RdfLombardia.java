@@ -31,6 +31,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -144,15 +148,26 @@ public class RdfLombardia {
   }
 
   private void flushContent(String itemId, int rows, String outFolder, int dataIndex, byte[] content) throws IOException {
-    if (lastStartRow == 0 || rows - lastStartRow >= rowCountFlush) {
+    /* nt.gz
+    if (lastStartRow==0 || rows-lastStartRow>=rowCountFlush) { if (bos!=null) closeContent();
+     String filename = "arco-knowledge-graph-1.0_R03_" + (dataIndex>0?""+dataIndex+"_":"") + df7.format(rows) + ".nt.gz";
+     System.out.println("STATUS - writing @" + filename);
+     bos = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(new File(outFolder, filename),false)));
+     lastStartRow = rows;
+    }
+    /nt.gz */
+    /* nt */
+    if (lastStartRow == 0 || rows - lastStartRow >= rowCountFlush / 4) {
       if (bos != null) closeContent();
-      String filename = "arco-knowledge-graph-1.0_R03_" + (dataIndex > 0 ? "" + dataIndex + "_" : "") + df7.format(rows) + ".nt.gz";
+      String filename = "arco-knowledge-graph-1.0_R03_" + (dataIndex > 0 ? "" + dataIndex + "_" : "") + df7.format(rows) + ".nt";
       System.out.println("STATUS - writing @" + filename);
-      bos = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(new File(outFolder, filename), false)));
+      bos = new BufferedOutputStream(new FileOutputStream(new File(outFolder, filename), false));
       lastStartRow = rows;
     }
+    /* /nt */
     bos.write(("# " + itemId + "\n").getBytes(StandardCharsets.UTF_8.toString()));
     bos.write(content);
+
     /*
     String lines[] = new String(content, StandardCharsets.UTF_8.toString()).split("\\r\\n|\\n|\\r");
     Set<String>xlines = new HashSet<String>(1024);
@@ -223,17 +238,32 @@ public class RdfLombardia {
 
   CsvRow2domReader getPassReader(String id, int pass) throws Exception {
     String csv = properties.getProperty("csv");
-    String csvUrl = csv.replaceAll("\\$\\(id\\)", id);
+    String csvUrl = csv.replaceAll("\\$\\(id\\)", id), filterCell = properties.getProperty("" + pass + ".filterCell", "").trim();
+    Set<String> filter = filterCell.length() > 0 ? filter(filterCell, pass) : null;
+    ;
     for (int tryCount = 1;; tryCount++) {
       try {
         System.out.println("STATUS - reading @" + csvUrl);
-        return new CsvRow2domReader(csvUrl, properties.getProperty("" + pass + ".splitter"), properties.getProperty("" + pass + ".split"), true, timeout);
+        return new CsvRow2domReader(csvUrl, properties.getProperty("" + pass + ".splitter"), properties.getProperty("" + pass + ".split"), true, timeout,
+            filter, filterCell);
       } catch (Exception e) {
         if (tryCount == maxTry) throw e;
         System.err.println("ERROR - failure @try " + tryCount + "/" + maxTry);
         Thread.sleep(tryWait * 1000);
       }
     }
+  }
+
+  Set<String> filter(String cell, int pass) {
+    Set<String> result = null;
+    if (cell == null || cell.length() == 0) return result;
+    String filterList = properties.getProperty("" + pass + ".filterList", "").trim();
+    if (filterList.length() == 0) return result;
+    String[] filters = filterList.split(",");
+    result = new HashSet<String>();
+    for (int j = 0; j < filters.length; j++)
+      result.add(filters[j]);
+    return result;
   }
 
   private Converter converter = null;
@@ -417,7 +447,7 @@ public class RdfLombardia {
           //if (line==2) break; // test
           //if (line==1024) break; // test
         }
-        System.out.println("STATUS - got " + line + " lines @dataset " + dataset);
+        System.out.println("STATUS - got " + (line - 1) + "/" + r2d.rows() + " lines @dataset " + dataset);
         r2d.close();
       }
       closeContent();
@@ -449,6 +479,30 @@ public class RdfLombardia {
       }
       if (args[j].startsWith("-dataset:")) {
         dataIndex = Integer.parseInt(args[j].substring(9));
+        continue;
+      }
+      if (args[j].compareTo("-nocert") == 0) {
+        System.out.println("installing the all-trusting trust manager");
+        // Create a trust manager that does not validate certificate chains
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+          public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            return null;
+          }
+
+          public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+          }
+
+          public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+          }
+        } };// Install the all-trusting trust manager
+        try {
+          SSLContext sc = SSLContext.getInstance("SSL");
+          sc.init(null, trustAllCerts, new java.security.SecureRandom());
+          HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+          System.err.println("got " + e);
+        }
+        // /Create a trust manager that does not validate certificate chains
         continue;
       }
       uso();

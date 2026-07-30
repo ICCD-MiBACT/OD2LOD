@@ -9,7 +9,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -27,15 +29,20 @@ import com.opencsv.RFC4180ParserBuilder;
 
 public class CsvRow2domReader {
   private CSVReader reader;
-  private Set<String> splitFields = null;
+  private Set<String> splitFields = null, filter = null;
   private DocumentBuilder documentBuilder;
-  private String splitter = null, fieldNames[];
+  private Map<String, Integer> cell2index = new HashMap<String, Integer>();
+  private String splitter = null, fieldNames[], cellFilter = null;
 
   CsvRow2domReader(String url, String splitter, String splitFields) throws IOException, ParserConfigurationException {
-    this(url, splitter, splitFields, false, 0);
+    this(url, splitter, splitFields, false, 0, null, null);
   }
 
-  CsvRow2domReader(String url, String splitter, String splitFields, boolean preload, int timeout) throws IOException, ParserConfigurationException {
+  CsvRow2domReader(String url, String splitter, String splitFields, boolean preload, int timeout, Set<String> filter, String cellFilter) throws IOException,
+      ParserConfigurationException {
+    this.filter = filter;
+    this.cellFilter = cellFilter;
+    if (cellFilter != null) System.err.println("cellFilter is " + cellFilter);
     documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
     if (splitter != null) {
       System.out.println("splitter is '" + splitter + "'");
@@ -61,6 +68,8 @@ public class CsvRow2domReader {
     }
     reader = new CSVReaderBuilder(br).withCSVParser(new RFC4180ParserBuilder().build()).build();
     fieldNames = reader.readNext();
+    for (int j = 0; j < fieldNames.length; j++)
+      cell2index.put(fieldNames[j], new Integer(j));
   }
 
   // https://www.xmltutorial.info/xml/how-to-remove-invalid-characters-from-xml/
@@ -86,32 +95,56 @@ public class CsvRow2domReader {
     row.appendChild(cell);
   }
 
-  private int lines = 1;
+  private int lines = 1, skip = 0;
+
+  public int line() {
+    return lines;
+  }
+
+  public int rows() {
+    return lines - 1;
+  }
+
+  public int skip() {
+    return skip;
+  }
+
   private Set<String> multi = new HashSet<String>();
 
+  String cellValue(String[] values, String cell) {
+    return values[cell2index.get(cell)];
+  }
+
   Document next() throws IOException {
-    String[] fieldValues = reader.readNext();
-    if (fieldValues == null) return null;
-    lines++;
-    if (fieldValues.length != fieldNames.length)
-      System.err.println("field count mismatch at line " + lines + " " + fieldValues.length + "!=" + fieldNames.length + " (line starts with '"
-          + fieldValues[0] + "')");
-    Document document = documentBuilder.newDocument();
-    Element row = document.createElement("row");
-    document.appendChild(row);
-    for (int j = 0; j < fieldValues.length && j < fieldNames.length; j++) {
-      if (splitter != null && (splitFields == null || splitFields.contains(fieldNames[j])) /*&& fieldValues[j].indexOf(splitter)>=0*/) {
-        String[] values = fieldValues[j].split(splitter, -2);
-        if (values.length > 1 && !multi.contains(fieldNames[j])) {
-          System.out.println(fieldNames[j] + " is multiple '" + fieldValues[j] + "'");
-          multi.add(fieldNames[j]);
+    for (;;) {
+      String[] fieldValues = reader.readNext();
+      if (fieldValues == null) return null;
+      lines++;
+      if (fieldValues.length != fieldNames.length)
+        System.err.println("field count mismatch at line " + lines + " " + fieldValues.length + "!=" + fieldNames.length + " (line starts with '"
+            + fieldValues[0] + "')");
+      //if (filter!=null) System.err.println(cellFilter + " is " + cellValue(fieldValues,cellFilter));
+      //if (filter!=null) System.err.println(Arrays.toString(filter.toArray()));
+      if (filter == null || !filter.contains(cellValue(fieldValues, cellFilter).trim()/*.toLowerCase()*/)) {
+        Document document = documentBuilder.newDocument();
+        Element row = document.createElement("row");
+        document.appendChild(row);
+        for (int j = 0; j < fieldValues.length && j < fieldNames.length; j++) {
+          if (splitter != null && (splitFields == null || splitFields.contains(fieldNames[j])) /*&& fieldValues[j].indexOf(splitter)>=0*/) {
+            String[] values = fieldValues[j].split(splitter, -2);
+            if (values.length > 1 && !multi.contains(fieldNames[j])) {
+              System.out.println(fieldNames[j] + " is multiple '" + fieldValues[j] + "'");
+              multi.add(fieldNames[j]);
+            }
+            for (String value : values)
+              addCell(row, fieldNames[j], value, values.length > 1);
+          } else
+            addCell(row, fieldNames[j], fieldValues[j]);
         }
-        for (String value : values)
-          addCell(row, fieldNames[j], value, values.length > 1);
-      } else
-        addCell(row, fieldNames[j], fieldValues[j]);
+        return document;
+      }
+      skip++;
     }
-    return document;
   }
 
   void close() throws IOException {
