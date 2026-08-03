@@ -8,9 +8,16 @@
   exclude-result-prefixes="fn">
   
  <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
- <xsl:param name="datestamp" select="'2020-05-07T00:00:00Z'"/>
-
+ <xsl:param name="datestamp"><xsl:value-of select="format-date(current-date(), '[Y0001]-[M01]-[D01]')"/>T00:00:00Z</xsl:param>
+	   <!--
+	   LDCZ, SGTC, PVCN, PVCJ, COLD, *AUTP*, STCD, CMPE, RVME campi esclusi perché non presenti in scheda OA.
+	   
+	   Inserita gestione dampi di gruppo (AUT, ATB): si ripetono AUT e ATB se si trovano valori ripetuti.
+       -->
+	   
  <xsl:template match="row">
+ <xsl:variable name="TSKK" select="cell[@name='TSK']"/>
+ 
   <record>
    <header>
     <xsl:element name="identifier">
@@ -21,13 +28,13 @@
    <metadata>
     <schede>
     
-     <xsl:element name="OA">
+     <xsl:element name="{$TSKK}">
       <xsl:attribute name="version">3.00</xsl:attribute>
       <xsl:element name="CD">
        <xsl:attribute name="hint">CODICI</xsl:attribute>
        <xsl:element name="TSK">
-        <xsl:attribute name="hint">Tipo scheda</xsl:attribute>OA</xsl:element>
-       <!-- LIR? -->
+        <xsl:attribute name="hint">Tipo scheda</xsl:attribute><xsl:value-of select="$TSKK"/></xsl:element>
+		
        <xsl:element name="NCT">
         <xsl:attribute name="hint">CODICE UNIVOCO</xsl:attribute>
         <xsl:element name="NCTR">
@@ -39,10 +46,6 @@
        </xsl:element>
        <xsl:element name="ESC">
         <xsl:attribute name="hint">Ente schedatore</xsl:attribute><xsl:value-of select="cell[@name='ESC']"/></xsl:element>
-       
-       <!--
-       GRP, SGTC, PVCN, PVCJ, LDCI, LDCZ, STCD, CMPE, RVME
-       -->
       </xsl:element>
    
       <xsl:element name="AC">
@@ -108,71 +111,250 @@
           <xsl:attribute name="hint">Denominazione spazio viabilistico</xsl:attribute><xsl:value-of select="cell[@name='LDCU']"/></xsl:element>
         </xsl:if>
         <xsl:element name="LDCM">
-         <xsl:attribute name="hint">Denominazione raccolta</xsl:attribute><xsl:value-of select="cell[@name='LDCM']"/><xsl:if test="cell[@name='COLD']">. <xsl:value-of select="cell[@name='COLD']"/></xsl:if></xsl:element>
-        <xsl:if test="cell[@name='LDCI']">
-         <xsl:element name="LDCS">
-          <xsl:attribute name="hint">Specifiche</xsl:attribute><xsl:value-of select="cell[@name='LDCI']"/></xsl:element>
-        </xsl:if>
+         <xsl:attribute name="hint">Denominazione raccolta</xsl:attribute><xsl:value-of select="cell[@name='LDCM']"/><xsl:if test="cell[@name='LDCI']">. <xsl:value-of select="cell[@name='LDCI']"/></xsl:if></xsl:element>
        </xsl:element>
        
       </xsl:element>
    
+   <xsl:if test="cell[@name='DTZG']|cell[@name='DTZS']|cell[@name='DTSI']|cell[@name='DTSV']|cell[@name='DTSF']|cell[@name='DTSL']">
+   <xsl:variable name="max" select="max((count(cell[@name='DTZG']), count(cell[@name='DTZS']), count(cell[@name='DTSI']), count(cell[@name='DTSV']), count(cell[@name='DTSF']), count(cell[@name='DTSL'])))"/>
+    <xsl:variable name="dtzgCells" select="cell[@name='DTZG']"/>
+	<xsl:variable name="dtzsCells" select="cell[@name='DTZS']"/>
+    <xsl:variable name="dtsiCells" select="cell[@name='DTSI']"/>
+	<xsl:variable name="dtsvCells" select="cell[@name='DTSV']"/>
+	<xsl:variable name="dtsfCells" select="cell[@name='DTSF']"/>
+	<xsl:variable name="dtslCells" select="cell[@name='DTSL']"/>
+   
+    <xsl:for-each select="1 to $max">
+    <xsl:variable name="pos" select="."/>
       <xsl:element name="DT">
        <xsl:attribute name="hint">CRONOLOGIA</xsl:attribute>
-       <xsl:if test="cell[@name='DTZG']|cell[@name='DTZS']">
-        <xsl:element name="DTZ">
+		
+		<xsl:if test="$dtzgCells[$pos]|$dtzsCells[$pos]">
+	     <xsl:element name="DTZ">
          <xsl:attribute name="hint">CRONOLOGIA GENERICA</xsl:attribute>
-         <xsl:apply-templates select="cell[@name='DTZG']"/>
-         <xsl:apply-templates select="cell[@name='DTZS']"/>
-        </xsl:element>
-       </xsl:if>
-       <xsl:if test="cell[@name='DTSI']|cell[@name='DTSV']|cell[@name='DTSF']|cell[@name='DTSL']">
+			<xsl:if test="$dtzgCells[$pos]">
+				<xsl:element name="DTZG">
+				<xsl:attribute name="hint">Secolo</xsl:attribute>
+					<xsl:value-of select="$dtzgCells[$pos]"/>
+				</xsl:element>
+			</xsl:if>
+			<xsl:if test="$dtzsCells[$pos]">
+				<xsl:element name="DTZS">
+				<xsl:attribute name="hint">Frazione cronologica</xsl:attribute>
+					<xsl:value-of select="$dtzsCells[$pos]"/>
+				</xsl:element>
+			</xsl:if>
+         </xsl:element>
+        </xsl:if>
+       <xsl:if test="$dtsiCells[$pos]|$dtsvCells[$pos]|$dtsfCells[$pos]|$dtslCells[$pos]">
         <xsl:element name="DTS">
          <xsl:attribute name="hint">CRONOLOGIA SPECIFICA</xsl:attribute>
-         <xsl:apply-templates select="cell[@name='DTSI']"/>
-         <xsl:apply-templates select="cell[@name='DTSV']"/>
-         <xsl:apply-templates select="cell[@name='DTSF']"/>
-         <xsl:apply-templates select="cell[@name='DTSL']"/>
+			<xsl:if test="$dtsiCells[$pos]">
+				<xsl:element name="DTSI">
+				<xsl:attribute name="hint">Da</xsl:attribute>
+					<xsl:value-of select="$dtsiCells[$pos]"/>
+				</xsl:element>
+			</xsl:if>
+			<xsl:if test="$dtsvCells[$pos]">
+				<xsl:element name="DTSV">
+				<xsl:attribute name="hint">Validità</xsl:attribute>
+					<xsl:value-of select="$dtsvCells[$pos]"/>
+				</xsl:element>
+			</xsl:if>
+			<xsl:if test="$dtsfCells[$pos]">
+				<xsl:element name="DTSF">
+				<xsl:attribute name="hint">A</xsl:attribute>
+					<xsl:value-of select="$dtsfCells[$pos]"/>
+				</xsl:element>
+			</xsl:if>
+			<xsl:if test="$dtslCells[$pos]">
+				<xsl:element name="DTSL">
+				<xsl:attribute name="hint">Validità</xsl:attribute>
+					<xsl:value-of select="$dtslCells[$pos]"/>
+				</xsl:element>
+			</xsl:if>
         </xsl:element>
        </xsl:if>
       </xsl:element>
+	 </xsl:for-each>
+	</xsl:if>
    
       <xsl:element name="AU">
        <xsl:attribute name="hint">DEFINIZIONE CULTURALE</xsl:attribute>
 
-       <xsl:if test="cell[@name='AUTS']|cell[@name='AUTN']|cell[@name='AUTA']|cell[@name='AUTB']">
-        <xsl:element name="AUT">
-         <xsl:attribute name="hint">AUTORE</xsl:attribute>
-         <xsl:apply-templates select="cell[@name='AUTS']"/>
-         <xsl:apply-templates select="cell[@name='AUTN']"/>
-         <xsl:apply-templates select="cell[@name='AUTA']"/>
-         <xsl:apply-templates select="cell[@name='AUTB']"/>
-        </xsl:element>
-       </xsl:if>
-       <xsl:if test="cell[@name='ATBD']|cell[@name='ATBR']">
-        <xsl:element name="ATB">
-         <xsl:attribute name="hint">AMBITO CULTURALE</xsl:attribute>
-         <xsl:apply-templates select="cell[@name='ATBD']"/>
-         <xsl:apply-templates select="cell[@name='ATBR']"/>
-        </xsl:element>
-       </xsl:if>
-       
+       <xsl:if test="cell[@name='AUTN'] or cell[@name='AUTS'] or cell[@name='AUTA']">
+	   <xsl:variable name="max" select="max((count(cell[@name='AUTN']), count(cell[@name='AUTA']), count(cell[@name='AUTS'])))"/>
+       <xsl:variable name="autnCells" select="cell[@name='AUTN']"/>
+       <xsl:variable name="autaCells" select="cell[@name='AUTA']"/>
+	   <xsl:variable name="autsCells" select="cell[@name='AUTS']"/>
+	   
+	   <xsl:for-each select="1 to $max">
+        <xsl:variable name="pos" select="."/>
+		
+	   <xsl:element name="AUT">
+	   <xsl:attribute name="hint">AUTORE</xsl:attribute>
+	   	   
+		<xsl:if test="$autsCells[$pos]">
+			<xsl:element name="AUTS">
+			<xsl:attribute name="hint">Riferimento all'autore</xsl:attribute>
+				<xsl:value-of select="$autsCells[$pos]"/>
+			</xsl:element>
+        </xsl:if>
+		<xsl:if test="$autnCells[$pos]">
+			<xsl:element name="AUTN">
+			<xsl:attribute name="hint">Nome scelto</xsl:attribute>
+				<xsl:value-of select="$autnCells[$pos]"/>
+			</xsl:element>
+        </xsl:if>
+		<xsl:if test="$autaCells[$pos]">
+			<xsl:element name="AUTA">
+			<xsl:attribute name="hint">Dati anagrafici</xsl:attribute>
+				<xsl:value-of select="$autaCells[$pos]"/>
+			</xsl:element>
+        </xsl:if>
+	   	   
+	   </xsl:element>
+	   </xsl:for-each>
+	   </xsl:if>
+
+       <xsl:if test="cell[@name='ATBD'] or cell[@name='ATBR']">
+	   <xsl:variable name="max" select="max((count(cell[@name='ATBD']), count(cell[@name='ATBR'])))"/>
+       <xsl:variable name="atbdCells" select="cell[@name='ATBD']"/>
+       <xsl:variable name="atbrCells" select="cell[@name='ATBR']"/>
+	   
+	   <xsl:for-each select="1 to $max">
+        <xsl:variable name="pos" select="."/>
+		
+	   <xsl:element name="ATB">
+	   <xsl:attribute name="hint">AMBITO CULTURALE</xsl:attribute>
+				
+	   
+		<xsl:if test="$atbdCells[$pos]">
+			<xsl:element name="ATBD">
+			<xsl:attribute name="hint">Denominazione</xsl:attribute>
+				<xsl:value-of select="$atbdCells[$pos]"/>
+			</xsl:element>
+        </xsl:if>
+		<xsl:if test="$atbrCells[$pos]">
+			<xsl:element name="ATBR">
+			<xsl:attribute name="hint">Riferimento all'intervento</xsl:attribute>
+				<xsl:value-of select="$atbrCells[$pos]"/>
+			</xsl:element>
+        </xsl:if>
+	  	   
+	   </xsl:element>
+	    </xsl:for-each>
+	   </xsl:if>
+	   
       </xsl:element>
    
       <xsl:element name="MT">
        <xsl:attribute name="hint">DATI TECNICI</xsl:attribute>
        <xsl:apply-templates select="cell[@name='MTC']"/>
-       <xsl:if test="cell[@name='MISU']|cell[@name='MISA']|cell[@name='MISL']|cell[@name='MISP']|cell[@name='MISD']|cell[@name='MISN']">
-        <xsl:element name="MIS">
-         <xsl:attribute name="hint">MISURE</xsl:attribute>
-         <xsl:apply-templates select="cell[@name='MISU']"/>
-         <xsl:apply-templates select="cell[@name='MISA']"/>
-         <xsl:apply-templates select="cell[@name='MISL']"/>
-         <xsl:apply-templates select="cell[@name='MISP']"/>
-         <xsl:apply-templates select="cell[@name='MISD']"/>
-         <xsl:apply-templates select="cell[@name='MISN']"/>
-        </xsl:element>
-       </xsl:if>  
+	   
+	   <xsl:choose>
+		<xsl:when test="cell[@name='TSK']='OA'">
+			<xsl:if test="cell[@name='MISU']|cell[@name='MISA']|cell[@name='MISL']|cell[@name='MISP']|cell[@name='MISD']|cell[@name='MISN']">
+			<xsl:variable name="max" select="max((count(cell[@name='MISU']), count(cell[@name='MISA']), count(cell[@name='MISL']), count(cell[@name='MISP']), count(cell[@name='MISD']), count(cell[@name='MISN'])))"/>
+			<xsl:variable name="misuCells" select="cell[@name='MISU']"/>
+			<xsl:variable name="misaCells" select="cell[@name='MISA']"/>
+			<xsl:variable name="mislCells" select="cell[@name='MISL']"/>
+			<xsl:variable name="mispCells" select="cell[@name='MISP']"/>
+			<xsl:variable name="misdCells" select="cell[@name='MISD']"/>
+			<xsl:variable name="misnCells" select="cell[@name='MISN']"/>
+			
+			<xsl:for-each select="1 to $max">
+			<xsl:variable name="pos" select="."/>
+			
+			<xsl:element name="MIS">
+			<xsl:attribute name="hint">MISURE</xsl:attribute>
+			
+				<xsl:if test="$misuCells[$pos]">
+					<xsl:element name="MISU">
+					<xsl:attribute name="hint">Unità</xsl:attribute>
+						<xsl:value-of select="$misuCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+				<xsl:if test="$misaCells[$pos]">
+					<xsl:element name="MISA">
+					<xsl:attribute name="hint">Altezza</xsl:attribute>
+						<xsl:value-of select="$misaCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+				<xsl:if test="$mislCells[$pos]">
+					<xsl:element name="MISL">
+					<xsl:attribute name="hint">Larghezza</xsl:attribute>
+						<xsl:value-of select="$mislCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+				<xsl:if test="$mispCells[$pos]">
+					<xsl:element name="MISP">
+					<xsl:attribute name="hint">Profondità</xsl:attribute>
+						<xsl:value-of select="$mispCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+				<xsl:if test="$misdCells[$pos]">
+					<xsl:element name="MISD">
+					<xsl:attribute name="hint">Diametro</xsl:attribute>
+						<xsl:value-of select="$misdCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+				<xsl:if test="$misnCells[$pos]">
+					<xsl:element name="MISN">
+					<xsl:attribute name="hint">Lunghezza</xsl:attribute>
+						<xsl:value-of select="$misnCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+			</xsl:element>
+			</xsl:for-each>
+			</xsl:if>  
+		</xsl:when>
+		<xsl:when test="cell[@name='TSK']='D'">
+			<xsl:if test="cell[@name='MISU']|cell[@name='MISA']|cell[@name='MISL']|cell[@name='MISD']">
+			<xsl:variable name="max" select="max((count(cell[@name='MISU']), count(cell[@name='MISA']), count(cell[@name='MISL']), count(cell[@name='MISD'])))"/>
+			<xsl:variable name="misuCells" select="cell[@name='MISU']"/>
+			<xsl:variable name="misaCells" select="cell[@name='MISA']"/>
+			<xsl:variable name="mislCells" select="cell[@name='MISL']"/>
+			<xsl:variable name="misdCells" select="cell[@name='MISD']"/>
+			
+			<xsl:element name="MIS">
+			<xsl:attribute name="hint">MISURE</xsl:attribute>
+			
+			<xsl:for-each select="1 to $max">
+			<xsl:variable name="pos" select="."/>
+				<xsl:if test="$misuCells[$pos]">
+					<xsl:element name="MISU">
+					<xsl:attribute name="hint">Unità</xsl:attribute>
+						<xsl:value-of select="$misuCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+				<xsl:if test="$misaCells[$pos]">
+					<xsl:element name="MISA">
+					<xsl:attribute name="hint">Altezza</xsl:attribute>
+						<xsl:value-of select="$misaCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+				<xsl:if test="$mislCells[$pos]">
+					<xsl:element name="MISL">
+					<xsl:attribute name="hint">Larghezza</xsl:attribute>
+						<xsl:value-of select="$mislCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+				<xsl:if test="$misdCells[$pos]">
+					<xsl:element name="MISD">
+					<xsl:attribute name="hint">Diametro</xsl:attribute>
+						<xsl:value-of select="$misdCells[$pos]"/>
+					</xsl:element>
+				</xsl:if>
+			</xsl:for-each>
+			
+			</xsl:element>
+			</xsl:if>  
+		</xsl:when>
+	   </xsl:choose>
+       
+	   
       </xsl:element>
    
       <xsl:if test="cell[@name='DESO']|cell[@name='NSC']|cell[@name='SGTC']">
@@ -194,7 +376,7 @@
          <xsl:attribute name="hint">STATO DI CONSERVAZIONE</xsl:attribute>
          <xsl:element name="STCC">
           <xsl:attribute name="hint">Stato di conservazione</xsl:attribute>
-          <xsl:value-of select="cell[@name='STCC']"/>
+          <xsl:value-of select="replace(cell[@name='STCC'],'\|\|','; ')"/>
          </xsl:element>
         </xsl:element>
        </xsl:element>
@@ -242,12 +424,13 @@
          <xsl:apply-templates select="cell[@name='RVMN']"/>
         </xsl:element>
        </xsl:if>
-       <xsl:if test="cell[@name='AGGD']|cell[@name='AGGN']|cell[@name='AGGE']|cell[@name='AGGF']">
+       <xsl:if test="cell[@name='AGGD']|cell[@name='AGGN']|cell[@name='AGGE']|cell[@name='AGGR']|cell[@name='AGGF']">
         <xsl:element name="AGG">
          <xsl:attribute name="hint">AGGIORNAMENTO - REVISIONE</xsl:attribute>
          <xsl:apply-templates select="cell[@name='AGGD']"/>
          <xsl:apply-templates select="cell[@name='AGGN']"/>
          <xsl:apply-templates select="cell[@name='AGGE']"/>
+		 <xsl:apply-templates select="cell[@name='AGGR']"/>
          <xsl:apply-templates select="cell[@name='AGGF']"/>
         </xsl:element>
        </xsl:if>
@@ -268,15 +451,6 @@
       </xsl:if>
 
      </xsl:element>
-<!--
-     <xsl:if test="cell[@name='WGS84_X'] and cell[@name='WGS84_Y']">
-     <xsl:element name="harvesting">
-      <xsl:element name="geocoding">
-       <xsl:element name="x"><xsl:value-of select="cell[@name='WGS84_X']"/></xsl:element>		
-       <xsl:element name="y"><xsl:value-of select="cell[@name='WGS84_Y']"/></xsl:element>
-      </xsl:element>
-     </xsl:element>
-     </xsl:if> -->
      
      <xsl:choose>
      
@@ -301,8 +475,6 @@
      <xsl:otherwise/>
      
      </xsl:choose>
-
-
     </schede>
        
    </metadata>
@@ -321,119 +493,7 @@
    <xsl:value-of select="."/>
   </xsl:element>
  </xsl:template>
-
- <xsl:template match="cell[@name='DTZG']">
-  <xsl:element name="DTZG">
-   <xsl:attribute name="hint">Secolo</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>	
- <xsl:template match="cell[@name='DTZS']">
-  <xsl:element name="DTZS">
-   <xsl:attribute name="hint">Frazione di secolo</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>		
- <xsl:template match="cell[@name='DTSI']">
-  <xsl:element name="DTSI">
-   <xsl:attribute name="hint">Da</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>		
- <xsl:template match="cell[@name='DTSV']">
-  <xsl:element name="DTSV">
-   <xsl:attribute name="hint">Validità</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>	
- <xsl:template match="cell[@name='DTSF']">
-  <xsl:element name="DTSF">
-   <xsl:attribute name="hint">A</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>	
- <xsl:template match="cell[@name='DTSL']">
-  <xsl:element name="DTSL">
-   <xsl:attribute name="hint">Validità</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>		
-    
- <xsl:template match="cell[@name='AUTS']">
-  <xsl:element name="AUTS">
-   <xsl:attribute name="hint">Riferimento all'autore</xsl:attribute>
-   <xsl:value-of select="replace(.,'\|\|','; ')"/>
-  </xsl:element>
- </xsl:template>	
- <xsl:template match="cell[@name='AUTN']">
-  <xsl:element name="AUTN">
-   <xsl:attribute name="hint">Nome scelto</xsl:attribute>
-   <xsl:value-of select="replace(.,'\|\|','; ')"/>
-  </xsl:element>
- </xsl:template>	
- <xsl:template match="cell[@name='AUTA']">
-  <xsl:element name="AUTA">
-   <xsl:attribute name="hint">Dati anagrafici</xsl:attribute>
-   <xsl:value-of select="replace(.,'\|\|','; ')"/>
-  </xsl:element>
- </xsl:template>	
- <xsl:template match="cell[@name='AUTB']">
-  <xsl:element name="AUTB">
-   <xsl:attribute name="hint">Nome scelto (ente collettivo)</xsl:attribute>
-   <xsl:value-of select="replace(.,'\|\|','; ')"/>
-  </xsl:element>
- </xsl:template>	
-
- <xsl:template match="cell[@name='ATBD']">
-  <xsl:element name="ATBD">
-   <xsl:attribute name="hint">Denominazione</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>	
- <xsl:template match="cell[@name='ATBR']">
-  <xsl:element name="ATBR">
-   <xsl:attribute name="hint">Riferimento all'intervento</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>	
-     
- <xsl:template match="cell[@name='MISU']">
-  <xsl:element name="MISU">
-   <xsl:attribute name="hint">Unità</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>
- <xsl:template match="cell[@name='MISA']">
-  <xsl:element name="MISA">
-   <xsl:attribute name="hint">Altezza</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>
- <xsl:template match="cell[@name='MISL']">
-  <xsl:element name="MISL">
-   <xsl:attribute name="hint">Larghezza</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>
- <xsl:template match="cell[@name='MISP']">
-  <xsl:element name="MISP">
-   <xsl:attribute name="hint">Profondità</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>
- <xsl:template match="cell[@name='MISD']">
-  <xsl:element name="MISD">
-   <xsl:attribute name="hint">Diametro</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>
- <xsl:template match="cell[@name='MISN']">
-  <xsl:element name="MISN">
-   <xsl:attribute name="hint">Lunghezza</xsl:attribute>
-   <xsl:value-of select="."/>
-  </xsl:element>
- </xsl:template>
-
+ 
  <xsl:template match="cell[@name='DESO']">
   <xsl:element name="DESO">
    <xsl:attribute name="hint">Indicazioni sull'oggetto</xsl:attribute>
@@ -482,25 +542,31 @@
  <xsl:template match="cell[@name='AGGD']">
   <xsl:element name="AGGD">
    <xsl:attribute name="hint">Data</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>
  <xsl:template match="cell[@name='AGGN']">
   <xsl:element name="AGGN">
    <xsl:attribute name="hint">Nome</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>
  <xsl:template match="cell[@name='AGGE']">
   <xsl:element name="AGGE">
    <xsl:attribute name="hint">Ente</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
+  </xsl:element>
+ </xsl:template>
+  <xsl:template match="cell[@name='AGGR']">
+  <xsl:element name="AGGR">
+   <xsl:attribute name="hint">Referente scientifico</xsl:attribute>
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>
  <xsl:template match="cell[@name='AGGF']">
   <xsl:element name="AGGF">
    <xsl:attribute name="hint">Funzionario responsabile</xsl:attribute>
-   <xsl:value-of select="."/>
+   <xsl:value-of select="replace(.,'\|\|','; ')"/>
   </xsl:element>
  </xsl:template>
       

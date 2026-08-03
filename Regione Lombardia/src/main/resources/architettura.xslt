@@ -8,7 +8,7 @@
   exclude-result-prefixes="fn">
   
  <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
- <xsl:param name="datestamp" select="'2025-09-28T09:00:00Z'"/>
+ <xsl:param name="datestamp"><xsl:value-of select="format-date(current-date(), '[Y0001]-[M01]-[D01]')"/>T00:00:00Z</xsl:param>
   
  <xsl:template match="/">
   <xsl:apply-templates mode="a"/>
@@ -59,7 +59,8 @@
        </xsl:choose>
       </xsl:element>
       
-      <xsl:if test="cell[@name='COMPLESSITA_DEL_BENE']='bene componente'">
+	   <xsl:choose>
+        <xsl:when test="cell[@name='COMPLESSITA_DEL_BENE']='bene componente'">
        <xsl:element name="RV">
         <xsl:attribute name="hint">RELAZIONI</xsl:attribute>
         <xsl:element name="RVE">
@@ -70,8 +71,8 @@
           <xsl:attribute name="hint">Codice bene radice</xsl:attribute><xsl:value-of select="cell[@name='NUM_SCHEDA_BENE_COMPLESSO']"/> /R03</xsl:element>
         </xsl:element>
        </xsl:element>
-      </xsl:if>
-      <xsl:if test="cell[@name='COMPLESSITA_DEL_BENE']='bene complesso'">
+      </xsl:when>
+	  <xsl:when test="cell[@name='COMPLESSITA_DEL_BENE']='bene complesso'">
        <xsl:element name="RV">
         <xsl:attribute name="hint">RELAZIONI</xsl:attribute>
         <xsl:element name="RVE">
@@ -80,7 +81,8 @@
           <xsl:attribute name="hint">Livello</xsl:attribute>0</xsl:element>
         </xsl:element>
        </xsl:element>
-      </xsl:if>
+      </xsl:when>
+	  </xsl:choose>
       
       <xsl:element name="AC">
        <xsl:attribute name="hint">ALTRI CODICI</xsl:attribute>
