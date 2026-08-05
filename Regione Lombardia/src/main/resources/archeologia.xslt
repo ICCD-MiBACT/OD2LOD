@@ -138,11 +138,12 @@
        <xsl:variable name="autaCells" select="cell[@name='AUTA']"/>
 	   <xsl:variable name="autsCells" select="cell[@name='AUTS']"/>
 	   
-	   <xsl:element name="AUT">
-	   <xsl:attribute name="hint">AUTORE</xsl:attribute>
-	   
 	   <xsl:for-each select="1 to $max">
         <xsl:variable name="pos" select="."/>
+		
+	   <xsl:element name="AUT">
+	   <xsl:attribute name="hint">AUTORE</xsl:attribute>
+	   	   
 		<xsl:if test="$autsCells[$pos]">
 			<xsl:element name="AUTS">
 			<xsl:attribute name="hint">Riferimento all'autore</xsl:attribute>
@@ -161,9 +162,9 @@
 				<xsl:value-of select="$autaCells[$pos]"/>
 			</xsl:element>
         </xsl:if>
-	   </xsl:for-each>
-	   
 	   </xsl:element>
+	   
+	   </xsl:for-each>
 	   </xsl:if>
        
 			<xsl:for-each select="cell[@name='ATBD']">
