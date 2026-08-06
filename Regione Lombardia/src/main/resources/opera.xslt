@@ -227,8 +227,7 @@
         <xsl:variable name="pos" select="."/>
 		
 	   <xsl:element name="ATB">
-	   <xsl:attribute name="hint">AMBITO CULTURALE</xsl:attribute>
-				
+	   <xsl:attribute name="hint">AMBITO CULTURALE</xsl:attribute>				
 	   
 		<xsl:if test="$atbdCells[$pos]">
 			<xsl:element name="ATBD">
@@ -318,11 +317,12 @@
 			<xsl:variable name="mislCells" select="cell[@name='MISL']"/>
 			<xsl:variable name="misdCells" select="cell[@name='MISD']"/>
 			
-			<xsl:element name="MIS">
-			<xsl:attribute name="hint">MISURE</xsl:attribute>
-			
 			<xsl:for-each select="1 to $max">
 			<xsl:variable name="pos" select="."/>
+			
+			<xsl:element name="MIS">
+			<xsl:attribute name="hint">MISURE</xsl:attribute>
+						
 				<xsl:if test="$misuCells[$pos]">
 					<xsl:element name="MISU">
 					<xsl:attribute name="hint">Unità</xsl:attribute>
@@ -347,13 +347,12 @@
 						<xsl:value-of select="$misdCells[$pos]"/>
 					</xsl:element>
 				</xsl:if>
-			</xsl:for-each>
-			
+						
 			</xsl:element>
+			</xsl:for-each>
 			</xsl:if>  
 		</xsl:when>
-	   </xsl:choose>
-       
+	   </xsl:choose>       
 	   
       </xsl:element>
    

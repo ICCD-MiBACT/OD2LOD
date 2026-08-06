@@ -10,10 +10,6 @@
  <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
  <xsl:param name="datestamp"><xsl:value-of select="format-date(current-date(), '[Y0001]-[M01]-[D01]')"/>T00:00:00Z</xsl:param>
  
- 
- <!-- PROVARE IN VIRTUALBOX -->
- 
- 
  <xsl:template match="row">
   <xsl:variable name="TSKK" select="cell[@name='TSK']"/>
   
@@ -310,12 +306,32 @@
          <xsl:apply-templates select="cell[@name='RVMN']"/>
         </xsl:element>
        </xsl:if>
-       <xsl:if test="(cell[@name='AGGD'] and normalize-space(cell[@name='AGGD']) != '') or (cell[@name='AGGN'] and normalize-space(cell[@name='AGGN']) != '')">
+       <xsl:if test="some $c in (cell[@name='AGGD'] | cell[@name='AGGN']) satisfies normalize-space($c) != ''">
+	   <xsl:variable name="max" select="max((count(cell[@name='AGGD']), count(cell[@name='AGGN'])))"/>
+        <xsl:variable name="aggdCells" select="cell[@name='AGGD']"/>
+        <xsl:variable name="aggnCells" select="cell[@name='AGGN']"/>
+        
+        <xsl:for-each select="1 to $max">
+         <xsl:variable name="pos" select="."/>
         <xsl:element name="AGG">
          <xsl:attribute name="hint">AGGIORNAMENTO</xsl:attribute>
-         <xsl:apply-templates select="cell[@name='AGGD']"/>
-         <xsl:apply-templates select="cell[@name='AGGN']"/>
+		 
+		 <xsl:if test="$aggdCells[$pos] and normalize-space($aggdCells[$pos]) != ''">
+           <xsl:element name="AGGD">
+            <xsl:attribute name="hint">Data</xsl:attribute>
+            <xsl:value-of select="$aggdCells[$pos]"/>
+           </xsl:element>
+          </xsl:if>
+		 <xsl:if test="$aggnCells[$pos] and normalize-space($aggnCells[$pos]) != ''">
+           <xsl:element name="AGGN">
+            <xsl:attribute name="hint">Nome</xsl:attribute>
+            <xsl:value-of select="$aggnCells[$pos]"/>
+           </xsl:element>
+          </xsl:if>
+		  
         </xsl:element>
+		</xsl:for-each>
+		
        </xsl:if>
       </xsl:element>
 
@@ -414,24 +430,6 @@
    <xsl:element name="RVMN">
     <xsl:attribute name="hint">Nome</xsl:attribute>
     <xsl:value-of select="."/>
-   </xsl:element>
-  </xsl:if>
- </xsl:template>
-     
- <xsl:template match="cell[@name='AGGD']">
-  <xsl:if test="normalize-space(.) != ''">
-   <xsl:element name="AGGD">
-    <xsl:attribute name="hint">Data</xsl:attribute>
-    <xsl:value-of select="replace(.,'\|\|','; ')"/>
-   </xsl:element>
-  </xsl:if>
- </xsl:template>
- 
- <xsl:template match="cell[@name='AGGN']">
-  <xsl:if test="normalize-space(.) != ''">
-   <xsl:element name="AGGN">
-    <xsl:attribute name="hint">Nome</xsl:attribute>
-    <xsl:value-of select="replace(.,'\|\|','; ')"/>
    </xsl:element>
   </xsl:if>
  </xsl:template>
