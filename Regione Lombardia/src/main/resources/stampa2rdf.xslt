@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:fn="http://www.w3.org/2005/xpath-functions"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:arco="https://w3id.org/arco/ontology/arco/"
+  exclude-result-prefixes="fn">
+  
+ <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
+  
+ <xsl:template match="/">
+  <rdf:RDF xml:base="https://w3id.org/arco/resource/Lombardia/"
+   xmlns="https://w3id.org/arco/resource/"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:dcterms="http://purl.org/dc/terms/"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:foaf="http://xmlns.com/foaf/0.1/"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:cis="http://dati.beniculturali.it/cis/"
+   xmlns:l0="https://w3id.org/italia/onto/l0/"
+   xmlns:tiapit="https://w3id.org/italia/onto/TI/"
+   xmlns:potapit="https://w3id.org/italia/onto/POT/"
+   xmlns:cpevapit="https://w3id.org/italia/onto/CPEV/"
+   xmlns:cpvapit="https://w3id.org/italia/onto/CPV/"
+   xmlns:accessCondition="https://w3id.org/italia/onto/AccessCondition/"
+   xmlns:smapit="https://w3id.org/italia/onto/SM/"
+   xmlns:roapit="https://w3id.org/italia/onto/RO/"
+   xmlns:clvapit="https://w3id.org/italia/onto/CLV/"
+   xmlns:covapit="https://w3id.org/italia/onto/COV/"
+   xmlns:arco="https://w3id.org/arco/ontology/arco/"
+   xmlns:arco-core="https://w3id.org/arco/ontology/core/"
+   xmlns:arco-cd="https://w3id.org/arco/ontology/context-description/"
+   xmlns:cataloguing-campaign="https://w3id.org/arco/ontology/cataloguing-campaign/"
+   >  
+   <xsl:apply-templates mode="b"/>
+  </rdf:RDF>
+ </xsl:template>
+
+ <xsl:template match="row" mode="b">
+	 <xsl:element name="rdf:Description">
+  	<xsl:attribute name="rdf:about">
+    <xsl:text>HistoricOrArtisticProperty/</xsl:text>
+    <xsl:choose>
+     <xsl:when test="cell[@name='NCTN']">
+      <xsl:value-of select="concat(cell[@name='NCTR'],cell[@name='NCTN'])"/>
+     </xsl:when>
+     <xsl:otherwise>
+      <xsl:value-of select="concat(cell[@name='IDK'],'_R03')"/>
+     </xsl:otherwise>
+    </xsl:choose>
+   </xsl:attribute>
+   
+   <xsl:for-each select="cell[starts-with(@name,'URLIMG')][string-length(normalize-space(.)) &gt; 0]">
+    <xsl:element name="foaf:depiction"><!--
+     <xsl:attribute name="rdf:resource"><xsl:value-of select="replace(.,' ','%20')"/></xsl:attribute> -->
+     <xsl:attribute name="rdf:resource"><xsl:value-of select="."/></xsl:attribute>
+    </xsl:element>
+   </xsl:for-each>
+   
+	 </xsl:element>
+
+ </xsl:template>
+
+</xsl:stylesheet>
