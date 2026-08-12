@@ -11,8 +11,14 @@
  <xsl:param name="datestamp"><xsl:value-of select="format-date(current-date(), '[Y0001]-[M01]-[D01]')"/>T00:00:00Z</xsl:param>
 	  
  <xsl:template match="row">
- <xsl:variable name="TSKK" select="cell[@name='TSK']"/>
-  
+ <!--<xsl:variable name="TSKK" select="cell[@name='TSK']"/>-->
+ 	<xsl:variable name="TSKK">
+		<xsl:choose>
+			<xsl:when test="cell[@name='OGTD']='matrice'">MI</xsl:when>
+			<xsl:otherwise>S</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable> 
+		
   <record>
    <header>
     <xsl:element name="identifier">
