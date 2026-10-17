@@ -429,6 +429,10 @@ public class RdfLombardia {
             Model model;
             byte[] ba = baos.toByteArray();
             if (dump) zWrite(outFolder, itemId + ".xml", ba);
+
+            documentPrefix = (String) xPath.evaluate("row/cell[@name='URL']", row, XPathConstants.STRING);
+            documentPrefix += "$(NOTHING)";
+
             long start = new Date().getTime();
             try { //updateArco(db.parse(new ByteArrayInputStream(ba)));
               model = converter.convert(itemId, resourcePrefix, documentPrefix, new ByteArrayInputStream(ba));
