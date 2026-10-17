@@ -57,6 +57,7 @@ import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.cnr.istc.stlab.arco.Converter;
 import it.cnr.istc.stlab.arco.preprocessing.PreprocessedData;
@@ -356,20 +357,18 @@ public class RdfLombardia {
       String resourcePrefix = properties.getProperty("resourcePrefix", "https://w3id.org/arco/resource/Lombardia/").trim();
       String rmp = properties.getProperty("rmDup");
       if (rmp != null) System.out.println("INFO - remove duplicates " + rmp);//String rmp = "row/cell[@name='NCTN']";
-      String rmr = properties.getProperty("rmRange");
-      int rml = 0, rmh = 0;
-      if (rmr != null) {
-        System.out.println("INFO - remove outside range " + rmr);
-        String[] r = rmr.split("<=>");
-        rml = Integer.parseUnsignedInt(r[0]);
-        rmh = Integer.parseUnsignedInt(r[1]);
+      /*
+      String rmr = properties.getProperty("rmRange"); int rml=0, rmh=0;
+      if (rmr!=null) { System.out.println("INFO - remove outside range " + rmr);
+       String[]r = rmr.split("<=>"); rml = Integer.parseUnsignedInt(r[0]); rmh = Integer.parseUnsignedInt(r[1]);
       }
+       */
       for (int pass = 1; pass <= ids.size(); pass++) {
         if (dataIndex > 0 && pass != dataIndex) continue;
         int line = 1;
         String dataset = properties.getProperty("" + pass + ".dataset", "#" + pass);
         System.out.println("INFO - dataset " + dataset);
-        String id = ids.get(pass - 1), itemPath = properties.getProperty("" + pass + ".itemId"); //System.out.println("@id " + id);
+        String id = ids.get(pass - 1), idPath = properties.getProperty("" + pass + ".itemId"), tskPath = properties.getProperty("" + pass + ".itemTsk");
         String documentPrefix = properties.getProperty("" + pass + ".documentPrefix").trim();
         String date = dateStamp(id);
         dates.add(date);
@@ -386,35 +385,46 @@ public class RdfLombardia {
         CsvRow2domReader r2d = getPassReader(id, pass);
         Set<String> rmSet = new HashSet<String>();// TODO duplicati tra dataset?
         for (Document row; (row = r2d.next()) != null; line++, rows++) {
-          String itemId = null;
+          String itemId = null, itemTsk = null;
           try {
-            itemId = safeIriPart((String) xPath.evaluate(itemPath, row, XPathConstants.STRING), "_");
-            //row2rdf(itemId, row, itemPath, xtr, xtrRdf, baos, result, outFolder, line, dump);
-            if (rmp != null) {
-              int count = ((Double) xPath.evaluate("count(" + rmp + ")", row, XPathConstants.NUMBER)).intValue();
-              if (count > 0) {
-                String rmc = (String) xPath.evaluate(rmp, row, XPathConstants.STRING);
-                // TODO ? int dotpos = rmc.indexOf('.'); if (dotpos>0) rmc = rmc.substring(0, dotpos); // elimina suffisso .*
-                int rmv = 0;
-                try {
-                  rmv = Integer.parseUnsignedInt(rmc);
-                } catch (Exception e) {
-                  ;
-                }
-                Node target = (Node) xPath.evaluate(rmp, row, XPathConstants.NODE);
-                if (rmc.length() == 0 || !rmSet.add(rmc) || (rmr != null && (rmv < rml || rmv > rmh))) { // avoid duplicate/outside range IRI
-                  target.getParentNode().removeChild(target);
-                  System.out.println("INFO - duplicate/outside range " + rmp + " " + rmc + " removed");
-                } else { // zero fill
-                  String nctn = "" + rmv;
-                  while (nctn.length() < 8)
-                    nctn = "0" + nctn;
-                  target.setTextContent(nctn);
-                }
+            itemId = safeIriPart((String) xPath.evaluate(idPath, row, XPathConstants.STRING), "_");
+            //row2rdf(itemId, row, idPath, xtr, xtrRdf, baos, result, outFolder, line, dump);
+            /*
+            if (rmp!=null) { int count = ((Double)xPath.evaluate("count("+rmp+")", row, XPathConstants.NUMBER)).intValue();
+             if (count>0) { String rmc = (String)xPath.evaluate(rmp, row, XPathConstants.STRING);
+              // TODO ? int dotpos = rmc.indexOf('.'); if (dotpos>0) rmc = rmc.substring(0, dotpos); // elimina suffisso .*
+              int rmv = 0; try {rmv = Integer.parseUnsignedInt(rmc);}catch(Exception e) {;}
+              Node target = (Node)xPath.evaluate(rmp, row, XPathConstants.NODE);
+              if (rmc.length()==0 || !rmSet.add(rmc) || (rmr!=null && (rmv<rml||rmv>rmh))) { // avoid duplicate/outside range IRI
+               target.getParentNode().removeChild(target);
+               System.out.println("INFO - duplicate/outside range " + rmp + " " + rmc + " removed");
               }
+              else { // zero fill
+               String nctn = "" + rmv; while (nctn.length()<8) nctn = "0" + nctn;
+               target.setTextContent(nctn);
+              }
+             }
             }
+             */
+            if (rmp != null) {
+              NodeList nl = (NodeList) xPath.evaluate(rmp, row, XPathConstants.NODESET);
+              for (int j = nl.getLength() - 1; j >= 0; j--)
+                nl.item(j).getParentNode().removeChild(nl.item(j));
+            }
+            itemTsk = safeIriPart((String) xPath.evaluate(tskPath, row, XPathConstants.STRING), "_"); // expected A BDM D F MI NU OA PST RA S
+            // impone univocità tra dataset con suffisso tipo scheda
+            itemId = itemId + "_" + itemTsk;
+            if (!rmSet.add(itemId)) {
+              System.err.println("ERROR - duplicate id " + itemId + " removed");
+              continue;
+            }
+
+            Node idNode = (Node) xPath.evaluate(idPath, row, XPathConstants.NODE);
+            idNode.setTextContent(itemId);
+
             if (dump) zWrite(outFolder, itemId + ".csv2.xml", document2bytes(row));
-            xtr.setSource(new DOMSource(row)); //System.out.println("@id " + itemId);      
+
+            xtr.setSource(new DOMSource(row)); //System.out.println("@id " + itemId);
             xtr.transform();
             Model model;
             byte[] ba = baos.toByteArray();
@@ -511,8 +521,7 @@ public class RdfLombardia {
     try {
       if (datestamp)
         rdfl.datestamp(outFolder, dataIndex);
-      else
-        rdfl.convert(outFolder, dataIndex, dump);
+      else if (!(new File(outFolder, ".done").exists())) rdfl.convert(outFolder, dataIndex, dump);
     } catch (Throwable t) {
       fatal(outFolder, t);
     }
